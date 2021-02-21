@@ -1,0 +1,12 @@
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\bin\Debug\netcoreapp2.0\cosmos\CosmosKernel2.deps.json
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\bin\Debug\netcoreapp2.0\cosmos\CosmosKernel2.dll
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\bin\Debug\netcoreapp2.0\cosmos\CosmosKernel2.pdb
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\bin\Debug\netcoreapp2.0\cosmos\DotNetParaser.dll
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\bin\Debug\netcoreapp2.0\cosmos\DotNetParaser.pdb
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.csprojAssemblyReference.cache
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.AssemblyInfoInputs.cache
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.AssemblyInfo.cs
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.csproj.CoreCompileInputs.cache
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.csproj.CopyComplete
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.dll
+C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\CosmosKernel2\obj\Debug\netcoreapp2.0\cosmos\CosmosKernel2.pdb

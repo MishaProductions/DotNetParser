@@ -1,0 +1,47 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "DotNetParser/1.0.0": {
+        "dependencies": {
+          "LibDotNetParser": "1.0.0",
+          "TestApp": "1.0.0"
+        },
+        "runtime": {
+          "DotNetParser.dll": {}
+        }
+      },
+      "LibDotNetParser/1.0.0": {
+        "runtime": {
+          "LibDotNetParser.dll": {}
+        }
+      },
+      "TestApp/1.0.0": {
+        "runtime": {
+          "TestApp.exe": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DotNetParser/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "LibDotNetParser/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TestApp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

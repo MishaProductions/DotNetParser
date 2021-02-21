@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v2.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v2.0": {
+      "DotNetParaser/1.0.0": {
+        "dependencies": {
+          "TestApp": "1.0.0"
+        },
+        "runtime": {
+          "DotNetParaser.dll": {}
+        }
+      },
+      "TestApp/1.0.0": {
+        "runtime": {
+          "TestApp.exe": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DotNetParaser/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TestApp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

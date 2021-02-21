@@ -1,0 +1,140 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\DotNetParser\\DotNetParser.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\DotNetParser\\DotNetParser.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\DotNetParser\\DotNetParser.csproj",
+        "projectName": "DotNetParser",
+        "projectPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\DotNetParser\\DotNetParser.csproj",
+        "packagesPath": "C:\\Users\\Misha\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\DotNetParser\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Misha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\Misha\\AppData\\Roaming\\Cosmos User Kit\\packages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
+            "projectReferences": {
+              "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\LibDotNetParser\\LibDotNetParser.csproj": {
+                "projectPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\LibDotNetParser\\LibDotNetParser.csproj"
+              },
+              "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\TestApp\\TestApp.csproj": {
+                "projectPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\TestApp\\TestApp.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\LibDotNetParser\\LibDotNetParser.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\LibDotNetParser\\LibDotNetParser.csproj",
+        "projectName": "LibDotNetParser",
+        "projectPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\LibDotNetParser\\LibDotNetParser.csproj",
+        "packagesPath": "C:\\Users\\Misha\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\LibDotNetParser\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Misha\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\Misha\\AppData\\Roaming\\Cosmos User Kit\\packages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.0": {
+            "targetAlias": "netcoreapp2.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.0": {
+          "targetAlias": "netcoreapp2.0",
+          "dependencies": {
+            "Microsoft.NETCore.App": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.0, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\TestApp\\TestApp.csproj": {
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\TestApp\\TestApp.csproj",
+        "projectName": "TestApp",
+        "projectPath": "C:\\Users\\Misha\\OneDrive\\Source\\C#\\repos\\DotNetParser\\TestApp\\TestApp.csproj"
+      },
+      "frameworks": {
+        "net472": {}
+      }
+    }
+  }
+}
