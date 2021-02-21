@@ -1,5 +1,5 @@
 #various junk
-.vs/*.*
+.vs/
 *.txt
 *.cache
 *.suo
