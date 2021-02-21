@@ -1,4 +1,4 @@
-
+#various junk
 .vs/*.*
 *.txt
 *.cache
@@ -6,12 +6,13 @@
 *.asm
 *.cdb
 
-TesterKernel/bin/Debug/netcoreapp2.0/cosmos/*.*
-LibDotNetParser/bin/Debug/netcoreapp2.0/*.*
-DotNetParser/bin/Debug/netcoreapp3.1/*.*
-TestApp/bin/Debug/*.*
+# build leftovers
+TesterKernel/bin/Debug/netcoreapp2.0/cosmos/
+LibDotNetParser/bin/Debug/netcoreapp2.0/
+DotNetParser/bin/Debug/netcoreapp3.1/
+TestApp/bin/Debug/
 
-TesterKernel/obj/*.*
-LibDotNetParser/obj/*.*
-DotNetParser/obj/*.*
-TestApp/obj/*.*
+TesterKernel/obj/
+LibDotNetParser/obj/
+DotNetParser/obj/
+TestApp/obj/
