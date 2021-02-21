@@ -1,8 +1,0 @@
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\bin\Debug\netcoreapp2.0\LibDotNetParser.deps.json
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\bin\Debug\netcoreapp2.0\LibDotNetParser.dll
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\bin\Debug\netcoreapp2.0\LibDotNetParser.pdb
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\obj\Debug\netcoreapp2.0\LibDotNetParser.AssemblyInfoInputs.cache
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\obj\Debug\netcoreapp2.0\LibDotNetParser.AssemblyInfo.cs
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\obj\Debug\netcoreapp2.0\LibDotNetParser.csproj.CoreCompileInputs.cache
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\obj\Debug\netcoreapp2.0\LibDotNetParser.dll
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\LibDotNetParser\obj\Debug\netcoreapp2.0\LibDotNetParser.pdb

@@ -1,7 +1,0 @@
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\bin\Debug\TestApp.exe.config
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\bin\Debug\TestApp.exe
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\bin\Debug\TestApp.pdb
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\obj\Debug\TestApp.csprojAssemblyReference.cache
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\obj\Debug\TestApp.csproj.CoreCompileInputs.cache
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\obj\Debug\TestApp.exe
-C:\Users\Misha\OneDrive\Source\X\DotNetFxReader\TestApp\obj\Debug\TestApp.pdb
