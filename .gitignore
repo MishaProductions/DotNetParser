@@ -32,3 +32,4 @@ DotNetParser/obj/Debug/netcoreapp3.1/DotNetParser.AssemblyInfo.cs
 *.suo
 *.asm
 *.cdb
+.vs/DotNetParser/v16/.suo
