@@ -33,3 +33,8 @@ DotNetParser/obj/Debug/netcoreapp3.1/DotNetParser.AssemblyInfo.cs
 *.asm
 *.cdb
 .vs/DotNetParser/v16/.suo
+.vs/DotNetFxReader/config/applicationhost.config
+.vs/DotNetFxReader/DesignTimeBuild/.dtbcache.v2
+.vs/DotNetFxReader/v16/.suo
+.vs/DotNetParser/DesignTimeBuild/.dtbcache.v2
+.vs/DotNetParser/v16/.suo
