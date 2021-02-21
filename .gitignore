@@ -38,3 +38,6 @@ DotNetParser/obj/Debug/netcoreapp3.1/DotNetParser.AssemblyInfo.cs
 .vs/DotNetFxReader/v16/.suo
 .vs/DotNetParser/DesignTimeBuild/.dtbcache.v2
 .vs/DotNetParser/v16/.suo
+DotNetParser/obj/Debug/netcoreapp3.1/DotNetParser.assets.cache
+LibDotNetParser/obj/Debug/netcoreapp2.0/LibDotNetParser.assets.cache
+TesterKernel/obj/Debug/netcoreapp2.0/cosmos/TesterKernel.assets.cache
