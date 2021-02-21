@@ -42,3 +42,4 @@ DotNetParser/obj/Debug/netcoreapp3.1/DotNetParser.assets.cache
 LibDotNetParser/obj/Debug/netcoreapp2.0/LibDotNetParser.assets.cache
 TesterKernel/obj/Debug/netcoreapp2.0/cosmos/TesterKernel.assets.cache
 .vs/DotNetParser/v16/.suo
+*.cache
