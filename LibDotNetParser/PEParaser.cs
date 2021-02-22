@@ -79,9 +79,9 @@ namespace LibDotNetParser
             ClrMetaDataHeader.NumberOfStreams = r.ReadUInt16();
 
             //Simple checks
-            // Debug.Assert(ClrMetaDataHeader.Signature == 0x424A5342);
+            //Debug.Assert(ClrMetaDataHeader.Signature == 0x424A5342);
             //Debug.Assert(ClrMetaDataHeader.Reserved1 == 0);
-            // Debug.Assert(ClrMetaDataHeader.Flags == 0);
+            //Debug.Assert(ClrMetaDataHeader.Flags == 0);
             #endregion
             #region Parse streams
 
@@ -117,9 +117,11 @@ namespace LibDotNetParser
             //Parse the #String stream
             var bytes = GetStreamBytes(r, Streams[1], ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
             ClrStringsStream = new StringsStreamReader(bytes).Read();
+            
             //Parse the #US Stream
             var bytes2 = GetStreamBytes(r, Streams[2], ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
             ClrUsStream = new USStreamReader(bytes2).Read();
+            
             #endregion
             #region Parse #~ Stream
             //Parse the #~ stream
@@ -132,11 +134,11 @@ namespace LibDotNetParser
             var numberOfTables = GetTableCount(ClrMetaDataStreamHeader.TablesFlags);
             ClrMetaDataStreamHeader.TableSizes = new uint[numberOfTables];
 
-
             for (var i = 0; i < numberOfTables; i++)
             {
                 ClrMetaDataStreamHeader.TableSizes[i] = TableStreamR.ReadUInt32();
             }
+            
             MetadataReader = new MetadataReader(TableStreamR.BaseStream);
             //Parse the tabels
             tabels = new Tabels(this);
@@ -185,8 +187,6 @@ namespace LibDotNetParser
         }
         public PEHeader ReadPEHeader(ushort headerAddress, BinaryReader _assemblyReader)
         {
-            // the passed in "headerAddress" is DOSHeader.COFFHeaderAddress
-            // "_assemblyReader" is a BinaryReader I had defined at the class level.
             _assemblyReader.BaseStream.Seek(headerAddress, SeekOrigin.Begin);
             var header = new PEHeader
             {
@@ -363,9 +363,6 @@ namespace LibDotNetParser
         public static ulong RelativeVirtualAddressToFileOffset(ulong rva, IEnumerable<Section> sections)
         {
             // find the section whose virtual address range contains the data directory's virtual address.
-            // var section = sections.First(s => s.VirtualAddress <= rva
-            //     && s.VirtualAddress + s.SizeOfRawData >= rva);
-
             Section section = null;
             foreach (var s in sections)
             {
@@ -375,6 +372,7 @@ namespace LibDotNetParser
                     break;
                 }
             }
+            
             if (section == null)
                 throw new Exception("Cannot find the section");
 
