@@ -20,7 +20,8 @@ namespace TesterKernel
             try
             {
                 var fl = new DotNetFile(TestApp.file);
-                var vm = new DotNetVirtualMachine(fl);
+                var vm = new DotNetVirtualMachine();
+                vm.SetMainExe(fl);
                 vm.Start();
 
                 Console.WriteLine("Program exited.");

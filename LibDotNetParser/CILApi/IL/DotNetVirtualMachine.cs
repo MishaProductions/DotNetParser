@@ -186,9 +186,6 @@ namespace LibDotNetParser.CILApi
 
                         DotNetMethod m2 = ResolveMethod(Namespace, classs, funcName);
 
-                        //if (m2 == null)
-                        //    throw new Exception("Cannot find method: " + funcName);
-
                         inst.Operand = new CallMethodDataHolder() { ClassName = classs, NameSpace = Namespace, FunctionName = funcName, ResolvedMethod = m2 };
 
 
@@ -290,7 +287,7 @@ namespace LibDotNetParser.CILApi
                     //Execute Method
                     if (x.ResolvedMethod != null)
                     {
-                        ProcessMethod(x.ResolvedMethod, fs, "TODO");
+                        ProcessMethod(x.ResolvedMethod, x.ResolvedMethod.File, "TODO");
                     }
                     else
                     {

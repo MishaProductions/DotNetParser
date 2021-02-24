@@ -17,7 +17,7 @@ namespace LibDotNetParser.CILApi
                 int i = 0;
                 foreach (var item in peFile.tabels.TypeDefTabel)
                 {
-                    t.Add(new DotNetType(peFile, item, i + 1));
+                    t.Add(new DotNetType(this, item, i + 1));
                     i++;
                 }
 

@@ -12,6 +12,7 @@ namespace LibDotNetParser.CILApi
     public class DotNetMethod
     {
         private PEParaser file;
+        private DotNetFile file2;
         private MethodTabelRow method;
 
         MethodAttr flags;
@@ -23,6 +24,13 @@ namespace LibDotNetParser.CILApi
             get
             {
                 return (uint)PEParaser.RelativeVirtualAddressToFileOffset(RVA, file.PeHeader.Sections);
+            }
+        }
+        public DotNetFile File
+        {
+            get
+            {
+                return file2;
             }
         }
         public bool IsStatic
@@ -48,6 +56,7 @@ namespace LibDotNetParser.CILApi
             this.Parrent = parrent;
             this.flags = (MethodAttr)item.Flags;
             this.nextMethod = nextMethod;
+            this.file2 = parrent.File;
 
             this.Signature = file.ClrStringsStream.GetByOffset(item.Signature);
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);

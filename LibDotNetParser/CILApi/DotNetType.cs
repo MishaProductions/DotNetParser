@@ -73,21 +73,25 @@ namespace LibDotNetParser.CILApi
                 return m;
             }
         }
+
+        public DotNetFile File { get; internal set; }
+
         /// <summary>
         /// Should be used internaly
         /// </summary>
         /// <param name="file"></param>
         /// <param name="item"></param>
         /// <param name="NextTypeIndex"></param>
-        public DotNetType(PEParaser file, TypeDefTabelRow item, int NextTypeIndex)
+        public DotNetType(DotNetFile file, TypeDefTabelRow item, int NextTypeIndex)
         {
-            this.file = file;
+            this.file = file.Backend;
             this.type = item;
+            this.File = file;
             this.NextTypeIndex = NextTypeIndex;
             this.flags = (TypeFlags)item.Flags;
 
-            Name = file.ClrStringsStream.GetByOffset(item.Name);
-            NameSpace = file.ClrStringsStream.GetByOffset(item.Namespace);
+            Name = this.file.ClrStringsStream.GetByOffset(item.Name);
+            NameSpace = this.file.ClrStringsStream.GetByOffset(item.Namespace);
         }
 
         public override string ToString()
