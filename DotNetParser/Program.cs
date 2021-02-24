@@ -7,9 +7,12 @@ namespace DotNetParaser
     {
         static void Main(string[] args)
         {
-            string file = @"TestDll.dll";
+            string dll = @"TestDll.dll";
+            string exe = @"TestApp.exe";
 
-            var vm = new DotNetVirtualMachine(new DotNetFile(file));
+            var vm = new DotNetVirtualMachine();
+            vm.SetMainExe(new DotNetFile(exe));
+            vm.AddDll(new DotNetFile(dll));
             vm.Start();
 
             Console.WriteLine("Program exited.");

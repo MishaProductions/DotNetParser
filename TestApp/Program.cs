@@ -11,9 +11,6 @@ namespace TestApp
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            
-            if (args[0] == "ha")
-                Console.WriteLine("This Should never be executed");
         }
     }
 }
