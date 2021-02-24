@@ -63,7 +63,7 @@ namespace LibDotNetParser.CILApi
             byte format = fs.ReadByte();
             int CodeSize = 0;
             Console.WriteLine(fs == null);
-            if (format == 27)
+            if (format == 27 | format == 19)
             {
                 //Fat format
                 byte info2 = fs.ReadByte(); //some info on header

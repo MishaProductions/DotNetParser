@@ -7,7 +7,7 @@ namespace DotNetParaser
     {
         static void Main(string[] args)
         {
-            string file = @"TestApp.exe";
+            string file = @"TestDll.dll";
 
             var vm = new DotNetVirtualMachine(new DotNetFile(file));
             vm.Start();
