@@ -1,5 +1,5 @@
 # What is this?
-This is a .NET framework Exe parser that parses and executes the IL code in the executable. This library does not depend on any Windows libraries or .NET Self reflection. This library can also read most of the metadata and PE Headers in the .NET executable.
+This is a .NET framework EXE parser that parses the IL code and reads .NET Metadata in the executable. This library does not depend on any Windows libraries or .NET Self reflection.
 Feel free to contribute.
 
 # TODO
