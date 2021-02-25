@@ -1,6 +1,7 @@
 ﻿using LibDotNetParser;
 using LibDotNetParser.DotNet.Tabels.Defs;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -71,8 +72,18 @@ namespace LibDotNetParser.CILApi
             fs.BaseStream.Seek(Offset, System.IO.SeekOrigin.Begin);
             byte format = fs.ReadByte();
             int CodeSize = 0;
-            Console.WriteLine(fs == null);
-            if (format == 27 | format == 19)
+            var verytinyheader = format.ConvertByteToBoolArray();
+
+
+            var HeaderType = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[0], verytinyheader[1], verytinyheader[2], verytinyheader[3] });
+
+            var sizer = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[4], verytinyheader[5], verytinyheader[6], verytinyheader[7] });
+            fs.BaseStream.Seek(Offset + 1, System.IO.SeekOrigin.Begin);
+            byte form2 = fs.ReadByte();
+
+            fs.BaseStream.Seek(Offset + 1, System.IO.SeekOrigin.Begin);
+
+            if (form2 == 48)
             {
                 //Fat format
                 byte info2 = fs.ReadByte(); //some info on header
@@ -83,31 +94,18 @@ namespace LibDotNetParser.CILApi
             else
             {
                 //Tiny format (2nd byte is code size)
-                var size = format.ToString()[1];
-                CodeSize = int.Parse(size.ToString());
+                CodeSize = sizer;
             }
             List<byte> code = new List<byte>();
 
-            if (file.tabels.MethodTabel.Count <= nextMethod)
-            {
-                for (uint i = Offset + 1; i < (Offset + CodeSize); i++)
-                {
-                    //fs.BaseStream.Seek(i, System.IO.SeekOrigin.Begin);
-                    byte opcode = fs.ReadByte();
 
-                    code.Add(opcode);
-                }
-            }
-            else
-            {
-                uint offset = (uint)PEParaser.RelativeVirtualAddressToFileOffset(file.tabels.MethodTabel[(int)nextMethod].RVA, file.PeHeader.Sections);
-                for (uint i = Offset + 1; i < offset; i++)
-                {
-                    //fs.BaseStream.Seek(i, System.IO.SeekOrigin.Begin);
-                    byte opcode = fs.ReadByte();
 
-                    code.Add(opcode);
-                }
+            uint offset = (uint)PEParaser.RelativeVirtualAddressToFileOffset(file.tabels.MethodTabel[(int)nextMethod].RVA, file.PeHeader.Sections);
+            for (uint i = offset + 1; i < offset + 1 + CodeSize; i++)
+            {
+                byte opcode = fs.ReadByte();
+
+                code.Add(opcode);
             }
 
             return code.ToArray();

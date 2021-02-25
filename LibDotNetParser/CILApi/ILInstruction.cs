@@ -21,8 +21,8 @@ namespace LibDotNetParser.CILApi
         /// </summary>
         public object Operand { get; set; }
         /// <summary>
-        /// Extra data from decompiler
+        /// OpCode Name
         /// </summary>
-        public object DecompilerExtraData { get; set; }
+        public string OpCodeName { get; set; }
     }
 }

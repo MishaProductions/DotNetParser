@@ -29,5 +29,19 @@ namespace LibDotNetParser.CILApi.IL
         /// Loads the argument at index 0 onto the evaluation stack.
         /// </summary>
         public const int Ldarg_0 = 0x02;
+
+        public const int Ldc_I4_5 = 0x1B;
+
+        public const int Stloc_0 = 0x0A;
+
+        public const int Ldloc_0 = 0x06;
+
+        public const int Add = 0x58;
+
+        public const int Stloc_1 = 0x0B;
+
+        public const int Ldloca_S = 0x12;
+
+        public const int Pop = 0x26;
     }
 }

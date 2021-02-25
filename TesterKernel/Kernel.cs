@@ -1,6 +1,7 @@
 ﻿using Cosmos.System.FileSystem;
 using LibDotNetParser;
 using LibDotNetParser.CILApi;
+using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,12 +21,26 @@ namespace TesterKernel
             try
             {
                 var fl = new DotNetFile(TestApp.file);
-                var vm = new DotNetVirtualMachine();
-                vm.SetMainExe(fl);
-                vm.Start();
 
-                Console.WriteLine("Program exited.");
-                Console.ReadLine();
+                var decompiler = new IlDecompiler(fl.EntryPoint);
+                Console.WriteLine("Decompiltion of Main function:");
+                Console.WriteLine("");
+                foreach (var item in decompiler.Decompile())
+                {
+                    if (item.Operand is string)
+                    {
+                        Console.WriteLine(item.OpCodeName + " \"" + (string)item.Operand + "\"");
+                    }
+                    else if (item.Operand is CallMethodDataHolder)
+                    {
+                        var me = (CallMethodDataHolder)item.Operand;
+                        Console.WriteLine(item.OpCodeName + " " + me.NameSpace + "." + me.ClassName + "." + me.FunctionName + "()");
+                    }
+                    else
+                    {
+                        Console.WriteLine(item.OpCodeName);
+                    }
+                }
             }
             catch(Exception x)
             {
