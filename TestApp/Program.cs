@@ -15,7 +15,8 @@ namespace TestApp
 
             Console.WriteLine(" New Obj Test: ");
             new object();
-
+            new StringBuilder();
+            new sbyte();
 
             Console.WriteLine(" New varible Test: ");
             var x = 234;

@@ -43,5 +43,7 @@ namespace LibDotNetParser.CILApi.IL
         public const int Ldloca_S = 0x12;
 
         public const int Pop = 0x26;
+
+        public const int Newobj = 0x73;
     }
 }

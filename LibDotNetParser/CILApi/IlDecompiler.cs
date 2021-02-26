@@ -36,10 +36,6 @@ namespace LibDotNetParser.CILApi
                     //Get the string
                     string s;
 
-                    //Microsoft does really good documentation on front-end things. For example: Windows Apis, and the dot net framework.
-                    //But, They don't do backend documentation, for example: Decoding this string token. 
-                    //I have to go through 100,000+ lines of code in the .NET Clr to figure out how these string tokens work and still didnt figure it out.
-
                     if (forth != 112)
                     {
                         //Will this ever be in the String Stream?
@@ -52,7 +48,6 @@ namespace LibDotNetParser.CILApi
                         //This is only a temp. hack
                         s = mainFile.Backend.ClrUsStream.GetByOffset((uint)numb);
                     }
-                    int rid = numb & 0x00ffffff; //Not sure weather this is needed, but I found it in the CLR
                     i += 4; //skip past the string
 
                     inr.Add(new ILInstruction()
@@ -216,9 +211,26 @@ namespace LibDotNetParser.CILApi
                         OpCodeName = "pop"
                     });
                 }
+                else if (opCode == OpCodes.Newobj)
+                {
+                    byte newObj = code[i + 1];
+
+                    uint tabel;
+                    uint row;
+
+                    DecodeMemberRefParent(newObj, out tabel, out row);
+                    i++;
+
+                    throw new NotImplementedException("NewObj not supported yet!");
+                    inr.Add(new ILInstruction()
+                    {
+                        OpCode = opCode,
+                        OpCodeName = "newobj"
+                    });
+                }
                 else
                 {
-                    inr.Add(new ILInstruction() { OpCode = opCode });
+                    inr.Add(new ILInstruction() { OpCode = opCode, OpCodeName="Unknown opcode: "+opCode });
                 }
             }
 
