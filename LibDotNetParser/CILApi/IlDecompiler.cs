@@ -214,14 +214,17 @@ namespace LibDotNetParser.CILApi
                 else if (opCode == OpCodes.Newobj)
                 {
                     byte newObj = code[i + 1];
+                    byte newObj2 = code[i + 2];
+                    byte newObj3 = code[i + 3];
+                    byte newObj4 = code[i + 4]; //token type. 10 = TypeRef
 
+                    var numb = BitConverter.ToInt32(new byte[] { newObj, newObj2, newObj3, 0 }, 0);
                     uint tabel;
                     uint row;
 
                     DecodeMemberRefParent(newObj, out tabel, out row);
-                    i++;
+                    i += 4;
 
-                    throw new NotImplementedException("NewObj not supported yet!");
                     inr.Add(new ILInstruction()
                     {
                         OpCode = opCode,
@@ -230,7 +233,7 @@ namespace LibDotNetParser.CILApi
                 }
                 else
                 {
-                    inr.Add(new ILInstruction() { OpCode = opCode, OpCodeName="Unknown opcode: "+opCode });
+                    inr.Add(new ILInstruction() { OpCode = opCode, OpCodeName = "Unknown opcode: " + opCode });
                 }
             }
 

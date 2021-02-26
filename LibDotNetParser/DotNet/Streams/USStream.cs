@@ -62,9 +62,16 @@ namespace LibDotNetParser.DotNet.Streams
 
                 for (int i2 = 0; i2 < len; i2++)
                 {
-                    char c = _reader.ReadChar();
-                    if (c != '\0')
-                        str += c;
+                    try
+                    {
+                        char c = _reader.ReadChar();
+                        if (c != '\0')
+                            str += c;
+                    }
+                    catch (System.IO.EndOfStreamException)
+                    {
+
+                    }
                 }
 
                 i = (int)_reader.BaseStream.Position;

@@ -49,37 +49,4 @@ namespace LibDotNetParser.DotNet.Streams
             return new StringsStream(strings);
         }
     }
-
-    public static class Ext
-    {
-        public static string ReadNullTermString(this BinaryReader reader,bool secondPass=false)
-        {
-            var buffer = new List<char>();
-            char current;
-            while ((current = reader.ReadChar()) != '\0')
-                buffer.Add(current);
-
-            if (secondPass)
-                while ((current = reader.ReadChar()) != '\0')
-                    buffer.Add(current);
-            return new string(buffer.ToArray());
-        }
-        public static string ReadNullTermString(this BinaryReader reader, int readLength)
-        {
-            var bytes = reader.ReadChars(readLength);
-            List<char> b = new List<char>();
-            foreach (var item in bytes)
-            {
-                if (!item.Equals('\0'))
-                {
-                    b.Add(item);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return new string(b.ToArray());
-        }
-    }
 }

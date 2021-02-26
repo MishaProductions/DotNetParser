@@ -76,9 +76,9 @@ namespace LibDotNetParser.CILApi
             var verytinyheader = format.ConvertByteToBoolArray();
 
 
-            var reserved = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[6], verytinyheader[7] });
+            var reserved = BinUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[6], verytinyheader[7] });
 
-            var sizer = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[0], verytinyheader[1], verytinyheader[2], verytinyheader[3], verytinyheader[4], verytinyheader[5], });
+            var sizer = BinUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[0], verytinyheader[1], verytinyheader[2], verytinyheader[3], verytinyheader[4], verytinyheader[5], });
             fs.BaseStream.Seek(Offset + 1, System.IO.SeekOrigin.Begin);
             byte form2 = fs.ReadByte();
 

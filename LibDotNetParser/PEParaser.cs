@@ -16,11 +16,13 @@ namespace LibDotNetParser
         #endregion
         #region CLR
         public CLRHeader ClrHeader { get; private set; }
-        public MetadataHeader ClrMetaDataHeader;
+        public MetadataHeader ClrMetaDataHeader { get; private set; }
         public MetadataStreamHeader ClrMetaDataStreamHeader { get; private set; }
-        public StringsStream ClrStringsStream;
-        public USStream ClrUsStream;
-        public MetadataReader MetadataReader;
+
+        public StringsStream ClrStringsStream { get; private set; }
+        public USStream ClrUsStream { get; private set; }
+
+        public MetadataReader MetadataReader { get; private set; }
         public Tabels tabels { get; private set; }
         public byte[] ClrStrongNameHash { get; private set; }
         #endregion
