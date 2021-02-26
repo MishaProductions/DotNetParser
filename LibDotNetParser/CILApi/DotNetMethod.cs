@@ -70,14 +70,15 @@ namespace LibDotNetParser.CILApi
         {
             var fs = file.RawFile;
             fs.BaseStream.Seek(Offset, System.IO.SeekOrigin.Begin);
+
             byte format = fs.ReadByte();
             int CodeSize = 0;
             var verytinyheader = format.ConvertByteToBoolArray();
 
 
-            var HeaderType = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[0], verytinyheader[1], verytinyheader[2], verytinyheader[3] });
+            var reserved = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[6], verytinyheader[7] });
 
-            var sizer = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[4], verytinyheader[5], verytinyheader[6], verytinyheader[7] });
+            var sizer = BitUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[0], verytinyheader[1], verytinyheader[2], verytinyheader[3], verytinyheader[4], verytinyheader[5], });
             fs.BaseStream.Seek(Offset + 1, System.IO.SeekOrigin.Begin);
             byte form2 = fs.ReadByte();
 
@@ -93,15 +94,12 @@ namespace LibDotNetParser.CILApi
             }
             else
             {
-                //Tiny format (2nd byte is code size)
+                //Tiny format
                 CodeSize = sizer;
             }
             List<byte> code = new List<byte>();
 
-
-
-            uint offset = (uint)PEParaser.RelativeVirtualAddressToFileOffset(file.tabels.MethodTabel[(int)nextMethod].RVA, file.PeHeader.Sections);
-            for (uint i = offset + 1; i < offset + 1 + CodeSize; i++)
+            for (uint i = Offset + 1; i < Offset + 1 + CodeSize; i++)
             {
                 byte opcode = fs.ReadByte();
 

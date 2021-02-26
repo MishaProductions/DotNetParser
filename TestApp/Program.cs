@@ -10,7 +10,21 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("C# DotNetParser Tester");
+            ;
+
+            Console.WriteLine(" New Obj Test: ");
+            new object();
+
+
+            Console.WriteLine(" New varible Test: ");
+            var x = 234;
+
+            Console.WriteLine("Read array test");
+            var a = args[0];
+
+
+            Console.WriteLine("Output is : a="+x+" and first arg is "+a);
         }
     }
 }
