@@ -9,6 +9,10 @@ namespace LibDotNetParser.CILApi.IL
     /// </summary>
     public static class OpCodes
     {
+        public const int Add_Ovf = 0xD6;
+        public const int Add_Ovf_Un = 0xD7;
+        public const int And = 0x5F;
+
         /// <summary>
         /// No Operating
         /// </summary>

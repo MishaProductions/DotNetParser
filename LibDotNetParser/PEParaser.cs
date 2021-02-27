@@ -111,8 +111,6 @@ namespace LibDotNetParser
                 //#GUID Stream
                 else if (hdr.Name.Length == 5)
                     r.BaseStream.Position += 2;
-
-                Console.WriteLine("Stream: " + hdr.Name + " Size: " + hdr.Size + " Offset: " + hdr.Offset);
                 Streams.Add(hdr);
             }
 

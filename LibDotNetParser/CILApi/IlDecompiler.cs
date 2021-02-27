@@ -219,16 +219,37 @@ namespace LibDotNetParser.CILApi
                     byte newObj4 = code[i + 4]; //token type. 10 = TypeRef
 
                     var numb = BitConverter.ToInt32(new byte[] { newObj, newObj2, newObj3, 0 }, 0);
-                    uint tabel;
-                    uint row;
-
-                    DecodeMemberRefParent(newObj, out tabel, out row);
+                    
                     i += 4;
 
                     inr.Add(new ILInstruction()
                     {
                         OpCode = opCode,
-                        OpCodeName = "newobj"
+                        OpCodeName = "newobj (WIP)"
+                    });
+                }
+                else if (opCode == OpCodes.Add_Ovf)
+                {
+                    inr.Add(new ILInstruction()
+                    {
+                        OpCode = opCode,
+                        OpCodeName = "and.ovf"
+                    });
+                }
+                else if (opCode == OpCodes.Add_Ovf_Un)
+                {
+                    inr.Add(new ILInstruction()
+                    {
+                        OpCode = opCode,
+                        OpCodeName = "add.ovf.un"
+                    });
+                }
+                else if (opCode == OpCodes.And)
+                {
+                    inr.Add(new ILInstruction()
+                    {
+                        OpCode = opCode,
+                        OpCodeName = "and"
                     });
                 }
                 else
