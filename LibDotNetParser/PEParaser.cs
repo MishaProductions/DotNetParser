@@ -25,6 +25,8 @@ namespace LibDotNetParser
         public MetadataReader MetadataReader { get; private set; }
         public Tabels tabels { get; private set; }
         public byte[] ClrStrongNameHash { get; private set; }
+
+        List<StreamHeader> Streams = new List<StreamHeader>();
         #endregion
         public BinaryReader RawFile;
         public PEParaser(string FilePath)
@@ -87,9 +89,6 @@ namespace LibDotNetParser
             #endregion
             #region Parse streams
 
-            //Read all of the tabels
-            List<StreamHeader> Streams = new List<StreamHeader>();
-
             //Parse the StreamHeader(s)
             for (int i = 0; i < ClrMetaDataHeader.NumberOfStreams; i++)
             {
@@ -115,19 +114,17 @@ namespace LibDotNetParser
             }
 
             //Parse the #String stream
-            var bytes = GetStreamBytes(r, Streams[1], ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
+            var bytes = GetStreamBytes("#Strings", r);
             ClrStringsStream = new StringsStreamReader(bytes).Read();
-            
+
             //Parse the #US Stream
-            var bytes2 = GetStreamBytes(r, Streams[2], ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
+            var bytes2 = GetStreamBytes("#US", r);
             ClrUsStream = new USStreamReader(bytes2).Read();
-            
+
             #endregion
             #region Parse #~ Stream
             //Parse the #~ stream
-            BinaryReader TableStreamR = new BinaryReader(new MemoryStream(
-                GetStreamBytes(r, Streams[0], ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections)));
-
+            BinaryReader TableStreamR = new BinaryReader(new MemoryStream(GetStreamBytes("#~", r)));
             ClrMetaDataStreamHeader = ReadHeader(TableStreamR);
 
             //Parse the tabels data
@@ -138,11 +135,29 @@ namespace LibDotNetParser
             {
                 ClrMetaDataStreamHeader.TableSizes[i] = TableStreamR.ReadUInt32();
             }
-            
+
             MetadataReader = new MetadataReader(TableStreamR.BaseStream);
+
             //Parse the tabels
             tabels = new Tabels(this);
             #endregion
+        }
+
+        public byte[] GetStreamBytes(string streamName, BinaryReader r)
+        {
+            StreamHeader hdr = null;
+            foreach (var item in Streams)
+            {
+                if (item.Name == streamName)
+                {
+                    hdr = item;
+                    break;
+                }
+            }
+            if (hdr == null)
+                return null;
+
+            return GetStreamBytes(r, hdr, ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
         }
 
 
@@ -188,47 +203,47 @@ namespace LibDotNetParser
         public PEHeader ReadPEHeader(ushort headerAddress, BinaryReader _assemblyReader)
         {
             _assemblyReader.BaseStream.Seek(headerAddress, SeekOrigin.Begin);
-            var header = new PEHeader
-            {
-                Signature = _assemblyReader.ReadUInt32(),
-                Machine = _assemblyReader.ReadUInt16(),
-                NumberOfSections = _assemblyReader.ReadUInt16(),
-                DateTimeStamp = _assemblyReader.ReadUInt32(),
-                PtrToSymbolTable = _assemblyReader.ReadUInt32(),
-                NumberOfSymbols = _assemblyReader.ReadUInt32(),
-                SizeOfOptionalHeaders = _assemblyReader.ReadUInt16(),
-                Characteristics = _assemblyReader.ReadUInt16(),
-                OptionalMagic = _assemblyReader.ReadUInt16(),
-                MajorLinkerVersion = _assemblyReader.ReadByte(),
-                MinorLinkerVersion = _assemblyReader.ReadByte(),
-                SizeOfCode = _assemblyReader.ReadUInt32(),
-                SizeOfInitData = _assemblyReader.ReadUInt32(),
-                SizeOfUninitData = _assemblyReader.ReadUInt32(),
-                AddressOfEntryPoint = _assemblyReader.ReadUInt32(),
-                BaseOfCode = _assemblyReader.ReadUInt32(),
-                BaseOfData = _assemblyReader.ReadUInt32(),
-                ImageBase = _assemblyReader.ReadUInt32(),
-                SectionAlignment = _assemblyReader.ReadUInt32(),
-                FileAlignment = _assemblyReader.ReadUInt32(),
-                MajorOSVersion = _assemblyReader.ReadUInt16(),
-                MinorOSVersion = _assemblyReader.ReadUInt16(),
-                MajorImageVersion = _assemblyReader.ReadUInt16(),
-                MinorImageVersion = _assemblyReader.ReadUInt16(),
-                MajorSubsystemVersion = _assemblyReader.ReadUInt16(),
-                MinorSubsystemVersion = _assemblyReader.ReadUInt16(),
-                Reserved1 = _assemblyReader.ReadUInt32(),
-                SizeOfImage = _assemblyReader.ReadUInt32(),
-                SizeOfHeaders = _assemblyReader.ReadUInt32(),
-                PEChecksum = _assemblyReader.ReadUInt32(),
-                Subsystem = _assemblyReader.ReadUInt16(),
-                DLLCharacteristics = _assemblyReader.ReadUInt16(),
-                SizeOfStackReserve = _assemblyReader.ReadUInt32(),
-                SizeOfStackCommit = _assemblyReader.ReadUInt32(),
-                SizeOfHeapReserve = _assemblyReader.ReadUInt32(),
-                SizeOfHeapCommit = _assemblyReader.ReadUInt32(),
-                LoaderFlags = _assemblyReader.ReadUInt32(),
-                DirectoryLength = _assemblyReader.ReadUInt32()
-            };
+            var header = new PEHeader();
+
+            header.Signature = _assemblyReader.ReadUInt32();
+            header.Machine = _assemblyReader.ReadUInt16();
+            header.NumberOfSections = _assemblyReader.ReadUInt16();
+            header.DateTimeStamp = _assemblyReader.ReadUInt32();
+            header.PtrToSymbolTable = _assemblyReader.ReadUInt32();
+            header.NumberOfSymbols = _assemblyReader.ReadUInt32();
+            header.SizeOfOptionalHeaders = _assemblyReader.ReadUInt16();
+            header.Characteristics = _assemblyReader.ReadUInt16();
+            header.OptionalMagic = _assemblyReader.ReadUInt16();
+            header.MajorLinkerVersion = _assemblyReader.ReadByte();
+            header.MinorLinkerVersion = _assemblyReader.ReadByte();
+            header.SizeOfCode = _assemblyReader.ReadUInt32();
+            header.SizeOfInitData = _assemblyReader.ReadUInt32();
+            header.SizeOfUninitData = _assemblyReader.ReadUInt32();
+            header.AddressOfEntryPoint = _assemblyReader.ReadUInt32();
+            header.BaseOfCode = _assemblyReader.ReadUInt32();
+            header.BaseOfData = _assemblyReader.ReadUInt32();
+            header.ImageBase = _assemblyReader.ReadUInt32();
+            header.SectionAlignment = _assemblyReader.ReadUInt32();
+            header.FileAlignment = _assemblyReader.ReadUInt32();
+            header.MajorOSVersion = _assemblyReader.ReadUInt16();
+            header.MinorOSVersion = _assemblyReader.ReadUInt16();
+            header.MajorImageVersion = _assemblyReader.ReadUInt16();
+            header.MinorImageVersion = _assemblyReader.ReadUInt16();
+            header.MajorSubsystemVersion = _assemblyReader.ReadUInt16();
+            header.MinorSubsystemVersion = _assemblyReader.ReadUInt16();
+            header.Reserved1 = _assemblyReader.ReadUInt32();
+            header.SizeOfImage = _assemblyReader.ReadUInt32();
+            header.SizeOfHeaders = _assemblyReader.ReadUInt32();
+            header.PEChecksum = _assemblyReader.ReadUInt32();
+            header.Subsystem = _assemblyReader.ReadUInt16();
+            header.DLLCharacteristics = _assemblyReader.ReadUInt16();
+            header.SizeOfStackReserve = _assemblyReader.ReadUInt32();
+            header.SizeOfStackCommit = _assemblyReader.ReadUInt32();
+            header.SizeOfHeapReserve = _assemblyReader.ReadUInt32();
+            header.SizeOfHeapCommit = _assemblyReader.ReadUInt32();
+            header.LoaderFlags = _assemblyReader.ReadUInt32();
+            header.DirectoryLength = _assemblyReader.ReadUInt32();
+
             return header;
         }
         #endregion
@@ -372,7 +387,7 @@ namespace LibDotNetParser
                     break;
                 }
             }
-            
+
             if (section == null)
                 throw new Exception("Cannot find the section");
 

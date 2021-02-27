@@ -64,7 +64,7 @@ namespace LibDotNetParser.PE
         public uint AddressOfEntryPoint { get; set; }
         public uint BaseOfCode { get; set; }
         public uint BaseOfData { get; set; }
-        public uint ImageBase { get; set; }
+        public ulong ImageBase { get; set; }
         public uint SectionAlignment { get; set; }
         public uint FileAlignment { get; set; }
         public ushort MajorOSVersion { get; set; }
