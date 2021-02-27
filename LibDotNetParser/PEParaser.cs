@@ -23,7 +23,7 @@ namespace LibDotNetParser
         public USStream ClrUsStream { get; private set; }
 
         public MetadataReader MetadataReader { get; private set; }
-        public Tabels tabels { get; private set; }
+        public Tabels Tabels { get; private set; }
         public byte[] ClrStrongNameHash { get; private set; }
 
         List<StreamHeader> Streams = new List<StreamHeader>();
@@ -139,7 +139,7 @@ namespace LibDotNetParser
             MetadataReader = new MetadataReader(TableStreamR.BaseStream);
 
             //Parse the tabels
-            tabels = new Tabels(this);
+            Tabels = new Tabels(this);
             #endregion
         }
 

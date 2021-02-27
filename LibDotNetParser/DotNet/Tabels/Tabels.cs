@@ -9,7 +9,6 @@ namespace LibDotNetParser.DotNet.Tabels
 {
     public class Tabels
     {
-        private PEParaser p;
         private MetadataReader r;
         public List<ModuleTabelRow> ModuleTabel { get; }
         public List<TypeRefTabelRow> TypeRefTabel { get; }
@@ -22,11 +21,7 @@ namespace LibDotNetParser.DotNet.Tabels
         public Tabels(PEParaser p)
         {
             //Init
-            this.p = p;
             this.r = p.MetadataReader;
-
-            var x = r.BaseStream.Position;
-
 
             //Read all of the tabels
             ModuleTabel = new List<ModuleTabelRow>();

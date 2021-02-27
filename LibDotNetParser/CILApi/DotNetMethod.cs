@@ -43,20 +43,18 @@ namespace LibDotNetParser.CILApi
         }
         public string Signature { get; set; }
         public DotNetType Parrent { get; }
-        uint nextMethod;
         /// <summary>
         /// Internal use only
         /// </summary>
         /// <param name="file"></param>
         /// <param name="item"></param>
         /// <param name="parrent"></param>
-        public DotNetMethod(PEParaser file, MethodTabelRow item, DotNetType parrent, uint nextMethod)
+        public DotNetMethod(PEParaser file, MethodTabelRow item, DotNetType parrent)
         {
             this.file = file;
             this.method = item;
             this.Parrent = parrent;
             this.flags = (MethodAttr)item.Flags;
-            this.nextMethod = nextMethod;
             this.file2 = parrent.File;
 
             this.Signature = file.ClrStringsStream.GetByOffset(item.Signature);

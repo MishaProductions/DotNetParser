@@ -69,13 +69,11 @@ namespace LibDotNetParser.CILApi
                         short numb = BitConverter.ToInt16(num, 0); //Method Token
 
                         //Get the method that we are calling
-                        var c = mainFile.Backend.tabels.MemberRefTabelRow[numb - 1]; //is the -1 needed?
+                        var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb - 1]; //is the -1 needed?
                         i += 4; //skip past the string
                         #region Decode
                         //Decode the class bytes
-                        uint tabel;
-                        uint row;
-                        DecodeMemberRefParent(c.Class, out tabel, out row);
+                        DecodeMemberRefParent(c.Class, out uint tabel, out uint row);
 
 
                         var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
@@ -85,7 +83,7 @@ namespace LibDotNetParser.CILApi
                         //TYPE def
                         if (tabel == 02)
                         {
-                            var tt = mainFile.Backend.tabels.TypeDefTabel[(int)row - 1];
+                            var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
 
                             classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Name);
                             Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
@@ -93,7 +91,7 @@ namespace LibDotNetParser.CILApi
                         //Type REF
                         else if (tabel == 01)
                         {
-                            var tt = mainFile.Backend.tabels.TypeRefTabel[(int)row - 1];
+                            var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
 
                             classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
                             Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);

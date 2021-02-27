@@ -52,22 +52,21 @@ namespace LibDotNetParser.CILApi
 
                 int max;
 
-                if (file.tabels.TypeDefTabel.Count <= NextTypeIndex)
+                if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
                 {
-                    max = file.tabels.TypeDefTabel.Count;
+                    max = file.Tabels.TypeDefTabel.Count;
                 }
                 else
                 {
-                    max = (int)file.tabels.TypeDefTabel[(int)NextTypeIndex].MethodList - 1;
+                    max = (int)file.Tabels.TypeDefTabel[NextTypeIndex].MethodList - 1;
                 }
                 for (uint i = startIndex - 1; i < max; i++)
                 {
-                    if (file.tabels.MethodTabel.Count != 1)
+                    if (file.Tabels.MethodTabel.Count != 1)
                     {
-                        var item = file.tabels.MethodTabel[(int)i];
-                        m.Add(new DotNetMethod(file, item, this, i + 1));
+                        var item = file.Tabels.MethodTabel[(int)i];
+                        m.Add(new DotNetMethod(file, item, this));
                     }
-
                 }
 
                 return m;
