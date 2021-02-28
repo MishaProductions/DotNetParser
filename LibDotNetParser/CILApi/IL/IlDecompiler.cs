@@ -26,6 +26,13 @@ namespace LibDotNetParser.CILApi
                 if (opCode == null)
                     continue;
 
+                if (opCodeb == 0xFE)
+                {
+                    opCodeb = code[i + 1];
+                    opCode = OpCodes.MultiOpCodes[opCodeb];
+                    i++;
+                }
+
                 //TODO: Implment the rest of these
                 switch (opCode.OpCodeOperandType)
                 {

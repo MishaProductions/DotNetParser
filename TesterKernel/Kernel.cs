@@ -25,6 +25,8 @@ namespace TesterKernel
                 var decompiler = new IlDecompiler(fl.EntryPoint);
                 Console.WriteLine("Decompiltion of Main function:");
                 Console.WriteLine("");
+
+
                 var ilFormater = new ILFormater(decompiler.Decompile());
                 var outputString = ilFormater.Format();
                 Console.WriteLine(outputString);

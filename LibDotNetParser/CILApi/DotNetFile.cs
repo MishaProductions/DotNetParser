@@ -4,8 +4,8 @@ namespace LibDotNetParser.CILApi
 {
     public class DotNetFile
     {
-        PEParaser peFile;
-        public PEParaser Backend
+        PEFile peFile;
+        public PEFile Backend
         {
             get { return peFile; }
         }
@@ -49,12 +49,12 @@ namespace LibDotNetParser.CILApi
         }
         public DotNetFile(string Path)
         {
-            peFile = new PEParaser(Path);
+            peFile = new PEFile(Path);
         }
 
         public DotNetFile(byte[] file)
         {
-            peFile = new PEParaser(file);
+            peFile = new PEFile(file);
         }
     }
 }

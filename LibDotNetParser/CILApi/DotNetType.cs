@@ -11,7 +11,7 @@ namespace LibDotNetParser.CILApi
 {
     public class DotNetType
     {
-        private PEParaser file;
+        private PEFile file;
         private TypeDefTabelRow type;
         private TypeFlags flags;
         private int NextTypeIndex;

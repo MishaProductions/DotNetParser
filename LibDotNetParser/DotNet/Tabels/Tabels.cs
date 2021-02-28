@@ -18,7 +18,7 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<ParamTabelRow> ParmTabel { get; }
         public List<InterfaceImplTabelRow> InterfaceImplTable { get; }
         public List<MemberRefTabelRow> MemberRefTabelRow { get; }
-        public Tabels(PEParaser p)
+        public Tabels(PEFile p)
         {
             //Init
             this.r = p.MetadataReader;

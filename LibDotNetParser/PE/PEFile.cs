@@ -8,7 +8,7 @@ using LibDotNetParser.DotNet.Tabels;
 
 namespace LibDotNetParser
 {
-    public class PEParaser
+    public class PEFile
     {
         #region PE
         public DOSHeader DosHeader { get; private set; }
@@ -29,13 +29,13 @@ namespace LibDotNetParser
         List<StreamHeader> Streams = new List<StreamHeader>();
         #endregion
         public BinaryReader RawFile;
-        public PEParaser(string FilePath)
+        public PEFile(string FilePath)
         {
             byte[] fs = File.ReadAllBytes(FilePath);
             Init(fs);
         }
 
-        public PEParaser(byte[] file)
+        public PEFile(byte[] file)
         {
             Init(file);
         }
@@ -142,24 +142,6 @@ namespace LibDotNetParser
             Tabels = new Tabels(this);
             #endregion
         }
-
-        public byte[] GetStreamBytes(string streamName, BinaryReader r)
-        {
-            StreamHeader hdr = null;
-            foreach (var item in Streams)
-            {
-                if (item.Name == streamName)
-                {
-                    hdr = item;
-                    break;
-                }
-            }
-            if (hdr == null)
-                return null;
-
-            return GetStreamBytes(r, hdr, ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
-        }
-
 
         #region Read Windows Header
         public DOSHeader ReadDOSHeader(BinaryReader reader)
@@ -375,6 +357,7 @@ namespace LibDotNetParser
             return reader.ReadBytes((int)streamHeader.Size);
         }
         #endregion
+        #region Utils
         public static ulong RelativeVirtualAddressToFileOffset(ulong rva, IEnumerable<Section> sections)
         {
             // find the section whose virtual address range contains the data directory's virtual address.
@@ -395,5 +378,22 @@ namespace LibDotNetParser
             var fileOffset = section.PointerToRawData + (rva - section.VirtualAddress);
             return fileOffset;
         }
+        public byte[] GetStreamBytes(string streamName, BinaryReader r)
+        {
+            StreamHeader hdr = null;
+            foreach (var item in Streams)
+            {
+                if (item.Name == streamName)
+                {
+                    hdr = item;
+                    break;
+                }
+            }
+            if (hdr == null)
+                return null;
+
+            return GetStreamBytes(r, hdr, ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
+        }
+        #endregion
     }
 }

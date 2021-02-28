@@ -12,7 +12,7 @@ namespace LibDotNetParser.CILApi
 {
     public class DotNetMethod
     {
-        private PEParaser file;
+        private PEFile file;
         private DotNetFile file2;
         private MethodTabelRow method;
 
@@ -24,7 +24,7 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                return (uint)PEParaser.RelativeVirtualAddressToFileOffset(RVA, file.PeHeader.Sections);
+                return (uint)PEFile.RelativeVirtualAddressToFileOffset(RVA, file.PeHeader.Sections);
             }
         }
         public DotNetFile File
@@ -49,7 +49,7 @@ namespace LibDotNetParser.CILApi
         /// <param name="file"></param>
         /// <param name="item"></param>
         /// <param name="parrent"></param>
-        public DotNetMethod(PEParaser file, MethodTabelRow item, DotNetType parrent)
+        public DotNetMethod(PEFile file, MethodTabelRow item, DotNetType parrent)
         {
             this.file = file;
             this.method = item;

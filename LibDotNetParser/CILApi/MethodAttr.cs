@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibDotNetParser.CILApi
 {
-    enum MethodAttr
+    internal enum MethodAttr
     {
         // member access mask - Use this mask to retrieve 
 
