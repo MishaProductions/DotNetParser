@@ -1,7 +1,6 @@
 ﻿using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LibDotNetParser.CILApi
 {
@@ -249,6 +248,21 @@ namespace LibDotNetParser.CILApi
                         OpCode = opCode,
                         OpCodeName = "and"
                     });
+                }
+
+
+
+                else if (opCode == OpCodes.Ext)
+                {
+                    byte otherOpCode = code[i + 1];
+                    i++;
+
+                    //TODO: Support
+
+                    if (otherOpCode == OpCodesExt.Arglist)
+                    {
+                        inr.Add(new ILInstruction() { OpCode = opCode, OpCodeName = "arglist" });
+                    }
                 }
                 else
                 {

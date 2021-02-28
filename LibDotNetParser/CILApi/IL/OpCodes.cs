@@ -49,5 +49,10 @@ namespace LibDotNetParser.CILApi.IL
         public const int Pop = 0x26;
 
         public const int Newobj = 0x73;
+
+        /// <summary>
+        /// Extended Opcode. Means that the opcode is 2 bytes long
+        /// </summary>
+        public const int Ext = 0xFE;
     }
 }
