@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibDotNetParser.CILApi.IL;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -24,5 +25,7 @@ namespace LibDotNetParser.CILApi
         /// OpCode Name
         /// </summary>
         public string OpCodeName { get; set; }
+
+        public OpCodeOperandType OperandType { get; set; }
     }
 }

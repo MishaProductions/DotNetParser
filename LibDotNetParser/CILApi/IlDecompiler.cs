@@ -21,252 +21,158 @@ namespace LibDotNetParser.CILApi
 
             for (int i = 0; i < code.Length; i++)
             {
-                byte opCode = code[i];
-                if (opCode == OpCodes.Ldstr)
+                byte opCodeb = code[i];
+                var opCode = OpCodes.SingleOpCodes[opCodeb];
+                if (opCode == null)
+                    continue;
+
+                //TODO: Implment the rest of these
+                switch (opCode.OpCodeOperandType)
                 {
-                    //Decode the number
-                    byte first = code[i + 1]; //1st index
-                    byte sec = code[i + 2]; //2nd
-                    byte third = code[i + 3];
-                    byte forth = code[i + 4];
-                    byte[] num = new byte[] { first, sec, third, 0 };
-                    var numb = BitConverter.ToInt32(num, 0);
-
-                    //Get the string
-                    string s;
-
-                    if (forth != 112)
-                    {
-                        //Will this ever be in the String Stream?
-                        s = mainFile.Backend.ClrStringsStream.GetByOffset((uint)numb);
-                    }
-                    else
-                    {
-                        //US stream
-
-                        //This is only a temp. hack
-                        s = mainFile.Backend.ClrUsStream.GetByOffset((uint)numb);
-                    }
-                    i += 4; //skip past the string
-
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = OpCodes.Ldstr,
-                        Operand = s,
-                        OpCodeName = "ldstr"
-                    });
-                }
-                else if (opCode == OpCodes.Call)
-                {
-                    try
-                    {
-                        byte fi = code[i + 1];
-                        byte s = code[i + 2];
-                        byte t = code[i + 3];
-                        byte f = code[i + 4];
-                        byte[] num = new byte[] { fi, s, t, f };
-                        short numb = BitConverter.ToInt16(num, 0); //Method Token
-
-                        //Get the method that we are calling
-                        var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb - 1]; //is the -1 needed?
-                        i += 4; //skip past the string
-                        #region Decode
-                        //Decode the class bytes
-                        DecodeMemberRefParent(c.Class, out uint tabel, out uint row);
-
-
-                        var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
-                        string classs;
-                        string Namespace;
-
-                        //TYPE def
-                        if (tabel == 02)
+                    case OpCodeOperandType.InlineBrTarget:
+                        break;
+                    case OpCodeOperandType.InlineField:
+                        break;
+                    case OpCodeOperandType.InlineI:
+                        break;
+                    case OpCodeOperandType.InlineI8:
+                        break;
+                    case OpCodeOperandType.InlineMethod:
                         {
-                            var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
+                            try
+                            {
+                                byte fi = code[i + 1];
+                                byte s2 = code[i + 2];
+                                byte t = code[i + 3];
+                                byte f = code[i + 4];
+                                byte[] num2 = new byte[] { fi, s2, t, f };
+                                short numb2 = BitConverter.ToInt16(num2, 0); //Method Token
 
-                            classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Name);
-                            Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+                                //Get the method that we are calling
+                                var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1]; //is the -1 needed?
+                                i += 4; //skip past the string
+                                #region Decode
+                                //Decode the class bytes
+                                DecodeMemberRefParent(c.Class, out uint tabel, out uint row);
+
+
+                                var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                                string classs;
+                                string Namespace;
+
+                                //TYPE def
+                                if (tabel == 02)
+                                {
+                                    var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
+
+                                    classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                                    Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+                                }
+                                //Type REF
+                                else if (tabel == 01)
+                                {
+                                    var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
+
+                                    classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
+                                    Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);
+                                }
+                                //Module Ref
+                                else if (tabel == 26)
+                                {
+                                    //var tt = file.Backend.MetaDataStreamTablesHeader.Tables.ModuleRef[(int)row - 1];
+
+                                    //classs = file.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                                    //Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+                                    Console.WriteLine("Module Ref not supported!");
+                                    classs = "<Module Ref>";
+                                    Namespace = "<Module Ref>";
+                                }
+                                //Unknown
+                                else
+                                {
+                                    classs = "<unknown>";
+                                    Namespace = "<unknown>";
+                                }
+                                #endregion
+                                var inst = new ILInstruction()
+                                {
+                                    OpCode = opCode.Value,
+                                    OpCodeName = opCode.Name,
+                                    OperandType = opCode.OpCodeOperandType
+                                };
+
+                                inst.Operand = new CallMethodDataHolder() { ClassName = classs, NameSpace = Namespace, FunctionName = funcName };
+                                inr.Add(inst);
+                            }
+                            catch { }
+                            break;
                         }
-                        //Type REF
-                        else if (tabel == 01)
+                    case OpCodeOperandType.InlineNone:
                         {
-                            var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
-
-                            classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
-                            Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType
+                            });
+                            break;
                         }
-                        //Module Ref
-                        else if (tabel == 26)
+                    case OpCodeOperandType.InlinePhi:
+                        break;
+                    case OpCodeOperandType.InlineR:
+                        break;
+                    case OpCodeOperandType.InlineSig:
+                        break;
+                    case OpCodeOperandType.InlineString:
                         {
-                            //var tt = file.Backend.MetaDataStreamTablesHeader.Tables.ModuleRef[(int)row - 1];
+                            byte first = code[i + 1]; //1st index
+                            byte sec = code[i + 2]; //2nd
+                            byte third = code[i + 3];
+                            byte forth = code[i + 4];
+                            byte[] num = new byte[] { first, sec, third, 0 };
+                            var numb = BitConverter.ToInt32(num, 0);
 
-                            //classs = file.Backend.ClrStringsStream.GetByOffset(tt.Name);
-                            //Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
-                            Console.WriteLine("Module Ref not supported!");
-                            classs = "<Module Ref>";
-                            Namespace = "<Module Ref>";
+                            //Get the string
+                            string s;
+
+                            if (forth != 112)
+                            {
+                                //Will this ever be in the String Stream?
+                                s = mainFile.Backend.ClrStringsStream.GetByOffset((uint)numb);
+                            }
+                            else
+                            {
+                                //US stream
+                                s = mainFile.Backend.ClrUsStream.GetByOffset((uint)numb);
+                            }
+                            i += 4; //skip past the string
+
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                Operand = s,
+                                OpCodeName = opCode.Name
+                            });
+                            break;
                         }
-                        //Unknown
-                        else
-                        {
-                            classs = "<unknown>";
-                            Namespace = "<unknown>";
-                        }
-                        #endregion
-                        var inst = new ILInstruction()
-                        {
-                            OpCode = OpCodes.Call,
-                            OpCodeName = "call"
-                        };
-
-                        inst.Operand = new CallMethodDataHolder() { ClassName = classs, NameSpace = Namespace, FunctionName = funcName };
-                        inr.Add(inst);
-                    }
-                    catch { }
-                }
-                else if (opCode == OpCodes.Nop)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "nop"
-                    });
-                }
-                else if (opCode == OpCodes.Ret)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "ret"
-                    });
-                }
-                else if (opCode == OpCodes.Ldarg_0)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "Ldarg_0"
-                    });
-                }
-                else if (opCode == OpCodes.Ldc_I4_5)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "ldc.i4.5"
-                    });
-                }
-                else if (opCode == OpCodes.Stloc_0)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "stloc.0"
-                    });
-                }
-                else if (opCode == OpCodes.Ldloc_0)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "ldloc.0"
-                    });
-                }
-                else if (opCode == OpCodes.Add)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "add"
-                    });
-                }
-                else if (opCode == OpCodes.Stloc_1)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "stloc.1"
-                    });
-                }
-                else if (opCode == OpCodes.Ldloca_S)
-                {
-                    byte varNum = code[i + 1];
-                    i++;
-
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "Ldloca.s",
-                        Operand = varNum
-                    });
-                }
-                else if (opCode == OpCodes.Pop)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "pop"
-                    });
-                }
-                else if (opCode == OpCodes.Newobj)
-                {
-                    byte newObj = code[i + 1];
-                    byte newObj2 = code[i + 2];
-                    byte newObj3 = code[i + 3];
-                    byte newObj4 = code[i + 4]; //token type. 10 = TypeRef
-
-                    var numb = BitConverter.ToInt32(new byte[] { newObj, newObj2, newObj3, 0 }, 0);
-                    
-                    i += 4;
-
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "newobj (WIP)"
-                    });
-                }
-                else if (opCode == OpCodes.Add_Ovf)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "and.ovf"
-                    });
-                }
-                else if (opCode == OpCodes.Add_Ovf_Un)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "add.ovf.un"
-                    });
-                }
-                else if (opCode == OpCodes.And)
-                {
-                    inr.Add(new ILInstruction()
-                    {
-                        OpCode = opCode,
-                        OpCodeName = "and"
-                    });
-                }
-
-
-
-                else if (opCode == OpCodes.Ext)
-                {
-                    byte otherOpCode = code[i + 1];
-                    i++;
-
-                    //TODO: Support
-
-                    if (otherOpCode == OpCodesExt.Arglist)
-                    {
-                        inr.Add(new ILInstruction() { OpCode = opCode, OpCodeName = "arglist" });
-                    }
-                }
-                else
-                {
-                    inr.Add(new ILInstruction() { OpCode = opCode, OpCodeName = "Unknown opcode: " + opCode });
+                    case OpCodeOperandType.InlineSwitch:
+                        break;
+                    case OpCodeOperandType.InlineTok:
+                        break;
+                    case OpCodeOperandType.InlineType:
+                        break;
+                    case OpCodeOperandType.InlineVar:
+                        break;
+                    case OpCodeOperandType.ShortInlineBrTarget:
+                        break;
+                    case OpCodeOperandType.ShortInlineI:
+                        break;
+                    case OpCodeOperandType.ShortInlineR:
+                        break;
+                    case OpCodeOperandType.ShortInlineVar:
+                        break;
+                    default:
+                        break;
                 }
             }
 
