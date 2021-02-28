@@ -288,6 +288,8 @@ namespace LibDotNetParser
         #region Read CLR Headers
         private CLRHeader ReadCLRHeader(BinaryReader assemblyReader, PEHeader peHeader)
         {
+            if (peHeader.Directories.Count == 0)
+                throw new InvalidDataException("PE Header has failed to parse");
             var clrDirectoryHeader = peHeader.Directories[(int)DataDirectoryName.CLRHeader];
             var clrDirectoryData = ReadVirtualDirectory(assemblyReader, clrDirectoryHeader, peHeader.Sections);
             using (var reader = new BinaryReader(new MemoryStream(clrDirectoryData)))

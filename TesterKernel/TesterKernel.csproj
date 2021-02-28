@@ -12,6 +12,7 @@
         <DebugMode>Source</DebugMode>
         <IgnoreDebugStubAttribute>False</IgnoreDebugStubAttribute>
         <ISOFile>bin\Debug\netcoreapp2.0\cosmos\TesterKernel.iso</ISOFile>
+        <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 
     <PropertyGroup>
