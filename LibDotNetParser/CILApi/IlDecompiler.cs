@@ -29,13 +29,76 @@ namespace LibDotNetParser.CILApi
                 //TODO: Implment the rest of these
                 switch (opCode.OpCodeOperandType)
                 {
+                    // other
+                    case OpCodeOperandType.InlineNone:
+                        {
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType
+                            });
+                        }
+                        break;
+                    case OpCodeOperandType.InlinePhi:
+                        //Never should be used
+                        break;
+                    case OpCodeOperandType.InlineTok:
+                        break;
+                    //8 bit int operand
+                    case OpCodeOperandType.ShortInlineVar:
+                        {
+                            byte fi = code[i + 1];
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType,
+                                Operand = fi
+                            });
+                            i += 1;
+                        }
+                        break;
+                    case OpCodeOperandType.ShortInlineBrTarget:
+                        break;
+                    case OpCodeOperandType.ShortInlineI:
+                        {
+                            byte fi = code[i + 1];
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType,
+                                Operand = fi
+                            });
+                            i += 1;
+                        }
+                        break;
+                    // 16 bit int
+                    case OpCodeOperandType.InlineVar:
+                        break;
+                    // 32 bit int
+                    case OpCodeOperandType.InlineI:
+                        {
+                            byte fi = code[i + 1];
+                            byte s2 = code[i + 2];
+                            byte t = code[i + 3];
+                            byte f = code[i + 4];
+                            byte[] num2 = new byte[] { fi, s2, t, f };
+                            var numb2 = BitConverter.ToInt32(num2, 0);
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType,
+                                Operand = numb2
+                            });
+                            i += 3;
+                        }
+                        break;
                     case OpCodeOperandType.InlineBrTarget:
                         break;
                     case OpCodeOperandType.InlineField:
-                        break;
-                    case OpCodeOperandType.InlineI:
-                        break;
-                    case OpCodeOperandType.InlineI8:
                         break;
                     case OpCodeOperandType.InlineMethod:
                         {
@@ -105,21 +168,7 @@ namespace LibDotNetParser.CILApi
                                 inr.Add(inst);
                             }
                             catch { }
-                            break;
                         }
-                    case OpCodeOperandType.InlineNone:
-                        {
-                            inr.Add(new ILInstruction()
-                            {
-                                OpCode = opCode.Value,
-                                OpCodeName = opCode.Name,
-                                OperandType = opCode.OpCodeOperandType
-                            });
-                            break;
-                        }
-                    case OpCodeOperandType.InlinePhi:
-                        break;
-                    case OpCodeOperandType.InlineR:
                         break;
                     case OpCodeOperandType.InlineSig:
                         break;
@@ -153,24 +202,43 @@ namespace LibDotNetParser.CILApi
                                 Operand = s,
                                 OpCodeName = opCode.Name
                             });
-                            break;
                         }
+                        break;
                     case OpCodeOperandType.InlineSwitch:
-                        break;
-                    case OpCodeOperandType.InlineTok:
-                        break;
-                    case OpCodeOperandType.InlineType:
-                        break;
-                    case OpCodeOperandType.InlineVar:
-                        break;
-                    case OpCodeOperandType.ShortInlineBrTarget:
-                        break;
-                    case OpCodeOperandType.ShortInlineI:
                         break;
                     case OpCodeOperandType.ShortInlineR:
                         break;
-                    case OpCodeOperandType.ShortInlineVar:
+                    case OpCodeOperandType.InlineType:
                         break;
+                    // 64 bit int
+                    case OpCodeOperandType.InlineI8:
+                        {
+                            byte fi = code[i + 1];
+                            byte s2 = code[i + 2];
+                            byte t = code[i + 3];
+                            byte f = code[i + 4];
+                            byte a = code[i + 5];
+                            byte b = code[i + 6];
+                            byte c = code[i + 7];
+                            byte d = code[i + 8];
+
+                            byte[] num2 = new byte[] { fi, s2, t, f, a, b, c, d };
+                            var numb2 = BitConverter.ToInt64(num2, 0);
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType,
+                                Operand = numb2
+                            });
+                            i += 7;
+                        }
+                        break;
+                    case OpCodeOperandType.InlineR:
+                        break;
+
+
+
                     default:
                         break;
                 }

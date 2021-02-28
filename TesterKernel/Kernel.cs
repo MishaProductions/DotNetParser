@@ -25,22 +25,9 @@ namespace TesterKernel
                 var decompiler = new IlDecompiler(fl.EntryPoint);
                 Console.WriteLine("Decompiltion of Main function:");
                 Console.WriteLine("");
-                foreach (var item in decompiler.Decompile())
-                {
-                    if (item.Operand is string)
-                    {
-                        Console.WriteLine(item.OpCodeName + " \"" + (string)item.Operand + "\"");
-                    }
-                    else if (item.Operand is CallMethodDataHolder)
-                    {
-                        var me = (CallMethodDataHolder)item.Operand;
-                        Console.WriteLine(item.OpCodeName + " " + me.NameSpace + "." + me.ClassName + "." + me.FunctionName + "()");
-                    }
-                    else
-                    {
-                        Console.WriteLine(item.OpCodeName);
-                    }
-                }
+                var ilFormater = new ILFormater(decompiler.Decompile());
+                var outputString = ilFormater.Format();
+                Console.WriteLine(outputString);
             }
             catch(Exception x)
             {

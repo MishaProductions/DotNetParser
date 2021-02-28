@@ -1,4 +1,5 @@
-﻿using LibDotNetParser.CILApi;
+﻿using LibDotNetParser;
+using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
 
@@ -15,21 +16,10 @@ namespace DotNetParaser
             var decompiler = new IlDecompiler(m.EntryPoint);
             Console.WriteLine("Decompiltion of Main function:");
             Console.WriteLine("");
-            foreach (var item in decompiler.Decompile())
-            {
-                if (item.Operand is string @string)
-                {
-                    Console.WriteLine(item.OpCodeName+" \""+@string+"\"");
-                }
-                else if (item.Operand is CallMethodDataHolder me)
-                {
-                    Console.WriteLine(item.OpCodeName + " " + me.NameSpace + "." + me.ClassName + "." + me.FunctionName + "()");
-                }
-                else
-                {
-                    Console.WriteLine(item.OpCodeName);
-                }
-            }
+            var ilFormater = new ILFormater(decompiler.Decompile());
+            var outputString = ilFormater.Format();
+            Console.WriteLine(outputString);
+
             Console.WriteLine("Program exited.");
             Console.ReadLine();
         }
