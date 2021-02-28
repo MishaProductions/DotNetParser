@@ -8,6 +8,7 @@ namespace TestApp
 {
     class Program
     {
+        public const string MyConstant = "My Constant!!!!";
         static void Main(string[] args)
         {
             Console.WriteLine("C# DotNetParser Tester");

@@ -18,6 +18,8 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<ParamTabelRow> ParmTabel { get; }
         public List<InterfaceImplTabelRow> InterfaceImplTable { get; }
         public List<MemberRefTabelRow> MemberRefTabelRow { get; }
+        public List<Constant> ConstantTabel { get; }
+        public List<CustomAttribute> CustomAttributeTabel { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -32,6 +34,8 @@ namespace LibDotNetParser.DotNet.Tabels
             ParmTabel = new List<ParamTabelRow>();
             InterfaceImplTable = new List<InterfaceImplTabelRow>();
             MemberRefTabelRow = new List<MemberRefTabelRow>();
+            ConstantTabel = new List<Constant>();
+            CustomAttributeTabel = new List<CustomAttribute>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -102,7 +106,7 @@ namespace LibDotNetParser.DotNet.Tabels
                 }
                 a++;
             }
-            //Read interfaceimpl Tabel (NOT TESTED)
+            //Read interfaceimpl Tabel
             if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.InterfaceImpl) != 0)
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
@@ -121,6 +125,28 @@ namespace LibDotNetParser.DotNet.Tabels
                     var m = new MemberRefTabelRow();
                     m.Read(r);
                     MemberRefTabelRow.Add(m);
+                }
+                a++;
+            }
+            //Read Constant tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.Constant) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new Constant();
+                    m.Read(r);
+                    ConstantTabel.Add(m);
+                }
+                a++;
+            }
+            //Read CustomAttribute tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.CustomAttribute) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new CustomAttribute();
+                    m.Read(r);
+                    CustomAttributeTabel.Add(m);
                 }
                 a++;
             }
