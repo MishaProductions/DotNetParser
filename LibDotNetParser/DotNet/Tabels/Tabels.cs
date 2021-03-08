@@ -20,6 +20,13 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<MemberRefTabelRow> MemberRefTabelRow { get; }
         public List<Constant> ConstantTabel { get; }
         public List<CustomAttribute> CustomAttributeTabel { get; }
+        public List<FieldMarshal> FieldMarshalTabel { get; }
+        public List<DeclSecurity> DeclSecurityTabel { get; }
+        public List<ClassLayout> ClassLayoutTabel { get; }
+        public List<FieldLayout> FieldLayoutTabel { get; }
+        public List<StandAloneSig> StandAloneSigTabel { get; }
+        public List<EventMap> EventMapTabel { get; }
+        public List<Event> EventTabel { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -36,6 +43,13 @@ namespace LibDotNetParser.DotNet.Tabels
             MemberRefTabelRow = new List<MemberRefTabelRow>();
             ConstantTabel = new List<Constant>();
             CustomAttributeTabel = new List<CustomAttribute>();
+            FieldMarshalTabel = new List<FieldMarshal>();
+            DeclSecurityTabel = new List<DeclSecurity>();
+            ClassLayoutTabel = new List<ClassLayout>();
+            FieldLayoutTabel = new List<FieldLayout>();
+            StandAloneSigTabel = new List<StandAloneSig>();
+            EventMapTabel = new List<EventMap>();
+            EventTabel = new List<Event>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -49,7 +63,6 @@ namespace LibDotNetParser.DotNet.Tabels
                 }
                 a++;
             }
-
             //Read TypeRef Tabel
             if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.TypeRef) != 0)
             {
@@ -72,7 +85,6 @@ namespace LibDotNetParser.DotNet.Tabels
                 }
                 a++;
             }
-
             //Read Field Tabel
             if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.Field) != 0)
             {
@@ -147,6 +159,83 @@ namespace LibDotNetParser.DotNet.Tabels
                     var m = new CustomAttribute();
                     m.Read(r);
                     CustomAttributeTabel.Add(m);
+                }
+                a++;
+            }
+            //Read FieldMarshal tabel (Please test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.FieldMarshal) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new FieldMarshal();
+                    m.Read(r);
+                    FieldMarshalTabel.Add(m);
+                }
+                a++;
+            }
+            //Read DeclSecurity tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.DeclSecurity) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new DeclSecurity();
+                    m.Read(r);
+                    DeclSecurityTabel.Add(m);
+                }
+                a++;
+            }
+            //Read ClassLayout tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.ClassLayout) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new ClassLayout();
+                    m.Read(r);
+                    ClassLayoutTabel.Add(m);
+                }
+                a++;
+            }
+            //Read FieldLayout tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.FieldLayout) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new FieldLayout();
+                    m.Read(r);
+                    FieldLayoutTabel.Add(m);
+                }
+                a++;
+            }
+            //Read StandAloneSig tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.StandAloneSig) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new StandAloneSig();
+                    m.Read(r);
+                    StandAloneSigTabel.Add(m);
+                }
+                a++;
+            }
+            //Read EventMap tabel (please test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.EventMap) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new EventMap();
+                    m.Read(r);
+                    EventMapTabel.Add(m);
+                }
+                a++;
+            }
+            //Read event tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.Event) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new Event();
+                    m.Read(r);
+                    EventTabel.Add(m);
                 }
                 a++;
             }

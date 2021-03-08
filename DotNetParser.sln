@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetParser", "DotNetParse
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDll", "TestDll\TestDll.csproj", "{98492900-5501-4AF1-B411-9BC084D28A86}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetClr", "DotNetClr\DotNetClr.csproj", "{67155BFC-F7B3-4494-A467-45319D9E5E8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,14 @@ Global
 		{98492900-5501-4AF1-B411-9BC084D28A86}.Release|Any CPU.Build.0 = Release|Any CPU
 		{98492900-5501-4AF1-B411-9BC084D28A86}.Release|x64.ActiveCfg = Release|x64
 		{98492900-5501-4AF1-B411-9BC084D28A86}.Release|x64.Build.0 = Release|x64
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Debug|x64.Build.0 = Debug|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Release|x64.ActiveCfg = Release|Any CPU
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
