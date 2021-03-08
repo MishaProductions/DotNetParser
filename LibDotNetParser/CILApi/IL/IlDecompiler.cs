@@ -116,54 +116,55 @@ namespace LibDotNetParser.CILApi
                                 byte t = code[i + 3];
                                 byte f = code[i + 4];
                                 byte[] num2 = new byte[] { fi, s2, t, f };
-                                short numb2 = BitConverter.ToInt16(num2, 0); //Method Token
+                                var numb2 = BitConverter.ToInt16(num2, 0); //Method Token
 
                                 //Get the method that we are calling
                                 var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1]; //is the -1 needed?
-                                i += 4; //skip past the string
+
                                 #region Decode
                                 //Decode the class bytes
-                                DecodeMemberRefParent(c.Class, out uint tabel, out uint row);
+                                DecodeMemberRefParent(c.Class, out MemberRefParentType tabel, out uint row);
 
-
+                                
                                 var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
-                                string classs;
-                                string Namespace;
+                                uint classs;
+                                uint Namespace;
 
                                 //TYPE def
-                                if (tabel == 02)
+                                if (tabel == MemberRefParentType.TypeDef)
                                 {
                                     var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
 
-                                    classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Name);
-                                    Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+                                    classs = tt.Name;
+                                    Namespace = tt.Namespace;
                                 }
                                 //Type REF
-                                else if (tabel == 01)
+                                else if (tabel == MemberRefParentType.TypeRef)
                                 {
                                     var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
 
-                                    classs = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
-                                    Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);
+                                    classs = tt.TypeName;
+                                    Namespace = tt.TypeNamespace;
                                 }
                                 //Module Ref
-                                else if (tabel == 26)
+                                else if (tabel == MemberRefParentType.ModuleRef)
                                 {
                                     //var tt = file.Backend.MetaDataStreamTablesHeader.Tables.ModuleRef[(int)row - 1];
 
-                                    //classs = file.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                                    //classs = tt.Name;
                                     //Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
                                     Console.WriteLine("Module Ref not supported!");
-                                    classs = "<Module Ref>";
-                                    Namespace = "<Module Ref>";
+                                    classs = 0;
+                                    Namespace = 0;
                                 }
                                 //Unknown
                                 else
                                 {
-                                    classs = "<unknown>";
-                                    Namespace = "<unknown>";
+                                    classs = 0;
+                                    Namespace = 0;
                                 }
                                 #endregion
+                            
                                 var inst = new ILInstruction()
                                 {
                                     OpCode = opCode.Value,
@@ -171,8 +172,17 @@ namespace LibDotNetParser.CILApi
                                     OperandType = opCode.OpCodeOperandType
                                 };
 
-                                inst.Operand = new CallMethodDataHolder() { ClassName = classs, NameSpace = Namespace, FunctionName = funcName };
+
+                                inst.Operand = new CallMethodDataHolder() 
+                                {
+                                    NameSpace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
+                                    ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs), 
+                                    FunctionName = funcName 
+                                };
+                               // Console.WriteLine("call " + (inst.Operand as CallMethodDataHolder).ClassName+", n="+numb2+", type="+ tabel);
                                 inr.Add(inst);
+
+                                i += 4; //skip past the string
                             }
                             catch { }
                         }
@@ -260,32 +270,41 @@ namespace LibDotNetParser.CILApi
         private const uint MemberRefParrent_MODULEREF = 0x2;
         private const uint MemberRefParrent_METHODDEF = 0x3;
         private const uint MemberRefParrent_TYPESPEC = 0x4;
-        private static void DecodeMemberRefParent(uint index, out uint tableIndex, out uint row)
+        private static void DecodeMemberRefParent(uint index, out MemberRefParentType tableIndex, out uint row)
         {
             tableIndex = 0;
             switch (index & MemberRefParrent)
             {
                 case MemberRefParrent_TYPEDEF:
-                    tableIndex = 02;
+                    tableIndex = MemberRefParentType.TypeDef;
                     break;
 
                 case MemberRefParrent_TYPEREF:
-                    tableIndex = 01;
+                    tableIndex = MemberRefParentType.TypeRef;
                     break;
 
                 case MemberRefParrent_MODULEREF:
-                    tableIndex = 26;
+                    tableIndex = MemberRefParentType.ModuleRef;
                     break;
 
                 case MemberRefParrent_METHODDEF:
-                    tableIndex = 06;
+                    tableIndex = MemberRefParentType.MethodDef;
                     break;
 
                 case MemberRefParrent_TYPESPEC:
-                    tableIndex = 27;
+                    tableIndex = MemberRefParentType.TypeSpec;
                     break;
             }
             row = index >> 3;
+        }
+
+        public enum MemberRefParentType
+        {
+            TypeDef,
+            TypeRef,
+            ModuleRef,
+            MethodDef,
+            TypeSpec
         }
         #endregion
     }
