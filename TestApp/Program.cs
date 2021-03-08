@@ -13,31 +13,43 @@ namespace TestApp
     {
         public event EventHandler test;
         public const string MyConstant = "My Constant!!!!";
-        [SecurityPermissionAttribute(SecurityAction.Deny)]
+
+        public string MyProperty { get; set; } = "Property Default Value.";
         [SecurityCriticalAttribute()]
         static void Main(string[] args)
         {
             Console.WriteLine("C# DotNetParser Tester");
-            ;
 
             Console.WriteLine(" New Obj Test: ");
-            new object();
-            new StringBuilder();
-            new sbyte();
+            var obj = new object();
+            if (obj == null)
+                Console.WriteLine("new object() returns null!");
 
             Console.WriteLine(" New varible Test: ");
             var x = 234;
+            if (x != 234)
+                Console.WriteLine("Value of the varible is "+x+" but it should be 234");
 
-            Console.WriteLine("Read array test");
-            var a = args[0];
+            Console.WriteLine("Misc. Tests");
+            new MySystemTime();
+            int fivePlus5 = 5 + 5;
+            Console.WriteLine("5 + 5 is "+ fivePlus5);
 
+            fivePlus5 -= fivePlus5;
+            Console.WriteLine("subtracting 10-10 is "+ fivePlus5);
 
-            Console.WriteLine("Output is : a="+x+" and first arg is "+a);
+            var x2 = new tests();
+
+            Console.WriteLine("You should see a test message below this message");
+
+            x2.test();
+
+            Console.WriteLine("Basic .NET clr test complete");
         }
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 16, CharSet = CharSet.Ansi)]
-    public class MySystemTime
+    public struct MySystemTime
     {
         [FieldOffset(0)] public ushort wYear;
         [FieldOffset(2)] public ushort wMonth;
@@ -47,5 +59,15 @@ namespace TestApp
         [FieldOffset(10)] public ushort wMinute;
         [FieldOffset(12)] public ushort wSecond;
         [FieldOffset(14)] public ushort wMilliseconds;
+    }
+
+    public interface ITest { void test(); }
+
+    public class tests : ITest
+    {
+        public void test()
+        {
+            Console.WriteLine("Test!");
+        }
     }
 }
