@@ -357,6 +357,24 @@ namespace LibDotNetParser.DotNet.Tabels
                 }
                 a++;
             }
+
+            //Read ignored tabels (These never should be present!)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.AssemblyProcessor) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var proc = r.ReadUInt32();
+                }
+                a++;
+            }
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.AssemblyOS) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    r.BaseStream.Position += 11; //Test please
+                }
+                a++;
+            }
         }
     }
 }
