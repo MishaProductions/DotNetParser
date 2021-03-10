@@ -27,6 +27,8 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<StandAloneSig> StandAloneSigTabel { get; }
         public List<EventMap> EventMapTabel { get; }
         public List<Event> EventTabel { get; }
+        public List<PropertyMap> PropertyMapTabel { get; }
+        public List<PropertyTabel> PropertyTabel { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -50,6 +52,8 @@ namespace LibDotNetParser.DotNet.Tabels
             StandAloneSigTabel = new List<StandAloneSig>();
             EventMapTabel = new List<EventMap>();
             EventTabel = new List<Event>();
+            PropertyMapTabel = new List<PropertyMap>();
+            PropertyTabel = new List<PropertyTabel>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -236,6 +240,28 @@ namespace LibDotNetParser.DotNet.Tabels
                     var m = new Event();
                     m.Read(r);
                     EventTabel.Add(m);
+                }
+                a++;
+            }
+            //Read Property Map tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.PropertyMap) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new PropertyMap();
+                    m.Read(r);
+                    PropertyMapTabel.Add(m);
+                }
+                a++;
+            }
+            //Read Property tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.Property) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new PropertyTabel();
+                    m.Read(r);
+                    PropertyTabel.Add(m);
                 }
                 a++;
             }
