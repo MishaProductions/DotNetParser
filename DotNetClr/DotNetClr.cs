@@ -12,38 +12,53 @@ namespace DotNetClr
     public class DotNetClr
     {
         private DotNetFile file;
-        public DotNetClr(string ApplicationPath)
+        private string EXEPath;
+        public DotNetClr(DotNetFile exe, string DllPath)
         {
-            init(File.ReadAllBytes(ApplicationPath));
-        }
-        public DotNetClr(byte[] exe)
-        {
+            if (!Directory.Exists(DllPath))
+            {
+                throw new DirectoryNotFoundException(DllPath);
+            }
+            EXEPath = DllPath;
             init(exe);
         }
-
-        private void init(byte[] b)
+        private void init(DotNetFile p)
         {
-            DotNetFile p = null;
-            try
-            {
-                p = new DotNetFile(b);
-            }
-            catch
-            {
-                throw new Exception("Invaild .NET executable");
-            }
             file = p;
+        }
+
+        public void Start()
+        {
             if (file.EntryPoint == null)
             {
                 clrError("The entry point was not found.", "System.EntryPointNotFoundException");
                 file = null;
                 return;
             }
+            //Resolve all of the DLLS
 
-            //TODO: load all of the assemblies in the assemblieRef Tabel.
+            foreach (var item in file.Backend.Tabels.AssemblyRefTabel)
+            {
+                var fileName = file.Backend.ClrStringsStream.GetByOffset(item.Name);
+                string fullPath="";
+
+                if (File.Exists(Path.Combine(EXEPath, fileName + ".exe")))
+                {
+                    fullPath = Path.Combine(EXEPath, fileName + ".exe");
+                }
+                else if (File.Exists(Path.Combine(EXEPath, fileName + ".dll")))
+                {
+                    fullPath = Path.Combine(EXEPath, fileName + ".dll");
+                }
+                else
+                {
+                    clrError("File: " + fileName + ".dll does not exist in "+EXEPath+"!", "System.FileNotFoundException");
+                    return;
+                }
+            }
         }
 
-        private void clrError(string message, string errorType, string stackStace="")
+        private void clrError(string message, string errorType, string stackStace = "")
         {
             Console.WriteLine($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}");
             Console.WriteLine(stackStace);

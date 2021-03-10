@@ -36,6 +36,7 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<ImplMap> ImplMapTabel { get; }
         public List<FieldRVA> FieldRVATabel { get; }
         public List<Assembly> AssemblyTabel { get; }
+        public List<AssemblyRef> AssemblyRefTabel { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -68,6 +69,7 @@ namespace LibDotNetParser.DotNet.Tabels
             ImplMapTabel = new List<ImplMap>();
             FieldRVATabel = new List<FieldRVA>();
             AssemblyTabel = new List<Assembly>();
+            AssemblyRefTabel = new List<AssemblyRef>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -372,6 +374,18 @@ namespace LibDotNetParser.DotNet.Tabels
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
                     r.BaseStream.Position += 11; //Test please
+                }
+                a++;
+            }  
+            //Read AssemblyRef Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.AssemblyRef) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new AssemblyRef();
+                    m.Read(r);
+                    var x = p.ClrStringsStream.GetByOffset(m.Name);
+                    AssemblyRefTabel.Add(m);
                 }
                 a++;
             }

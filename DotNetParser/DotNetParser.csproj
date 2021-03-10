@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DotNetClr\DotNetClr.csproj" />
     <ProjectReference Include="..\LibDotNetParser\LibDotNetParser.csproj" />
     <ProjectReference Include="..\TestApp\TestApp.csproj">
       <Private>true</Private>
