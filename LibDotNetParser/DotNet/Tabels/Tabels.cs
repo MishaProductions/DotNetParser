@@ -29,6 +29,8 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<Event> EventTabel { get; }
         public List<PropertyMap> PropertyMapTabel { get; }
         public List<PropertyTabel> PropertyTabel { get; }
+        public List<MethodSemantics> MethodSemanticsTabel { get; }
+        public List<MethodImpl> MethodImplTabel { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -54,6 +56,8 @@ namespace LibDotNetParser.DotNet.Tabels
             EventTabel = new List<Event>();
             PropertyMapTabel = new List<PropertyMap>();
             PropertyTabel = new List<PropertyTabel>();
+            MethodSemanticsTabel = new List<MethodSemantics>();
+            MethodImplTabel = new List<MethodImpl>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -262,6 +266,28 @@ namespace LibDotNetParser.DotNet.Tabels
                     var m = new PropertyTabel();
                     m.Read(r);
                     PropertyTabel.Add(m);
+                }
+                a++;
+            }
+            //Read MethodSemantics  tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.MethodSemantics) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new MethodSemantics();
+                    m.Read(r);
+                    MethodSemanticsTabel.Add(m);
+                }
+                a++;
+            }
+            //Read MethodImpl tabel (Please test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.MethodImpl) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new MethodImpl();
+                    m.Read(r);
+                    MethodImplTabel.Add(m);
                 }
                 a++;
             }

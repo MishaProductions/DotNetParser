@@ -28,15 +28,15 @@ namespace TestApp
             Console.WriteLine(" New varible Test: ");
             var x = 234;
             if (x != 234)
-                Console.WriteLine("Value of the varible is "+x+" but it should be 234");
+                Console.WriteLine("Value of the varible is " + x + " but it should be 234");
 
             Console.WriteLine("Misc. Tests");
             new MySystemTime();
             int fivePlus5 = 5 + 5;
-            Console.WriteLine("5 + 5 is "+ fivePlus5);
+            Console.WriteLine("5 + 5 is " + fivePlus5);
 
             fivePlus5 -= fivePlus5;
-            Console.WriteLine("subtracting 10-10 is "+ fivePlus5);
+            Console.WriteLine("subtracting 10-10 is " + fivePlus5);
 
             var x2 = new tests();
 
@@ -45,7 +45,12 @@ namespace TestApp
             x2.test();
 
             Console.WriteLine("Basic .NET clr test complete");
+
+            //if ((6 + 6) == 13)
+            ClrHello();
         }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        private extern static void ClrHello();
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 16, CharSet = CharSet.Ansi)]
@@ -62,7 +67,23 @@ namespace TestApp
     }
 
     public interface ITest { void test(); }
-
+    public abstract class AbstractClass
+    {
+        public abstract void ImplementMe();
+        public virtual void Virt() { }
+    }
+    public class Tests2 : AbstractClass
+    {
+        public override void ImplementMe()
+        {
+            Console.WriteLine("See this? good 4 u");
+        }
+        public override void Virt()
+        {
+            base.Virt();
+            Console.WriteLine("lol");
+        }
+    }
     public class tests : ITest
     {
         public void test()
