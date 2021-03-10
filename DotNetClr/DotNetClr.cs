@@ -64,7 +64,7 @@ namespace DotNetClr
                     clrError("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
                     return;
                 }
-
+                Console.WriteLine("[CLR] Loading: "+Path.GetFileName(fullPath));
                 try
                 {
                     dlls.Add(fileName, new DotNetFile(fullPath));
@@ -82,6 +82,7 @@ namespace DotNetClr
 
         private void RunMethod(DotNetMethod m, DotNetFile file)
         {
+            Console.WriteLine($"[CLR] Running Method: {m.Parrent.NameSpace}.{m.Parrent.Name}.{m.Name}()");
             var code = new IlDecompiler(m).Decompile();
             foreach (var item in code)
             {

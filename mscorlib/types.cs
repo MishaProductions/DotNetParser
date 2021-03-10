@@ -1,7 +1,6 @@
 ﻿#region A couple very basic things
 namespace System
 {
-    public class Object { IntPtr m_pEEType; }
     public struct Void { }
     public struct Boolean { }
     public struct Char { }

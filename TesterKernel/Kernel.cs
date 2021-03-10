@@ -14,10 +14,10 @@ namespace TesterKernel
     {
         protected override void BeforeRun()
         {
+            //Init
             CosmosVFS fs = new Sys.FileSystem.CosmosVFS();
             Sys.FileSystem.VFS.VFSManager.RegisterVFS(fs);
             Console.Clear();
-            Console.WriteLine("Cosmos booted successfully.");
 
             try
             {
@@ -40,10 +40,13 @@ namespace TesterKernel
                 var ilFormater = new ILFormater(decompiler.Decompile());
                 var outputString = ilFormater.Format();
                 Console.WriteLine(outputString);
-                Console.WriteLine("");
+                Console.WriteLine();
                 Console.WriteLine("Running program:");
+
+
                 DotNetClr.DotNetClr clr = new DotNetClr.DotNetClr(fl, @"0:\framework");
                 clr.Start();
+                Console.WriteLine("Program exec complete.");
             }
             catch(Exception x)
             {
@@ -53,10 +56,7 @@ namespace TesterKernel
 
         protected override void Run()
         {
-            Console.Write("Input: ");
-            var input = Console.ReadLine();
-            Console.Write("Text typed: ");
-            Console.WriteLine(input);
+            
         }
     }
 }

@@ -8,7 +8,6 @@ TesterKernel/bin/
 LibDotNetParser/bin/
 DotNetParser/bin/
 TestApp/bin/
-TestDll/bin/
 DotNetClr/bin/
 mscorlib/bin/
 
@@ -18,6 +17,5 @@ TesterKernel/obj/
 LibDotNetParser/obj/
 DotNetParser/obj/
 TestApp/obj/
-TestDll/obj/
 DotNetClr/obj/
 mscorlib/obj/

@@ -41,7 +41,7 @@ namespace LibDotNetParser
         }
         private void Init(byte[] data)
         {
-            #region Parse PE & Strong name hash
+            #region Parse PE Header
             RawFile = new BinaryReader(new MemoryStream(data));
             BinaryReader r = new BinaryReader(new MemoryStream(data));
 
@@ -51,7 +51,8 @@ namespace LibDotNetParser
             //Read all of the data
             PeHeader.Directories = ReadDirectoriesList(PeHeader.DirectoryLength, r);
             PeHeader.Sections = ReadSectionsList(PeHeader.NumberOfSections, r);
-
+            #endregion
+            #region Parse Clr header & Strong name hash
             try
             {
                 ClrHeader = ReadCLRHeader(r, PeHeader);
@@ -64,10 +65,10 @@ namespace LibDotNetParser
             //Read the strong name hash
             ClrStrongNameHash = ReadStrongNameHash(r, ClrHeader.StrongNameSignatureAddress, ClrHeader.StrongNameSignatureSize, PeHeader.Sections);
             #endregion
-            #region Parse metadata header
+            #region Parse Metadata header
 
             //Skip past all of the IL Code, and get tto the metadata header
-            long pos = (long)RelativeVirtualAddressToFileOffset(ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
+            long pos = (long)BinUtil.RVAToOffset(ClrHeader.MetaDataDirectoryAddress, PeHeader.Sections);
             r.BaseStream.Position = pos;
 
 
@@ -87,7 +88,7 @@ namespace LibDotNetParser
             //Debug.Assert(ClrMetaDataHeader.Reserved1 == 0);
             //Debug.Assert(ClrMetaDataHeader.Flags == 0);
             #endregion
-            #region Parse streams
+            #region Parse Streams
 
             //Parse the StreamHeader(s)
             for (int i = 0; i < ClrMetaDataHeader.NumberOfStreams; i++)
@@ -96,20 +97,8 @@ namespace LibDotNetParser
 
                 hdr.Offset = r.ReadUInt32();
                 hdr.Size = r.ReadUInt32();
-                hdr.Name = r.ReadNullTermString();
+                hdr.Name = r.ReadNullTermFourByteAlignedString();
 
-                //#~ Stream
-                if (hdr.Name.Length == 2)
-                    r.BaseStream.Position += 1; //Skip past the 4 zeros
-                //#Strings stream
-                else if (hdr.Name.Length == 8)
-                    r.BaseStream.Position += 3;
-                //#US Stream
-                else if (hdr.Name.Length == 3)
-                { }
-                //#GUID Stream
-                else if (hdr.Name.Length == 5)
-                    r.BaseStream.Position += 2;
                 Streams.Add(hdr);
             }
 
@@ -122,7 +111,7 @@ namespace LibDotNetParser
             ClrUsStream = new USStreamReader(bytes2).Read();
 
             #endregion
-            #region Parse #~ Stream
+            #region Parse #~ Stream aka Tabels stream
             //Parse the #~ stream
             BinaryReader TableStreamR = new BinaryReader(new MemoryStream(GetStreamBytes("#~", r)));
             ClrMetaDataStreamHeader = ReadHeader(TableStreamR);
@@ -337,7 +326,7 @@ namespace LibDotNetParser
             if (rva == 0)
                 return new byte[0];
 
-            var fileOffset = RelativeVirtualAddressToFileOffset(rva, sections);
+            var fileOffset = BinUtil.RVAToOffset(rva, sections);
             reader.BaseStream.Seek((long)fileOffset, SeekOrigin.Begin);
             return reader.ReadBytes((int)size);
         }
@@ -354,32 +343,12 @@ namespace LibDotNetParser
         public byte[] GetStreamBytes(BinaryReader reader, StreamHeader streamHeader, uint metadataDirectoryAddress, IEnumerable<Section> sections)
         {
             var rva = metadataDirectoryAddress + streamHeader.Offset;
-            var fileOffset = RelativeVirtualAddressToFileOffset(rva, sections);
+            var fileOffset = BinUtil.RVAToOffset(rva, sections);
             reader.BaseStream.Seek((long)fileOffset, SeekOrigin.Begin);
             return reader.ReadBytes((int)streamHeader.Size);
         }
         #endregion
         #region Utils
-        public static ulong RelativeVirtualAddressToFileOffset(ulong rva, IEnumerable<Section> sections)
-        {
-            // find the section whose virtual address range contains the data directory's virtual address.
-            Section section = null;
-            foreach (var s in sections)
-            {
-                if (s.VirtualAddress <= rva && s.VirtualAddress + s.SizeOfRawData >= rva)
-                {
-                    section = s;
-                    break;
-                }
-            }
-
-            if (section == null)
-                throw new Exception("Cannot find the section");
-
-            // calculate the offset into the file.
-            var fileOffset = section.PointerToRawData + (rva - section.VirtualAddress);
-            return fileOffset;
-        }
         public byte[] GetStreamBytes(string streamName, BinaryReader r)
         {
             StreamHeader hdr = null;

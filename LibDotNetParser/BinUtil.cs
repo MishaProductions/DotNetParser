@@ -1,7 +1,9 @@
-﻿using System;
+﻿using LibDotNetParser.PE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace LibDotNetParser
@@ -66,6 +68,51 @@ namespace LibDotNetParser
                 }
             }
             return new string(b.ToArray());
+        }
+
+        public static string ReadNullTermFourByteAlignedString(this BinaryReader reader)
+        {
+            var buffer = new List<char>();
+            char nextChar;
+            do
+            {
+                nextChar = reader.ReadChar();
+                buffer.Add(nextChar);
+            } while (nextChar != '\0' || reader.BaseStream.Position % 4 != 0);
+
+            List<char> b2 = new List<char>();
+
+            for (int i = 0; i < buffer.Count; i++)
+            {
+                char b = buffer[i];
+                if (b.Equals('\0'))
+                {
+                    break;
+                }
+
+                b2.Add(b);
+            }
+            return new string(b2.ToArray());
+        }
+        public static ulong RVAToOffset(ulong rva, IEnumerable<Section> sections)
+        {
+            // find the section whose virtual address range contains the data directory's virtual address.
+            Section section = null;
+            foreach (var s in sections)
+            {
+                if (s.VirtualAddress <= rva && s.VirtualAddress + s.SizeOfRawData >= rva)
+                {
+                    section = s;
+                    break;
+                }
+            }
+
+            if (section == null)
+                throw new Exception("Cannot find the section");
+
+            // calculate the offset into the file.
+            var fileOffset = section.PointerToRawData + (rva - section.VirtualAddress);
+            return fileOffset;
         }
     }
 }

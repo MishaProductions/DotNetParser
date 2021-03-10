@@ -24,7 +24,7 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                return (uint)PEFile.RelativeVirtualAddressToFileOffset(RVA, file.PeHeader.Sections);
+                return (uint)BinUtil.RVAToOffset(RVA, file.PeHeader.Sections);
             }
         }
         public DotNetFile File
