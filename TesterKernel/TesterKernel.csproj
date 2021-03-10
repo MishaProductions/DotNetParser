@@ -33,6 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DotNetClr\DotNetClr.csproj" />
       <ProjectReference Include="..\LibDotNetParser\LibDotNetParser.csproj" />
     </ItemGroup>
 

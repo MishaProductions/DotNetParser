@@ -4,6 +4,7 @@ using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Sys = Cosmos.System;
 
@@ -18,6 +19,8 @@ namespace TesterKernel
             Console.Clear();
             Console.WriteLine("Cosmos booted successfully.");
 
+            if (!Directory.Exists("0:\framework"))
+                Directory.CreateDirectory("0:\framework");
             try
             {
                 var fl = new DotNetFile(TestApp.file);
@@ -30,6 +33,9 @@ namespace TesterKernel
                 var ilFormater = new ILFormater(decompiler.Decompile());
                 var outputString = ilFormater.Format();
                 Console.WriteLine(outputString);
+                Console.WriteLine("");
+                Console.WriteLine("Running program:");
+                DotNetClr.DotNetClr clr = new DotNetClr.DotNetClr(fl, @"0:\framework");
             }
             catch(Exception x)
             {
