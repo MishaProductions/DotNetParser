@@ -10,14 +10,14 @@ namespace LibDotNetParser.DotNet.Tabels
     public class Tabels
     {
         private MetadataReader r;
-        public List<ModuleTabelRow> ModuleTabel { get; }
-        public List<TypeRefTabelRow> TypeRefTabel { get; }
-        public List<TypeDefTabelRow> TypeDefTabel { get; }
+        public List<Module> ModuleTabel { get; }
+        public List<TypeRef> TypeRefTabel { get; }
+        public List<TypeDef> TypeDefTabel { get; }
         public List<FieldTabelRow> FieldTabel { get; }
-        public List<MethodTabelRow> MethodTabel { get; }
-        public List<ParamTabelRow> ParmTabel { get; }
-        public List<InterfaceImplTabelRow> InterfaceImplTable { get; }
-        public List<MemberRefTabelRow> MemberRefTabelRow { get; }
+        public List<Method> MethodTabel { get; }
+        public List<Param> ParmTabel { get; }
+        public List<InterfaceImpl> InterfaceImplTable { get; }
+        public List<MemberRef> MemberRefTabelRow { get; }
         public List<Constant> ConstantTabel { get; }
         public List<CustomAttribute> CustomAttributeTabel { get; }
         public List<FieldMarshal> FieldMarshalTabel { get; }
@@ -33,14 +33,14 @@ namespace LibDotNetParser.DotNet.Tabels
             this.r = p.MetadataReader;
 
             //Read all of the tabels
-            ModuleTabel = new List<ModuleTabelRow>();
-            TypeRefTabel = new List<TypeRefTabelRow>();
-            TypeDefTabel = new List<TypeDefTabelRow>();
+            ModuleTabel = new List<Module>();
+            TypeRefTabel = new List<TypeRef>();
+            TypeDefTabel = new List<TypeDef>();
             FieldTabel = new List<FieldTabelRow>();
-            MethodTabel = new List<MethodTabelRow>();
-            ParmTabel = new List<ParamTabelRow>();
-            InterfaceImplTable = new List<InterfaceImplTabelRow>();
-            MemberRefTabelRow = new List<MemberRefTabelRow>();
+            MethodTabel = new List<Method>();
+            ParmTabel = new List<Param>();
+            InterfaceImplTable = new List<InterfaceImpl>();
+            MemberRefTabelRow = new List<MemberRef>();
             ConstantTabel = new List<Constant>();
             CustomAttributeTabel = new List<CustomAttribute>();
             FieldMarshalTabel = new List<FieldMarshal>();
@@ -57,7 +57,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new ModuleTabelRow();
+                    var m = new Module();
                     m.Read(r);
                     ModuleTabel.Add(m);
                 }
@@ -68,7 +68,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new TypeRefTabelRow();
+                    var m = new TypeRef();
                     m.Read(r);
                     TypeRefTabel.Add(m);
                 }
@@ -79,7 +79,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new TypeDefTabelRow();
+                    var m = new TypeDef();
                     m.Read(r);
                     TypeDefTabel.Add(m);
                 }
@@ -101,7 +101,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new MethodTabelRow();
+                    var m = new Method();
                     m.Read(r);
                     MethodTabel.Add(m);
                 }
@@ -112,7 +112,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new ParamTabelRow();
+                    var m = new Param();
                     m.Read(r);
                     ParmTabel.Add(m);
                 }
@@ -123,7 +123,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new InterfaceImplTabelRow();
+                    var m = new InterfaceImpl();
                     m.Read(r);
                     InterfaceImplTable.Add(m);
                 }
@@ -134,7 +134,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new MemberRefTabelRow();
+                    var m = new MemberRef();
                     m.Read(r);
                     MemberRefTabelRow.Add(m);
                 }

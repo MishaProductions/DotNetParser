@@ -12,7 +12,7 @@ namespace LibDotNetParser.CILApi
     public class DotNetType
     {
         private PEFile file;
-        private TypeDefTabelRow type;
+        private TypeDef type;
         private TypeFlags flags;
         private int NextTypeIndex;
 
@@ -81,7 +81,7 @@ namespace LibDotNetParser.CILApi
         /// <param name="file"></param>
         /// <param name="item"></param>
         /// <param name="NextTypeIndex"></param>
-        public DotNetType(DotNetFile file, TypeDefTabelRow item, int NextTypeIndex)
+        public DotNetType(DotNetFile file, TypeDef item, int NextTypeIndex)
         {
             this.file = file.Backend;
             this.type = item;

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LibDotNetParser.DotNet.Tabels.Defs
 {
-    public class TypeRefTabelRow : IMetadataTableRow
+    public class TypeRef : IMetadataTableRow
     {
         public uint ResolutionScope { get; private set; }
         /// <summary>

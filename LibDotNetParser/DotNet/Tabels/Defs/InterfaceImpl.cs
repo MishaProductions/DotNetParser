@@ -5,16 +5,15 @@ using System.Text;
 
 namespace LibDotNetParser.DotNet.Tabels.Defs
 {
-    public class MemberRefTabelRow : IMetadataTableRow
+    public class InterfaceImpl : IMetadataTableRow
     {
         public uint Class { get; private set; }
-        public uint Name { get; private set; }
-        public uint Signature { get; private set; }
+        public uint Interface { get; private set; }
+
         public void Read(MetadataReader reader)
         {
             Class = reader.ReadUInt16();
-            Name = reader.ReadStringStreamIndex();
-            Signature = reader.ReadBlobStreamIndex();
+            Interface = reader.ReadUInt16();
         }
     }
 }

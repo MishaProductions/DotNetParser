@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LibDotNetParser.DotNet.Tabels.Defs
 {
-    public class ParamTabelRow : IMetadataTableRow
+    public class Param : IMetadataTableRow
     {
         public ushort Flags { get; private set; }
         public ushort Sequence { get; private set; }

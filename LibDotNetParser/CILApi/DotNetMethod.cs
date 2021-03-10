@@ -14,7 +14,7 @@ namespace LibDotNetParser.CILApi
     {
         private PEFile file;
         private DotNetFile file2;
-        private MethodTabelRow method;
+        private Method method;
 
         MethodAttr flags;
 
@@ -49,7 +49,7 @@ namespace LibDotNetParser.CILApi
         /// <param name="file"></param>
         /// <param name="item"></param>
         /// <param name="parrent"></param>
-        public DotNetMethod(PEFile file, MethodTabelRow item, DotNetType parrent)
+        public DotNetMethod(PEFile file, Method item, DotNetType parrent)
         {
             this.file = file;
             this.method = item;

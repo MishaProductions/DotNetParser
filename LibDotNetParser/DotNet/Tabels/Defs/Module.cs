@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LibDotNetParser.DotNet.Tabels
 {
-    public class ModuleTabelRow : IMetadataTableRow
+    public class Module : IMetadataTableRow
     {
         /// <summary>
         /// a 2-byte value, reserved, shall be zero

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LibDotNetParser.DotNet.Tabels.Defs
 {
-    public class TypeDefTabelRow : IMetadataTableRow
+    public class TypeDef : IMetadataTableRow
     {
         public uint Flags { get; private set; }
 
