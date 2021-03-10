@@ -19,8 +19,15 @@ namespace TesterKernel
             Console.Clear();
             Console.WriteLine("Cosmos booted successfully.");
 
-            if (!Directory.Exists("0:\framework"))
-                Directory.CreateDirectory("0:\framework");
+            try
+            {
+                if (!Directory.Exists(@"0:\framework"))
+                    Directory.CreateDirectory(@"0:\framework");
+            }
+            catch (Exception x)
+            {
+                Console.WriteLine("Caught: " + x.Message);
+            }
             try
             {
                 var fl = new DotNetFile(TestApp.file);
@@ -36,6 +43,7 @@ namespace TesterKernel
                 Console.WriteLine("");
                 Console.WriteLine("Running program:");
                 DotNetClr.DotNetClr clr = new DotNetClr.DotNetClr(fl, @"0:\framework");
+                clr.Start();
             }
             catch(Exception x)
             {
