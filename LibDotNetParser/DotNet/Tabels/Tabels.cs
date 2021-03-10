@@ -31,6 +31,11 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<PropertyTabel> PropertyTabel { get; }
         public List<MethodSemantics> MethodSemanticsTabel { get; }
         public List<MethodImpl> MethodImplTabel { get; }
+        public List<ModuleRef> ModuleRefTabel { get; }
+        public List<TypeSpec> TypeSpecTabel { get; }
+        public List<ImplMap> ImplMapTabel { get; }
+        public List<FieldRVA> FieldRVATabel { get; }
+        public List<Assembly> AssemblyTabel { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -58,6 +63,11 @@ namespace LibDotNetParser.DotNet.Tabels
             PropertyTabel = new List<PropertyTabel>();
             MethodSemanticsTabel = new List<MethodSemantics>();
             MethodImplTabel = new List<MethodImpl>();
+            ModuleRefTabel = new List<ModuleRef>();
+            TypeSpecTabel = new List<TypeSpec>();
+            ImplMapTabel = new List<ImplMap>();
+            FieldRVATabel = new List<FieldRVA>();
+            AssemblyTabel = new List<Assembly>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -288,6 +298,62 @@ namespace LibDotNetParser.DotNet.Tabels
                     var m = new MethodImpl();
                     m.Read(r);
                     MethodImplTabel.Add(m);
+                }
+                a++;
+            }
+            //Read ModuleRef tabel (pls test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.ModuleRef) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new ModuleRef();
+                    m.Read(r);
+                    ModuleRefTabel.Add(m);
+                }
+                a++;
+            }
+            //Read TypeSpec tabel (pls test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.TypeSpec) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new TypeSpec();
+                    m.Read(r);
+                    TypeSpecTabel.Add(m);
+                }
+                a++;
+            }
+            //Read ImplMap tabel (pls test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.ImplMap) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new ImplMap();
+                    m.Read(r);
+                    ImplMapTabel.Add(m);
+                }
+                a++;
+            }
+            //Read FieldRVA  tabel (pls test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.FieldRVA) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new FieldRVA();
+                    m.Read(r);
+                    FieldRVATabel.Add(m);
+                }
+                a++;
+            }
+            //Read Assembly tabel (pls test)
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.Assembly) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new Assembly();
+                    m.Read(r);
+                    var x = p.ClrStringsStream.GetByOffset(m.Name);
+                    AssemblyTabel.Add(m);
                 }
                 a++;
             }
