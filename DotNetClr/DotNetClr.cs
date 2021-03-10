@@ -13,6 +13,7 @@ namespace DotNetClr
     {
         private DotNetFile file;
         private string EXEPath;
+        private Dictionary<string, DotNetFile> dlls = new Dictionary<string, DotNetFile>();
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -29,18 +30,26 @@ namespace DotNetClr
 
         public void Start()
         {
-            if (file.EntryPoint == null)
+            try
             {
-                clrError("The entry point was not found.", "System.EntryPointNotFoundException");
+                if (file.EntryPoint == null)
+                {
+                    clrError("The entry point was not found.", "System.EntryPointNotFoundException");
+                    file = null;
+                    return;
+                }
+            }
+            catch(Exception x)
+            {
+                clrError("The entry point was not found. Internal error: "+x.Message, "System.EntryPointNotFoundException");
                 file = null;
                 return;
             }
             //Resolve all of the DLLS
-
             foreach (var item in file.Backend.Tabels.AssemblyRefTabel)
             {
                 var fileName = file.Backend.ClrStringsStream.GetByOffset(item.Name);
-                string fullPath="";
+                string fullPath = "";
 
                 if (File.Exists(Path.Combine(EXEPath, fileName + ".exe")))
                 {
@@ -52,9 +61,31 @@ namespace DotNetClr
                 }
                 else
                 {
-                    clrError("File: " + fileName + ".dll does not exist in "+EXEPath+"!", "System.FileNotFoundException");
+                    clrError("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
                     return;
                 }
+
+                try
+                {
+                    dlls.Add(fileName, new DotNetFile(fullPath));
+                }
+                catch (Exception x)
+                {
+                    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
+                    return;
+                }
+            }
+
+            //Run the entry point
+            RunMethod(file.EntryPoint, file);
+        }
+
+        private void RunMethod(DotNetMethod m, DotNetFile file)
+        {
+            var code = new IlDecompiler(m).Decompile();
+            foreach (var item in code)
+            {
+                throw new NotImplementedException();
             }
         }
 

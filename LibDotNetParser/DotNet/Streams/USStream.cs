@@ -106,15 +106,23 @@ namespace LibDotNetParser.DotNet.Streams
                 temp += r.ReadByte() & 0x7F;
                 size++;
 
-                var b = r.ReadByte();
-                if (b > 127)
+                try
                 {
-                    temp <<= 7;
+                    var b = r.ReadByte();
+                    if (b > 127)
+                    {
+                        temp <<= 7;
+                    }
+                    else
+                    {
+                        r.BaseStream.Position -= size;
+                        break;
+                    }
                 }
-                else
+                catch(EndOfStreamException)
                 {
                     r.BaseStream.Position -= size;
-                    break;
+                    return temp;
                 }
             }
 
