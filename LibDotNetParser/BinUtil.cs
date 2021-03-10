@@ -36,7 +36,7 @@ namespace LibDotNetParser
 
             // check each bit in the byte. if 1 set to true, if 0 set to false
             for (int i = 0; i < 8; i++)
-                result[i] = (b & (1 << i)) == 0 ? false : true;
+                result[i] = (b & (1 << i)) != 0;
 
             // reverse the array
             Array.Reverse(result);

@@ -44,6 +44,19 @@ namespace TestApp
 
             x2.test();
 
+            bool broken = true;
+            try
+            {
+                throw new Exception("You should not see this");
+            }
+            catch
+            {
+                broken = false;
+            }
+
+            if (broken)
+                Console.WriteLine("Try/Catch does not work correctly");
+
             Console.WriteLine("Basic .NET clr test complete");
 
             //if ((6 + 6) == 13)

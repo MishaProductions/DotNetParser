@@ -19,6 +19,7 @@ namespace DotNetParaser
             Console.WriteLine("==============================");
             var ilFormater = new ILFormater(decompiler.Decompile());
             var outputString = ilFormater.Format();
+
             Console.WriteLine(outputString);
             Console.WriteLine("Running program              :");
             Console.WriteLine("==============================");

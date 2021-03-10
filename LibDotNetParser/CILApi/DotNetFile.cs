@@ -50,11 +50,15 @@ namespace LibDotNetParser.CILApi
         public DotNetFile(string Path)
         {
             peFile = new PEFile(Path);
+            if (!peFile.ContainsMetadata)
+                throw new System.Exception("EXE File has no .NET Metadata");
         }
 
         public DotNetFile(byte[] file)
         {
             peFile = new PEFile(file);
+            if (!peFile.ContainsMetadata)
+                throw new System.Exception("EXE File has no .NET Metadata");
         }
     }
 }

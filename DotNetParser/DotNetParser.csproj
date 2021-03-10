@@ -12,7 +12,6 @@
     <ProjectReference Include="..\TestApp\TestApp.csproj">
       <Private>true</Private>
     </ProjectReference>
-    <ProjectReference Include="..\TestDll\TestDll.csproj" />
   </ItemGroup>
 
 </Project>

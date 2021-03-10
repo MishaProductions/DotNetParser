@@ -29,6 +29,8 @@ namespace LibDotNetParser
         List<StreamHeader> Streams = new List<StreamHeader>();
         #endregion
         public BinaryReader RawFile;
+
+        public bool ContainsMetadata { get; private set; } = true;
         public PEFile(string FilePath)
         {
             byte[] fs = File.ReadAllBytes(FilePath);
@@ -57,9 +59,10 @@ namespace LibDotNetParser
             {
                 ClrHeader = ReadCLRHeader(r, PeHeader);
             }
-            catch (Exception ex)
+            catch
             {
-                throw new Exception("Error: Invaild metadata: " + ex.Message);
+                ContainsMetadata = false;
+                return;
             }
 
             //Read the strong name hash
@@ -335,7 +338,7 @@ namespace LibDotNetParser
             var count = 0;
             while (tablesFlags != 0)
             {
-                tablesFlags = tablesFlags & (tablesFlags - 1);
+                tablesFlags &= (tablesFlags - 1);
                 count++;
             }
             return count;

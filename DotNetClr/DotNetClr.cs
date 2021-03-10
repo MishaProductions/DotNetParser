@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LibDotNetParser;
 using LibDotNetParser.CILApi;
+using LibDotNetParser.CILApi.IL;
 
 namespace DotNetClr
 {
@@ -14,6 +15,8 @@ namespace DotNetClr
         private DotNetFile file;
         private string EXEPath;
         private Dictionary<string, DotNetFile> dlls = new Dictionary<string, DotNetFile>();
+        private List<MethodArgStack> stack = new List<MethodArgStack>();
+        private int CurrentStackItem = 0;
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -39,9 +42,9 @@ namespace DotNetClr
                     return;
                 }
             }
-            catch(Exception x)
+            catch (Exception x)
             {
-                clrError("The entry point was not found. Internal error: "+x.Message, "System.EntryPointNotFoundException");
+                clrError("The entry point was not found. Internal error: " + x.Message, "System.EntryPointNotFoundException");
                 file = null;
                 return;
             }
@@ -64,7 +67,7 @@ namespace DotNetClr
                     clrError("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
                     return;
                 }
-                Console.WriteLine("[CLR] Loading: "+Path.GetFileName(fullPath));
+                Console.WriteLine("[CLR] Loading: " + Path.GetFileName(fullPath));
                 try
                 {
                     dlls.Add(fileName, new DotNetFile(fullPath));
@@ -86,7 +89,40 @@ namespace DotNetClr
             var code = new IlDecompiler(m).Decompile();
             foreach (var item in code)
             {
-                throw new NotImplementedException();
+                if (item.OpCodeName == "ldstr")
+                {
+                    stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand});
+                    CurrentStackItem++;
+                }
+                else if (item.OpCodeName == "nop")
+                {
+                    //Don't do anything
+                }
+                else if (item.OpCodeName == "call")
+                {
+                    var call = (CallMethodDataHolder)item.Operand;
+
+
+                    //Temp.
+                    if (call.NameSpace == "System" && call.ClassName == "Console" && call.FunctionName == "WriteLine")
+                        Console.WriteLine((string)FirstStackItem());
+
+                    //Clear the stack
+                    stack.Clear();
+                    CurrentStackItem = 0;
+                }
+            }
+        }
+
+        private object FirstStackItem()
+        {
+            try
+            {
+                return stack[0].value;
+            }
+            catch
+            {
+                return "";
             }
         }
 

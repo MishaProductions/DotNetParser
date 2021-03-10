@@ -74,7 +74,7 @@ namespace LibDotNetParser.CILApi
             var verytinyheader = format.ConvertByteToBoolArray();
 
 
-            var reserved = BinUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[6], verytinyheader[7] });
+            var header = BinUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[6], verytinyheader[7] });
 
             var sizer = BinUtil.ConvertBoolArrayToByte(new bool[] { verytinyheader[0], verytinyheader[1], verytinyheader[2], verytinyheader[3], verytinyheader[4], verytinyheader[5], });
             fs.BaseStream.Seek(Offset + 1, System.IO.SeekOrigin.Begin);
@@ -82,17 +82,15 @@ namespace LibDotNetParser.CILApi
 
             fs.BaseStream.Seek(Offset + 1, System.IO.SeekOrigin.Begin);
 
-            if (form2 == 48)
+            if (header == 3) //Fat format
             {
-                //Fat format
                 byte info2 = fs.ReadByte(); //some info on header
                 ushort MaxStack = fs.ReadUInt16();
                 CodeSize = (int)fs.ReadUInt32();
                 uint LocalVarSigTok = fs.ReadUInt32();
             }
-            else
+            else //Tiny format
             {
-                //Tiny format
                 CodeSize = sizer;
             }
             List<byte> code = new List<byte>();
