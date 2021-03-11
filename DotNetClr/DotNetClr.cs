@@ -126,6 +126,38 @@ namespace DotNetClr
                         //Temp.
                         if (call.NameSpace == "System" && call.ClassName == "Console" && call.FunctionName == "WriteLine")
                             Console.WriteLine((string)FirstStackItem());
+                        else
+                        {
+
+                            //Attempt to resolve it
+                            //Local/Defined method
+                            DotNetMethod m2 = null;
+                            foreach (var item2 in dlls)
+                            {
+                                foreach (var item3 in item2.Value.Types)
+                                {
+                                    foreach (var meth in item3.Methods)
+                                    {
+                                        if (meth.Name == call.FunctionName && meth.Parrent.Name == call.ClassName && meth.Parrent.NameSpace == call.NameSpace)
+                                        {
+                                            m2 = meth;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (m2 != null)
+                            {
+                                //Call it
+                                RunMethod(m2, m.Parrent.File);
+                            }
+                            else
+                            {
+                                clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}","System.MethodNotFound");
+                                return;
+                            }
+                        }
                     }
 
                     //Clear the stack

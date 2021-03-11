@@ -64,8 +64,12 @@ namespace LibDotNetParser.CILApi
                 {
                     if (file.Tabels.MethodTabel.Count != 1)
                     {
-                        var item = file.Tabels.MethodTabel[(int)i];
-                        m.Add(new DotNetMethod(file, item, this));
+                        try
+                        {
+                            var item = file.Tabels.MethodTabel[(int)i];
+                            m.Add(new DotNetMethod(file, item, this));
+                        }
+                        catch { }
                     }
                 }
 

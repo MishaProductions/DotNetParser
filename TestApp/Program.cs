@@ -22,15 +22,14 @@ namespace TestApp
             Console.WriteLine("Calling function");
             main2();
         }
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
         private extern static void ClrHello();
 
         public static void main2()
         {
             Console.WriteLine("Function was called!");
+            ClrHello();
         }
-        [DllImport("user32.dll")]
-        public static extern void MessageBox(IntPtr handle, string text);
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 16, CharSet = CharSet.Ansi)]
