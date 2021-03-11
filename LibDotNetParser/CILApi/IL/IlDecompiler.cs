@@ -202,7 +202,7 @@ namespace LibDotNetParser.CILApi
                                     };
                                     string name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
                                     //Now, resolve this method
-                                    DotNetMethod m=null;
+                                    DotNetMethod m = null;
                                     foreach (var item in mainFile.Types)
                                     {
                                         foreach (var meth in item.Methods)
@@ -225,8 +225,8 @@ namespace LibDotNetParser.CILApi
 
                                     inst.Operand = new InlineMethodOperandData()
                                     {
-                                        NameSpace = Namespace,//mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
-                                        ClassName = className,//mainFile.Backend.ClrStringsStream.GetByOffset(classs),
+                                        NameSpace = Namespace,
+                                        ClassName = className,
                                         FunctionName = name,
                                         RVA = c.RVA
                                     };

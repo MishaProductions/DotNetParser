@@ -19,53 +19,16 @@ namespace TestApp
         static void Main(string[] args)
         {
             Console.WriteLine("C# DotNetParser Tester");
-
-            Console.WriteLine(" New Obj Test: ");
-            var obj = new object();
-            if (obj == null)
-                Console.WriteLine("new object() returns null!");
-
-            Console.WriteLine(" New varible Test: ");
-            var x = 234;
-            if (x != 234)
-                Console.WriteLine("Value of the varible is " + x + " but it should be 234");
-
-            Console.WriteLine("Misc. Tests");
-            new MySystemTime();
-            int fivePlus5 = 5 + 5;
-            Console.WriteLine("5 + 5 is " + fivePlus5);
-
-            fivePlus5 -= fivePlus5;
-            Console.WriteLine("subtracting 10-10 is " + fivePlus5);
-
-            var x2 = new tests();
-
-            Console.WriteLine("You should see a test message below this message");
-
-            x2.test();
-
-            bool broken = true;
-            try
-            {
-                throw new Exception("You should not see this");
-            }
-            catch
-            {
-                broken = false;
-            }
-
-            if (broken)
-                Console.WriteLine("Try/Catch does not work correctly");
-
-            Console.WriteLine("Basic .NET clr test complete");
-
-            //if ((6 + 6) == 13)
-            ClrHello();
+            Console.WriteLine("Calling function");
+            main2();
         }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
         private extern static void ClrHello();
 
-
+        public static void main2()
+        {
+            Console.WriteLine("Function was called!");
+        }
         [DllImport("user32.dll")]
         public static extern void MessageBox(IntPtr handle, string text);
     }

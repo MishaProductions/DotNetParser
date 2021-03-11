@@ -91,7 +91,7 @@ namespace DotNetClr
             {
                 if (item.OpCodeName == "ldstr")
                 {
-                    stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand});
+                    stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand });
                     CurrentStackItem++;
                 }
                 else if (item.OpCodeName == "nop")
@@ -102,10 +102,31 @@ namespace DotNetClr
                 {
                     var call = (InlineMethodOperandData)item.Operand;
 
-
-                    //Temp.
-                    if (call.NameSpace == "System" && call.ClassName == "Console" && call.FunctionName == "WriteLine")
-                        Console.WriteLine((string)FirstStackItem());
+                    if (call.RVA != 0)
+                    {
+                        //Local/Defined method
+                        DotNetMethod m2 = null;
+                        foreach (var item2 in file.Types)
+                        {
+                            foreach (var meth in item2.Methods)
+                            {
+                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName)
+                                {
+                                    m2 = meth;
+                                }
+                            }
+                        }
+                        if (m2.IsExtern)
+                            Console.WriteLine($"method: {m2.Name} is extern");
+                        //Call it
+                        RunMethod(m2, m.Parrent.File);
+                    }
+                    else
+                    {
+                        //Temp.
+                        if (call.NameSpace == "System" && call.ClassName == "Console" && call.FunctionName == "WriteLine")
+                            Console.WriteLine((string)FirstStackItem());
+                    }
 
                     //Clear the stack
                     stack.Clear();

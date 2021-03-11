@@ -41,6 +41,16 @@ namespace LibDotNetParser.CILApi
                 return (flags & MethodAttr.mdStatic) != 0;
             }
         }
+
+        public bool IsExtern
+        {
+            get
+            {
+                return (flags & MethodAttr.mdUnmanagedExport) != 0;
+            }
+        }
+
+
         public string Signature { get; set; }
         public DotNetType Parrent { get; }
         /// <summary>
