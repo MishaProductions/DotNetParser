@@ -6,7 +6,7 @@ namespace System
 {
     public static class Console
     {
-        //auto-generated
+        //Implemented in the CLR
         public static extern void WriteLine(string str);
     }
 }

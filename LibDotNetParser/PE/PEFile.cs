@@ -107,7 +107,7 @@ namespace LibDotNetParser
 
             //Parse the #String stream
             var bytes = GetStreamBytes("#Strings", r);
-            ClrStringsStream = new StringsStreamReader(bytes).Read();
+            ClrStringsStream = new StringsStream(bytes);
 
             //Parse the #US Stream
             var bytes2 = GetStreamBytes("#US", r);

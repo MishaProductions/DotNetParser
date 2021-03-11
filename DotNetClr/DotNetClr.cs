@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define CLR_DEBUG
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -85,28 +86,65 @@ namespace DotNetClr
             RunMethod(file.EntryPoint, file);
         }
 
-        private void RunMethod(DotNetMethod m, DotNetFile file)
+        private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file)
         {
+#if CLR_DEBUG
+            Console.WriteLine("===========================");
             Console.WriteLine($"[CLR] Running Method: {m.Parrent.NameSpace}.{m.Parrent.Name}.{m.Name}()");
+            if (stack.Count != 0)
+                Console.WriteLine("Following items are on the stack:");
+            foreach (var item in stack)
+            {
+                if (item.type == StackItemType.String)
+                {
+                    Console.WriteLine("String: \"" + (string)item.value + "\"");
+                }
+                else if (item.type == StackItemType.Int32)
+                {
+                    Console.WriteLine("Int32: " + (int)item.value);
+                }
+            }
+            Console.WriteLine("===========================");
+            Console.WriteLine("FUNCTION Output");
+#endif
+
 
             //Make sure that RVA is not zero. If its zero, than its extern
             if (m.RVA == 0)
             {
                 if (m.Name == "WriteLine")
                 {
-                    Console.WriteLine((string)FirstStackItem());
-                    return;
+                    var s = (string)FirstStackItem();
+                    Console.WriteLine(s);
                 }
                 else if (m.Name == "ClrHello")
                 {
                     Console.WriteLine("[CLR] Hello!");
-                    return;
+                }
+                else if (m.Name == "ClrDispose")
+                {
+                    //ignore
+                    Console.WriteLine("Disposing: " + FirstStackItem());
+                }
+                else if (m.Name == "ClrConcatString")
+                {
+                    string returnVal = "";
+                    foreach (var item in stack)
+                    {
+                        if (item.type == StackItemType.String)
+                            returnVal += (string)item.value;
+                    }
+
+                    return new MethodArgStack() { type = StackItemType.String, value = (string)returnVal };
                 }
                 else
                 {
                     throw new Exception("Unknown internal method: " + m.Name);
                 }
+                return null;
             }
+
+            //Now decompile the code and run it
             var code = new IlDecompiler(m).Decompile();
             foreach (var item in code)
             {
@@ -114,6 +152,8 @@ namespace DotNetClr
                 {
                     stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand });
                     CurrentStackItem++;
+
+                    Console.WriteLine("[CLRDEBUG] Pushing: " + (string)item.Operand);
                 }
                 else if (item.OpCodeName == "nop")
                 {
@@ -122,7 +162,7 @@ namespace DotNetClr
                 else if (item.OpCodeName == "call")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
-
+                    MethodArgStack returnValue;
                     if (call.RVA != 0)
                     {
                         //Local/Defined method
@@ -145,12 +185,12 @@ namespace DotNetClr
                         if (m2 == null)
                         {
                             Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}()");
-                            return;
+                            return null;
                         }
-                        if (m2.IsExtern)
-                            Console.WriteLine($"method: {m2.Name} is extern");
+
+
                         //Call it
-                        RunMethod(m2, m.Parrent.File);
+                        returnValue = RunMethod(m2, m.Parrent.File);
                     }
                     else
                     {
@@ -174,20 +214,52 @@ namespace DotNetClr
                         if (m2 != null)
                         {
                             //Call it
-                            RunMethod(m2, m.Parrent.File);
+                            returnValue = RunMethod(m2, m.Parrent.File);
                         }
                         else
                         {
                             clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}", "System.MethodNotFound");
-                            return;
+                            return null;
                         }
                     }
 
-                    //Clear the stack
+                    //Clear the stack, and if the return value is not null, add it to the stack
                     stack.Clear();
+                    if (returnValue != null)
+                    {
+                        stack.Add(returnValue);
+                    }
                     CurrentStackItem = 0;
                 }
+                else if (item.OpCodeName == "ret")
+                {
+                    //Return from function
+#if CLR_DEBUG
+                    Console.WriteLine("[CLR] Returning from function");
+#endif
+                    try
+                    {
+                        return stack[0];
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                }
+                else if (item.OpCodeName == "ldc.i4")
+                {
+                    //Puts an int32 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
+                    CurrentStackItem++;
+                }
+                else
+                {
+#if CLR_DEBUG
+                    Console.WriteLine("unsupported: " + item.OpCodeName);
+#endif
+                }
             }
+            return null;
         }
 
         private object FirstStackItem()

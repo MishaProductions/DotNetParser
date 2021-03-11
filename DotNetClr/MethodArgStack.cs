@@ -9,6 +9,7 @@
     internal enum StackItemType
     {
         String,
+        Int32,
         NotImpl
     }
 }
