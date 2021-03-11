@@ -96,6 +96,8 @@ namespace LibDotNetParser
         }
         public static ulong RVAToOffset(ulong rva, IEnumerable<Section> sections)
         {
+            if (rva == 0)
+                throw new ArgumentException("RVA cannot be 0.");
             // find the section whose virtual address range contains the data directory's virtual address.
             Section section = null;
             foreach (var s in sections)

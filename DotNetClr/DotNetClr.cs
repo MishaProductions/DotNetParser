@@ -29,6 +29,8 @@ namespace DotNetClr
         private void init(DotNetFile p)
         {
             file = p;
+            dlls.Clear();
+            dlls.Add("main_exe", p);
         }
 
         public void Start()
@@ -86,6 +88,25 @@ namespace DotNetClr
         private void RunMethod(DotNetMethod m, DotNetFile file)
         {
             Console.WriteLine($"[CLR] Running Method: {m.Parrent.NameSpace}.{m.Parrent.Name}.{m.Name}()");
+
+            //Make sure that RVA is not zero. If its zero, than its extern
+            if (m.RVA == 0)
+            {
+                if (m.Name == "WriteLine")
+                {
+                    Console.WriteLine((string)FirstStackItem());
+                    return;
+                }
+                else if (m.Name == "ClrHello")
+                {
+                    Console.WriteLine("[CLR] Hello!");
+                    return;
+                }
+                else
+                {
+                    throw new Exception("Unknown internal method: " + m.Name);
+                }
+            }
             var code = new IlDecompiler(m).Decompile();
             foreach (var item in code)
             {
@@ -106,15 +127,25 @@ namespace DotNetClr
                     {
                         //Local/Defined method
                         DotNetMethod m2 = null;
-                        foreach (var item2 in file.Types)
+                        foreach (var item2 in dlls)
                         {
-                            foreach (var meth in item2.Methods)
+                            foreach (var item3 in item2.Value.Types)
                             {
-                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName)
+                                foreach (var meth in item3.Methods)
                                 {
-                                    m2 = meth;
+                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName)
+                                    {
+                                        m2 = meth;
+                                        break;
+                                    }
                                 }
                             }
+                        }
+
+                        if (m2 == null)
+                        {
+                            Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}()");
+                            return;
                         }
                         if (m2.IsExtern)
                             Console.WriteLine($"method: {m2.Name} is extern");
@@ -123,40 +154,32 @@ namespace DotNetClr
                     }
                     else
                     {
-                        //Temp.
-                        if (call.NameSpace == "System" && call.ClassName == "Console" && call.FunctionName == "WriteLine")
-                            Console.WriteLine((string)FirstStackItem());
-                        else
+                        //Attempt to resolve it
+                        DotNetMethod m2 = null;
+                        foreach (var item2 in dlls)
                         {
-
-                            //Attempt to resolve it
-                            //Local/Defined method
-                            DotNetMethod m2 = null;
-                            foreach (var item2 in dlls)
+                            foreach (var item3 in item2.Value.Types)
                             {
-                                foreach (var item3 in item2.Value.Types)
+                                foreach (var meth in item3.Methods)
                                 {
-                                    foreach (var meth in item3.Methods)
+                                    if (meth.Name == call.FunctionName && meth.Parrent.Name == call.ClassName && meth.Parrent.NameSpace == call.NameSpace)
                                     {
-                                        if (meth.Name == call.FunctionName && meth.Parrent.Name == call.ClassName && meth.Parrent.NameSpace == call.NameSpace)
-                                        {
-                                            m2 = meth;
-                                            break;
-                                        }
+                                        m2 = meth;
+                                        break;
                                     }
                                 }
                             }
+                        }
 
-                            if (m2 != null)
-                            {
-                                //Call it
-                                RunMethod(m2, m.Parrent.File);
-                            }
-                            else
-                            {
-                                clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}","System.MethodNotFound");
-                                return;
-                            }
+                        if (m2 != null)
+                        {
+                            //Call it
+                            RunMethod(m2, m.Parrent.File);
+                        }
+                        else
+                        {
+                            clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}", "System.MethodNotFound");
+                            return;
                         }
                     }
 

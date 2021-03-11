@@ -43,37 +43,12 @@ namespace LibDotNetParser.CILApi
             }
         }
 
+        private List<DotNetMethod> methods = new List<DotNetMethod>();
         public List<DotNetMethod> Methods
         {
             get
             {
-                List<DotNetMethod> m = new List<DotNetMethod>();
-                uint startIndex = type.MethodList;
-
-                int max;
-
-                if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
-                {
-                    max = file.Tabels.TypeDefTabel.Count;
-                }
-                else
-                {
-                    max = (int)file.Tabels.TypeDefTabel[NextTypeIndex].MethodList - 1;
-                }
-                for (uint i = startIndex - 1; i < max; i++)
-                {
-                    if (file.Tabels.MethodTabel.Count != 1)
-                    {
-                        try
-                        {
-                            var item = file.Tabels.MethodTabel[(int)i];
-                            m.Add(new DotNetMethod(file, item, this));
-                        }
-                        catch { }
-                    }
-                }
-
-                return m;
+                return methods;
             }
         }
 
@@ -95,6 +70,40 @@ namespace LibDotNetParser.CILApi
 
             Name = this.file.ClrStringsStream.GetByOffset(item.Name);
             NameSpace = this.file.ClrStringsStream.GetByOffset(item.Namespace);
+            InitMethods();
+        }
+
+        private void InitMethods()
+        {
+            methods.Clear();
+            uint startIndex = type.MethodList;
+
+            int max;
+
+            if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
+            {
+                max = file.Tabels.MethodTabel.Count;
+               
+            }
+            else
+            {
+                max = (int)file.Tabels.TypeDefTabel[file.Tabels.TypeDefTabel.Count - 1].MethodList;
+            }
+
+
+            for (uint i = startIndex - 1; i < max; i++)
+            {
+                if ((startIndex - 1) == max)
+                {
+                    //No methods for this type, contiune
+                    break;
+                }
+                if (file.Tabels.MethodTabel.Count != 1)
+                {
+                    var item = file.Tabels.MethodTabel[(int)i];
+                    methods.Add(new DotNetMethod(file, item, this));
+                }
+            }
         }
 
         public override string ToString()
