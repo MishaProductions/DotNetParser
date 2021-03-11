@@ -1,13 +1,9 @@
 ﻿//#define CLR_DEBUG
+using LibDotNetParser.CILApi;
+using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LibDotNetParser;
-using LibDotNetParser.CILApi;
-using LibDotNetParser.CILApi.IL;
 
 namespace DotNetClr
 {
@@ -17,7 +13,6 @@ namespace DotNetClr
         private string EXEPath;
         private Dictionary<string, DotNetFile> dlls = new Dictionary<string, DotNetFile>();
         private List<MethodArgStack> stack = new List<MethodArgStack>();
-        private int CurrentStackItem = 0;
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -151,7 +146,6 @@ namespace DotNetClr
                 if (item.OpCodeName == "ldstr")
                 {
                     stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand });
-                    CurrentStackItem++;
 
                     Console.WriteLine("[CLRDEBUG] Pushing: " + (string)item.Operand);
                 }
@@ -229,7 +223,6 @@ namespace DotNetClr
                     {
                         stack.Add(returnValue);
                     }
-                    CurrentStackItem = 0;
                 }
                 else if (item.OpCodeName == "ret")
                 {
@@ -250,7 +243,6 @@ namespace DotNetClr
                 {
                     //Puts an int32 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
-                    CurrentStackItem++;
                 }
                 else
                 {
