@@ -26,7 +26,7 @@ namespace LibDotNetParser
                 {
                     output += $"{item.OpCodeName} \"{@string}\"\n";
                 }
-                else if (item.Operand is CallMethodDataHolder me)
+                else if (item.Operand is InlineMethodOperandData me)
                 {
                     output += $"{item.OpCodeName} {me.NameSpace}.{me.ClassName}.{me.FunctionName}()\n";
                 }

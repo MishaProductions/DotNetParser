@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LibDotNetParser.CILApi.IL
+﻿namespace LibDotNetParser.CILApi.IL
 {
-    public class CallMethodDataHolder
+    public class InlineMethodOperandData
     {
         public string NameSpace { get; set; }
         public string ClassName { get; set; }
         public string FunctionName { get; set; }
+        public uint RVA { get; set; }
     }
 }

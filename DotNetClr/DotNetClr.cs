@@ -100,7 +100,7 @@ namespace DotNetClr
                 }
                 else if (item.OpCodeName == "call")
                 {
-                    var call = (CallMethodDataHolder)item.Operand;
+                    var call = (InlineMethodOperandData)item.Operand;
 
 
                     //Temp.

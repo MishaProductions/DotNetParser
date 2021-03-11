@@ -114,75 +114,129 @@ namespace LibDotNetParser.CILApi
                                 byte fi = code[i + 1];
                                 byte s2 = code[i + 2];
                                 byte t = code[i + 3];
-                                byte f = code[i + 4];
-                                byte[] num2 = new byte[] { fi, s2, t, f };
-                                var numb2 = BitConverter.ToInt16(num2, 0); //Method Token
+                                byte f = code[i + 4]; //Method type. 6=Method,10=MemberRef
+                                byte[] num2 = new byte[] { fi, s2, t, 0 };
+                                var numb2 = BitConverter.ToInt32(num2, 0); //Method Token
 
-                                //Get the method that we are calling
-                                var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1]; //is the -1 needed?
 
-                                #region Decode
-                                //Decode the class bytes
-                                DecodeMemberRefParent(c.Class, out MemberRefParentType tabel, out uint row);
-
-                                
-                                var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
-                                uint classs;
-                                uint Namespace;
-
-                                //TYPE def
-                                if (tabel == MemberRefParentType.TypeDef)
+                                if (f == 10) //MemberRef
                                 {
-                                    var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
+                                    //Get the method that we are calling
+                                    var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1];
 
-                                    classs = tt.Name;
-                                    Namespace = tt.Namespace;
+                                    #region Decode
+                                    //Decode the class bytes
+                                    DecodeMemberRefParent(c.Class, out MemberRefParentType tabel, out uint row);
+
+
+                                    var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                                    uint classs;
+                                    uint Namespace;
+
+                                    //TYPE def
+                                    if (tabel == MemberRefParentType.TypeDef)
+                                    {
+                                        var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
+
+                                        classs = tt.Name;
+                                        Namespace = tt.Namespace;
+                                    }
+                                    //Type REF
+                                    else if (tabel == MemberRefParentType.TypeRef)
+                                    {
+                                        var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
+
+                                        classs = tt.TypeName;
+                                        Namespace = tt.TypeNamespace;
+                                    }
+                                    //Module Ref
+                                    else if (tabel == MemberRefParentType.ModuleRef)
+                                    {
+                                        var tt = mainFile.Backend.Tabels.ModuleRefTabel[(int)row - 1];
+
+                                        classs = tt.Name;
+                                        Namespace = tt.Name;
+                                    }
+                                    //Unknown
+                                    else
+                                    {
+                                        classs = 0;
+                                        Namespace = 0;
+                                        throw new NotImplementedException();
+                                    }
+                                    #endregion
+
+                                    var inst = new ILInstruction()
+                                    {
+                                        OpCode = opCode.Value,
+                                        OpCodeName = opCode.Name,
+                                        OperandType = opCode.OpCodeOperandType
+                                    };
+
+
+                                    inst.Operand = new InlineMethodOperandData()
+                                    {
+                                        NameSpace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
+                                        ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs),
+                                        FunctionName = funcName,
+                                        RVA = 0
+                                    };
+                                    inr.Add(inst);
+
+                                    i += 4; //skip past the string
+                                    continue;
                                 }
-                                //Type REF
-                                else if (tabel == MemberRefParentType.TypeRef)
+                                else if (f == 6)//method
                                 {
-                                    var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
+                                    //Get the method that we are calling
+                                    var c = mainFile.Backend.Tabels.MethodTabel[numb2 - 1];
 
-                                    classs = tt.TypeName;
-                                    Namespace = tt.TypeNamespace;
+
+
+
+                                    var inst = new ILInstruction()
+                                    {
+                                        OpCode = opCode.Value,
+                                        OpCodeName = opCode.Name,
+                                        OperandType = opCode.OpCodeOperandType
+                                    };
+                                    string name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                                    //Now, resolve this method
+                                    DotNetMethod m=null;
+                                    foreach (var item in mainFile.Types)
+                                    {
+                                        foreach (var meth in item.Methods)
+                                        {
+                                            if (meth.RVA == c.RVA && meth.Name == name)
+                                            {
+                                                m = meth;
+                                            }
+                                        }
+                                    }
+
+                                    string className = "CannotFind";
+                                    string Namespace = "CannotFind";
+
+                                    if (m != null)
+                                    {
+                                        className = m.Parrent.Name;
+                                        Namespace = m.Parrent.NameSpace;
+                                    }
+
+                                    inst.Operand = new InlineMethodOperandData()
+                                    {
+                                        NameSpace = Namespace,//mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
+                                        ClassName = className,//mainFile.Backend.ClrStringsStream.GetByOffset(classs),
+                                        FunctionName = name,
+                                        RVA = c.RVA
+                                    };
+
+                                    inr.Add(inst);
+
+                                    i += 4; //skip past the string
+                                    continue;
                                 }
-                                //Module Ref
-                                else if (tabel == MemberRefParentType.ModuleRef)
-                                {
-                                    //var tt = file.Backend.MetaDataStreamTablesHeader.Tables.ModuleRef[(int)row - 1];
 
-                                    //classs = tt.Name;
-                                    //Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
-                                    Console.WriteLine("Module Ref not supported!");
-                                    classs = 0;
-                                    Namespace = 0;
-                                }
-                                //Unknown
-                                else
-                                {
-                                    classs = 0;
-                                    Namespace = 0;
-                                }
-                                #endregion
-                            
-                                var inst = new ILInstruction()
-                                {
-                                    OpCode = opCode.Value,
-                                    OpCodeName = opCode.Name,
-                                    OperandType = opCode.OpCodeOperandType
-                                };
-
-
-                                inst.Operand = new CallMethodDataHolder() 
-                                {
-                                    NameSpace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
-                                    ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs), 
-                                    FunctionName = funcName 
-                                };
-                               // Console.WriteLine("call " + (inst.Operand as CallMethodDataHolder).ClassName+", n="+numb2+", type="+ tabel);
-                                inr.Add(inst);
-
-                                i += 4; //skip past the string
                             }
                             catch { }
                         }
