@@ -1,8 +1,9 @@
-﻿//#define CLR_DEBUG
+﻿#define CLR_DEBUG
 using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace DotNetClr
@@ -119,7 +120,9 @@ namespace DotNetClr
                 else if (m.Name == "ClrDispose")
                 {
                     //ignore
+#if CLR_DEBUG
                     Console.WriteLine("Disposing: " + FirstStackItem());
+#endif
                 }
                 else if (m.Name == "ClrConcatString")
                 {
@@ -141,13 +144,19 @@ namespace DotNetClr
 
             //Now decompile the code and run it
             var code = new IlDecompiler(m).Decompile();
-            foreach (var item in code)
+
+            var currentInstruction = -1;
+            int i;
+            for (i = 0; i < code.Length; i++)
             {
+                var item = code[i];
+                currentInstruction++;
                 if (item.OpCodeName == "ldstr")
                 {
                     stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand });
-
+#if CLR_DEBUG
                     Console.WriteLine("[CLRDEBUG] Pushing: " + (string)item.Operand);
+#endif
                 }
                 else if (item.OpCodeName == "nop")
                 {
@@ -244,11 +253,41 @@ namespace DotNetClr
                     //Puts an int32 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
                 }
+                else if (item.OpCodeName == "ldc.i4.1")
+                {
+                    //Puts an int32 with value 1 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                }
+                else if (item.OpCodeName == "br.s")
+                {
+
+
+                    //find the ILInstruction that is in this position
+                    int i2 = i + (byte)item.Operand;
+                    //ILInstruction inst=null;
+                    //for (i2 = 0; i2 < code.Length; i2++)
+                    //{
+                    //    var instr = code[i2];
+
+                    //    if (instr.Position == (byte)item.Operand)
+                    //    {
+                    //        inst = instr;
+                    //        break;
+                    //    }
+                    //}
+                    //if (inst == null)
+                    //    throw new Exception("Attempt to branch to null");
+                    //i2--;
+                    Console.WriteLine("branching to: IL_" + i2 + ": " + code[i2].OpCodeName);
+                    i = i2;
+
+                    //Debugger.Break();
+                }
                 else
                 {
-#if CLR_DEBUG
+                    //#if CLR_DEBUG
                     Console.WriteLine("unsupported: " + item.OpCodeName);
-#endif
+                    //#endif
                 }
             }
             return null;

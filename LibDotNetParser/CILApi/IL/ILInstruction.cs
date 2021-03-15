@@ -27,5 +27,14 @@ namespace LibDotNetParser.CILApi
         public string OpCodeName { get; set; }
 
         public OpCodeOperandType OperandType { get; set; }
+        /// <summary>
+        /// The position of the Opcode in the method body bytes
+        /// </summary>
+        public int Position { get; set; }
+
+        public override string ToString()
+        {
+            return OpCodeName + " At: " + Position;
+        }
     }
 }

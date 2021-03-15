@@ -43,7 +43,8 @@ namespace LibDotNetParser.CILApi
                             {
                                 OpCode = opCode.Value,
                                 OpCodeName = opCode.Name,
-                                OperandType = opCode.OpCodeOperandType
+                                OperandType = opCode.OpCodeOperandType,
+                                Position = i
                             });
                         }
                         break;
@@ -61,12 +62,26 @@ namespace LibDotNetParser.CILApi
                                 OpCode = opCode.Value,
                                 OpCodeName = opCode.Name,
                                 OperandType = opCode.OpCodeOperandType,
-                                Operand = fi
+                                Operand = fi,
+                                Position = i
                             });
                             i += 1;
                         }
                         break;
                     case OpCodeOperandType.ShortInlineBrTarget:
+                        {
+                            throw new NotImplementedException();
+                            byte fi = code[i + 1];
+                            inr.Add(new ILInstruction()
+                            {
+                                OpCode = opCode.Value,
+                                OpCodeName = opCode.Name,
+                                OperandType = opCode.OpCodeOperandType,
+                                Operand = fi,
+                                Position = i
+                            });
+                            i += 1;
+                        }
                         break;
                     case OpCodeOperandType.ShortInlineI:
                         {
@@ -76,7 +91,8 @@ namespace LibDotNetParser.CILApi
                                 OpCode = opCode.Value,
                                 OpCodeName = opCode.Name,
                                 OperandType = opCode.OpCodeOperandType,
-                                Operand = fi
+                                Operand = fi,
+                                Position = i
                             });
                             i += 1;
                         }
@@ -98,7 +114,8 @@ namespace LibDotNetParser.CILApi
                                 OpCode = opCode.Value,
                                 OpCodeName = opCode.Name,
                                 OperandType = opCode.OpCodeOperandType,
-                                Operand = numb2
+                                Operand = numb2,
+                                Position = i
                             });
                             i += 3;
                         }
@@ -170,7 +187,8 @@ namespace LibDotNetParser.CILApi
                                     {
                                         OpCode = opCode.Value,
                                         OpCodeName = opCode.Name,
-                                        OperandType = opCode.OpCodeOperandType
+                                        OperandType = opCode.OpCodeOperandType,
+                                        Position = i
                                     };
 
 
@@ -198,7 +216,8 @@ namespace LibDotNetParser.CILApi
                                     {
                                         OpCode = opCode.Value,
                                         OpCodeName = opCode.Name,
-                                        OperandType = opCode.OpCodeOperandType
+                                        OperandType = opCode.OpCodeOperandType,
+                                        Position = i
                                     };
                                     string name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
                                     //Now, resolve this method
@@ -246,9 +265,9 @@ namespace LibDotNetParser.CILApi
                     case OpCodeOperandType.InlineString:
                         {
                             byte first = code[i + 1]; //1st index
-                            byte sec = code[i + 2]; //2nd
-                            byte third = code[i + 3];
-                            byte forth = code[i + 4];
+                            byte sec = code[i + 2];   //2nd
+                            byte third = code[i + 3]; //3rd
+                            byte forth = code[i + 4]; //string type
                             byte[] num = new byte[] { first, sec, third, 0 };
                             var numb = BitConverter.ToInt32(num, 0);
 
@@ -271,7 +290,8 @@ namespace LibDotNetParser.CILApi
                             {
                                 OpCode = opCode.Value,
                                 Operand = s,
-                                OpCodeName = opCode.Name
+                                OpCodeName = opCode.Name,
+                                Position = i-4
                             });
                         }
                         break;
@@ -300,7 +320,8 @@ namespace LibDotNetParser.CILApi
                                 OpCode = opCode.Value,
                                 OpCodeName = opCode.Name,
                                 OperandType = opCode.OpCodeOperandType,
-                                Operand = numb2
+                                Operand = numb2,
+                                Position = i
                             });
                             i += 7;
                         }
