@@ -20,10 +20,10 @@ namespace TestApp
             Console.WriteLine("End of program");
 
             Console.WriteLine("While true Statement test:");
-            for (int i = 0; i < 10; i++)
-            {
-                Console.WriteLine("a");
-            }
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    Console.WriteLine("a");
+            //}
         }
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern static void ClrHello();
@@ -45,10 +45,10 @@ namespace TestApp
             Console.WriteLine(s);
 
             Console.WriteLine("While true Statement test:");
-            while (true)
-            {
-                Console.WriteLine("while(true == true) Console.WriteLine(\"...\")");
-            }
+            //while (true)
+            //{
+            //    Console.WriteLine("while(true == true) Console.WriteLine(\"...\")");
+            //}
         }
     }
 }
