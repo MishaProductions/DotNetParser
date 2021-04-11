@@ -31,6 +31,7 @@ namespace LibDotNetParser
         public BinaryReader RawFile;
 
         public bool ContainsMetadata { get; private set; } = true;
+        public byte[] BlobStream { get; private set; }
         public PEFile(string FilePath)
         {
             byte[] fs = File.ReadAllBytes(FilePath);
@@ -41,6 +42,7 @@ namespace LibDotNetParser
         {
             Init(file);
         }
+        static int asm = 0;
         private void Init(byte[] data)
         {
             #region Parse PE Header
@@ -113,6 +115,8 @@ namespace LibDotNetParser
             var bytes2 = GetStreamBytes("#US", r);
             ClrUsStream = new USStreamReader(bytes2).Read();
 
+
+
             #endregion
             #region Parse #~ Stream aka Tabels stream
             //Parse the #~ stream
@@ -129,7 +133,12 @@ namespace LibDotNetParser
             }
 
             MetadataReader = new MetadataReader(TableStreamR.BaseStream);
+            BlobStream = GetStreamBytes("#Blob", r);
 
+            //For debugging
+           // File.WriteAllBytes($"guid_{asm}.bin", GetStreamBytes("#GUID", r));
+           // File.WriteAllBytes($"blob_{asm}.bin", GetStreamBytes("#Blob", r));
+            asm++;
             //Parse the tabels
             Tabels = new Tabels(this);
             #endregion

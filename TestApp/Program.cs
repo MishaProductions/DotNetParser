@@ -33,22 +33,10 @@ namespace TestApp
 
         public static void main2()
         {
-            Console.WriteLine("Function was called!");
-            ClrHello();
-
-            //very complex math
-            int a = 4 * 4 * 100 * 10345/10+932-18;
-            ClrDispose(a);
-
-            string s = "hello string world";
-            s += "!";
-            Console.WriteLine(s);
-
-            Console.WriteLine("While true Statement test:");
-            //while (true)
-            //{
-            //    Console.WriteLine("while(true == true) Console.WriteLine(\"...\")");
-            //}
+            Console.WriteLine(GetBig());
+           
         }
+
+        private static byte GetBig() { return 255; }
     }
 }

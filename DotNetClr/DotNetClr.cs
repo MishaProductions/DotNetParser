@@ -110,19 +110,25 @@ namespace DotNetClr
             {
                 if (m.Name == "WriteLine")
                 {
-                    var s = (string)FirstStackItem();
-                    Console.WriteLine(s);
+                    var s = stack[0];
+                    string val = "<NULL>";
+                    if (s.type == StackItemType.Int32)
+                    {
+                        val = ((int)s.value).ToString();
+                    }
+                    else if (s.type == StackItemType.Int64)
+                    {
+                        val = ((long)s.value).ToString();
+                    }
+                    else if (s.type == StackItemType.String)
+                    {
+                        val = (string)s.value;
+                    }
+                    PrintColor(val, ConsoleColor.DarkCyan);
                 }
                 else if (m.Name == "ClrHello")
                 {
-                    Console.WriteLine("[CLR] Hello!");
-                }
-                else if (m.Name == "ClrDispose")
-                {
-                    //ignore
-#if CLR_DEBUG
-                    Console.WriteLine("Disposing: " + FirstStackItem());
-#endif
+                    PrintColor("[CLR] Hello!", ConsoleColor.Green);
                 }
                 else if (m.Name == "ClrConcatString")
                 {
@@ -253,10 +259,16 @@ namespace DotNetClr
                     //Puts an int32 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
                 }
+                //Push int32
                 else if (item.OpCodeName == "ldc.i4.1")
                 {
                     //Puts an int32 with value 1 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                }
+                //Push int64
+                else if (item.OpCodeName == "ldc.i8")
+                {
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int64, value = (long)item.Operand });
                 }
                 else if (item.OpCodeName == "br.s")
                 {
@@ -286,13 +298,19 @@ namespace DotNetClr
                 else
                 {
                     //#if CLR_DEBUG
-                    Console.WriteLine("unsupported: " + item.OpCodeName);
+                    PrintColor("Unsupported instruction: " + item.OpCodeName, ConsoleColor.Red);
                     //#endif
                 }
             }
             return null;
         }
-
+        private void PrintColor(string s, ConsoleColor c)
+        {
+            var old = Console.ForegroundColor;
+            Console.ForegroundColor = c;
+            Console.WriteLine(s);
+            Console.ForegroundColor = old;
+        }
         private object FirstStackItem()
         {
             try

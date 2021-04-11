@@ -10,6 +10,7 @@
     {
         String,
         Int32,
-        NotImpl
+        Int64,
+        NotImpl,
     }
 }

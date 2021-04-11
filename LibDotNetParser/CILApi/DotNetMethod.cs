@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,19 @@ namespace LibDotNetParser.CILApi
 
         MethodAttr flags;
 
+        /// <summary>
+        /// Function Signature. WIP
+        /// </summary>
+        public string Signature
+        {
+            get
+            {
+                var blobStreamReader = new BinaryReader(new MemoryStream(file.BlobStream));
+                blobStreamReader.BaseStream.Seek(method.Signature, SeekOrigin.Begin);
+
+                return "";
+            }
+        }
         public string Name { get; private set; }
         public uint RVA { get { return method.RVA; } }
         public uint Offset
@@ -49,9 +63,6 @@ namespace LibDotNetParser.CILApi
                 return (flags & MethodAttr.mdUnmanagedExport) != 0;
             }
         }
-
-
-        public string Signature { get; set; }
         public DotNetType Parrent { get; }
         /// <summary>
         /// Internal use only
@@ -67,7 +78,6 @@ namespace LibDotNetParser.CILApi
             this.flags = (MethodAttr)item.Flags;
             this.file2 = parrent.File;
 
-            this.Signature = file.ClrStringsStream.GetByOffset(item.Signature);
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);
         }
         /// <summary>
