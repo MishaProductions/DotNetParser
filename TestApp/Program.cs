@@ -21,10 +21,7 @@ namespace TestApp
             Console.WriteLine("Printing 123 onto the screen");
             Console.WriteLine(123);
             Console.WriteLine("End of program");
-            while (true)
-            {
-                Console.WriteLine("Hello!");
-            }
+            throw null;
         }
 
         public static void main2()

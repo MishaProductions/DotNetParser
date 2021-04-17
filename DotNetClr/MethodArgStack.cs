@@ -11,6 +11,7 @@
         String,
         Int32,
         Int64,
+        ldnull,
         NotImpl,
     }
 }

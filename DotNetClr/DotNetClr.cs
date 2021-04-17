@@ -262,6 +262,10 @@ namespace DotNetClr
                         stack.Add(returnValue);
                     }
                 }
+                else if (item.OpCodeName == "ldnull")
+                {
+                    stack.Add(new MethodArgStack() { type = StackItemType.ldnull, value = null });
+                }
                 else if (item.OpCodeName == "ret")
                 {
                     //Return from function
@@ -347,6 +351,21 @@ namespace DotNetClr
                     //Push 0 as int32 onto the stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
                 }
+                else if (item.OpCodeName == "throw")
+                {
+                    //Throw Exception
+                    var exp = stack[0];
+
+                    if (exp.type == StackItemType.ldnull)
+                    {
+                        clrError("Null.", "System.NullRefrenceException", "In method "+m.Parrent.NameSpace+"."+m.Parrent.Name +"."+ m.Name+"()");
+                        return null;
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
                 else
                 {
                     //#if CLR_DEBUG
@@ -364,17 +383,6 @@ namespace DotNetClr
             Console.ForegroundColor = c;
             Console.WriteLine(s);
             Console.ForegroundColor = old;
-        }
-        private object FirstStackItem()
-        {
-            try
-            {
-                return stack[0].value;
-            }
-            catch
-            {
-                return "";
-            }
         }
 
         private void clrError(string message, string errorType, string stackStace = "")
