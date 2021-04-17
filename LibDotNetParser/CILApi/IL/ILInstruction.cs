@@ -31,7 +31,14 @@ namespace LibDotNetParser.CILApi
         /// The position of the Opcode in the method body bytes
         /// </summary>
         public int Position { get; set; }
-
+        /// <summary>
+        /// Releative postion based on IlInstruction[] array.
+        /// </summary>
+        public int RelPosition { get; set; }
+        /// <summary>
+        /// The size of the instruction.
+        /// </summary>
+        public int Size { get; set; }
         public override string ToString()
         {
             return OpCodeName + " At: " + Position;

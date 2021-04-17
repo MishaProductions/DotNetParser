@@ -15,16 +15,21 @@ namespace TestApp
         static void Main(string[] args)
         {
             Console.WriteLine("C# DotNetParser Tester");
-            //Console.WriteLine("Calling function");
-            //main2();
+            Console.WriteLine("Calling function");
+            main2();
 
             Console.WriteLine("Printing 123 onto the screen");
             Console.WriteLine(123);
             Console.WriteLine("End of program");
+            while (true)
+            {
+                Console.WriteLine("Hello!");
+            }
         }
 
         public static void main2()
         {
+            Console.Write("This number should be 255: ");
             Console.WriteLine(GetBig());
         }
 

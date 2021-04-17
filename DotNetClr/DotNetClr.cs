@@ -14,6 +14,7 @@ namespace DotNetClr
         private string EXEPath;
         private Dictionary<string, DotNetFile> dlls = new Dictionary<string, DotNetFile>();
         private List<MethodArgStack> stack = new List<MethodArgStack>();
+        private List<MethodArgStack> Localstack = new List<MethodArgStack>();
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -77,7 +78,6 @@ namespace DotNetClr
                     return;
                 }
             }
-
             //Run the entry point
             RunMethod(file.EntryPoint, file);
         }
@@ -124,7 +124,29 @@ namespace DotNetClr
                     {
                         val = (string)s.value;
                     }
-                    PrintColor(val, ConsoleColor.DarkCyan);
+                    Console.WriteLine(val);
+                }
+                else if (m.Name == "Clear")
+                {
+                    Console.Clear();
+                }
+                else if (m.Name == "Write")
+                {
+                    var s = stack[0];
+                    string val = "<NULL>";
+                    if (s.type == StackItemType.Int32)
+                    {
+                        val = ((int)s.value).ToString();
+                    }
+                    else if (s.type == StackItemType.Int64)
+                    {
+                        val = ((long)s.value).ToString();
+                    }
+                    else if (s.type == StackItemType.String)
+                    {
+                        val = (string)s.value;
+                    }
+                    Console.Write(val);
                 }
                 else if (m.Name == "ClrHello")
                 {
@@ -149,7 +171,8 @@ namespace DotNetClr
             }
 
             //Now decompile the code and run it
-            var code = new IlDecompiler(m).Decompile();
+            var decompiler = new IlDecompiler(m);
+            var code = decompiler.Decompile();
 
             var currentInstruction = -1;
             int i;
@@ -254,6 +277,34 @@ namespace DotNetClr
                         return null;
                     }
                 }
+                else if (item.OpCodeName == "stloc.0")
+                {
+                    try
+                    {
+                        var oldItem = stack[0];
+                        Localstack.Add(oldItem);
+                        stack.RemoveAt(0);
+                        ;
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                else if (item.OpCodeName == "ldloc.0")
+                {
+                    try
+                    {
+                        var oldItem = Localstack[0];
+                        stack.Add(oldItem);
+                        Localstack.RemoveAt(0);
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
                 else if (item.OpCodeName == "ldc.i4")
                 {
                     //Puts an int32 onto the arg stack
@@ -268,7 +319,7 @@ namespace DotNetClr
                 else if (item.OpCodeName == "ldc.i4.s")
                 {
                     //Push an int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
                 }
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
@@ -277,33 +328,31 @@ namespace DotNetClr
                 }
                 else if (item.OpCodeName == "br.s")
                 {
-
-
                     //find the ILInstruction that is in this position
-                    int i2 = i + (byte)item.Operand;
-                    //ILInstruction inst=null;
-                    //for (i2 = 0; i2 < code.Length; i2++)
-                    //{
-                    //    var instr = code[i2];
+                    int i2 = item.Position + (int)item.Operand + 1;
+                    ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
 
-                    //    if (instr.Position == (byte)item.Operand)
-                    //    {
-                    //        inst = instr;
-                    //        break;
-                    //    }
-                    //}
-                    //if (inst == null)
-                    //    throw new Exception("Attempt to branch to null");
-                    //i2--;
-                    Console.WriteLine("branching to: IL_" + i2 + ": " + code[i2].OpCodeName);
-                    i = i2;
+                    if (inst == null)
+                        throw new Exception("Attempt to branch to null");
 
-                    //Debugger.Break();
+
+#if CLR_DEBUG
+                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
+#endif
+                    i = inst.RelPosition;
+                    continue;
+                }
+                else if (item.OpCodeName == "ldc.i4.0")
+                {
+                    //Push 0 as int32 onto the stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
                 }
                 else
                 {
                     //#if CLR_DEBUG
                     PrintColor("Unsupported instruction: " + item.OpCodeName, ConsoleColor.Red);
+                    PrintColor("Application Terminated.", ConsoleColor.Red);
+                    return null;
                     //#endif
                 }
             }
