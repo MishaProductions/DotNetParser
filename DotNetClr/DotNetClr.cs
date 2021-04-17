@@ -1,4 +1,4 @@
-﻿#define CLR_DEBUG
+﻿//#define CLR_DEBUG
 using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
@@ -182,7 +182,7 @@ namespace DotNetClr
                             {
                                 foreach (var meth in item3.Methods)
                                 {
-                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName)
+                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature)
                                     {
                                         m2 = meth;
                                         break;
@@ -193,7 +193,7 @@ namespace DotNetClr
 
                         if (m2 == null)
                         {
-                            Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}()");
+                            Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
                             return null;
                         }
 
@@ -211,7 +211,7 @@ namespace DotNetClr
                             {
                                 foreach (var meth in item3.Methods)
                                 {
-                                    if (meth.Name == call.FunctionName && meth.Parrent.Name == call.ClassName && meth.Parrent.NameSpace == call.NameSpace)
+                                    if (meth.Name == call.FunctionName && meth.Parrent.Name == call.ClassName && meth.Parrent.NameSpace == call.NameSpace && meth.Signature == call.Signature)
                                     {
                                         m2 = meth;
                                         break;
@@ -227,7 +227,7 @@ namespace DotNetClr
                         }
                         else
                         {
-                            clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}", "System.MethodNotFound");
+                            clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}. Method signature is {call.Signature}", "System.MethodNotFound");
                             return null;
                         }
                     }
@@ -264,6 +264,11 @@ namespace DotNetClr
                 {
                     //Puts an int32 with value 1 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                }
+                else if (item.OpCodeName == "ldc.i4.s")
+                {
+                    //Push an int32 onto the stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
                 }
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
@@ -325,8 +330,8 @@ namespace DotNetClr
 
         private void clrError(string message, string errorType, string stackStace = "")
         {
-            Console.WriteLine($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}");
-            Console.WriteLine(stackStace);
+            PrintColor($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}", ConsoleColor.Red);
+            PrintColor(stackStace, ConsoleColor.Red);
         }
     }
 }

@@ -8,5 +8,7 @@ namespace System
     {
         //Implemented in the CLR
         public static extern void WriteLine(string str);
+        //Implemented in the CLR
+        public static extern void WriteLine(int num);
     }
 }

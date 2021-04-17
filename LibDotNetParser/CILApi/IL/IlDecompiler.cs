@@ -149,7 +149,7 @@ namespace LibDotNetParser.CILApi
                                     var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
                                     uint classs;
                                     uint Namespace;
-
+                                    
                                     //TYPE def
                                     if (tabel == MemberRefParentType.TypeDef)
                                     {
@@ -157,6 +157,7 @@ namespace LibDotNetParser.CILApi
 
                                         classs = tt.Name;
                                         Namespace = tt.Namespace;
+                                        
                                     }
                                     //Type REF
                                     else if (tabel == MemberRefParentType.TypeRef)
@@ -197,7 +198,8 @@ namespace LibDotNetParser.CILApi
                                         NameSpace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
                                         ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs),
                                         FunctionName = funcName,
-                                        RVA = 0
+                                        RVA = 0,
+                                        Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName)
                                     };
                                     inr.Add(inst);
 
@@ -247,7 +249,8 @@ namespace LibDotNetParser.CILApi
                                         NameSpace = Namespace,
                                         ClassName = className,
                                         FunctionName = name,
-                                        RVA = c.RVA
+                                        RVA = c.RVA,
+                                        Signature = m.Signature
                                     };
 
                                     inr.Add(inst);
