@@ -1,11 +1,8 @@
 ﻿using Cosmos.System.FileSystem;
 using LibDotNetParser;
 using LibDotNetParser.CILApi;
-using LibDotNetParser.CILApi.IL;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Sys = Cosmos.System;
 
 namespace TesterKernel
@@ -28,6 +25,7 @@ namespace TesterKernel
             {
                 Console.WriteLine("Caught: " + x.Message);
             }
+
             try
             {
                 var fl = new DotNetFile(TestApp.file);
