@@ -31,12 +31,15 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
+                var c = peFile.ClrHeader.EntryPointToken;
+                var entryPoint = c & 0xFF;
+
                 DotNetMethod m = null;
                 foreach (var item in Types)
                 {
                     foreach (var m2 in item.Methods)
                     {
-                        if (m2.IsStatic && m2.Name == "Main")
+                        if (m2.BackendTabel == peFile.Tabels.MethodTabel[(int)entryPoint -1])
                         {
                             m = m2;
                             break;

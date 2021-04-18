@@ -15,6 +15,8 @@ namespace TestApp
         static void Main(string[] args)
         {
             Console.WriteLine("Starting test 1");
+
+            //Equal test
             if (ClrTest() == 123)
             {
                 Console.WriteLine("(1/2) Test success!");
@@ -24,15 +26,17 @@ namespace TestApp
                 Console.WriteLine("(1/2) Test failure. ");
             }
             Console.WriteLine("Starting test 2");
+
+            //Inequal test
             if (ClrTest() != 90)
             {
-                Console.WriteLine("(1/2) Test failure!");
+                Console.WriteLine("(1/2) Test success!");
             }
             else
             {
-                Console.WriteLine("(1/2) Test success.");
+                Console.WriteLine("(1/2) Test failure.");
             }
         }
-        public static extern int ClrTest();// { return 90; }
+        public static int ClrTest() { return 123; }
     }
 }

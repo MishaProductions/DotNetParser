@@ -11,6 +11,9 @@ namespace LibDotNetParser.CILApi
         private byte[] code;
         public IlDecompiler(DotNetMethod method)
         {
+            if (method == null)
+                throw new ArgumentException("method");
+
             m = method;
             mainFile = m.File;
             code = m.GetBody();

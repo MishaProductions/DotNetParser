@@ -11,27 +11,21 @@ namespace DotNetParaser
     {
         static void Main()
         {
-            string exe = @"TestApp.exe";
+            string exe = @"C:\Users\Misha\OneDrive\Source\C#\repos\DotNetParser\TestApp\bin\Debug\Confused\TestApp.exe";
             var m = new DotNetFile(exe);
 
             var decompiler = new IlDecompiler(m.EntryPoint);
-            Console.WriteLine("Decompile of Main function   :");
-            Console.WriteLine("==============================");
+            Console.WriteLine("Decompile of Main function:");
             var ilFormater = new ILFormater(decompiler.Decompile());
             var outputString = ilFormater.Format();
 
             Console.WriteLine(outputString);
-            Console.WriteLine("Running program              :");
-            Console.WriteLine("==============================");
+            Console.WriteLine("Running program:");
             DotNetClr.DotNetClr clr = new DotNetClr.DotNetClr(
                 m,
                 Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location),
                 "framework"));
             clr.Start();
-
-
-            Console.WriteLine("Program exited.");
-            Console.ReadLine();
         }
     }
 }

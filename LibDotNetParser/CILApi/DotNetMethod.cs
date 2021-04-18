@@ -8,7 +8,7 @@ namespace LibDotNetParser.CILApi
     {
         private PEFile file;
         private DotNetFile file2;
-        private Method method;
+        public Method BackendTabel;
 
         MethodAttr flags;
 
@@ -21,7 +21,7 @@ namespace LibDotNetParser.CILApi
             private set;
         }
         public string Name { get; private set; }
-        public uint RVA { get { return method.RVA; } }
+        public uint RVA { get { return BackendTabel.RVA; } }
         public uint Offset
         {
             get
@@ -61,7 +61,7 @@ namespace LibDotNetParser.CILApi
         public DotNetMethod(PEFile file, Method item, DotNetType parrent)
         {
             this.file = file;
-            this.method = item;
+            this.BackendTabel = item;
             this.Parrent = parrent;
             this.flags = (MethodAttr)item.Flags;
             this.file2 = parrent.File;

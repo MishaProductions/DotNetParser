@@ -3,7 +3,6 @@ using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace DotNetClr
@@ -24,9 +23,9 @@ namespace DotNetClr
                 throw new DirectoryNotFoundException(DllPath);
             }
             EXEPath = DllPath;
-            init(exe);
+            Init(exe);
         }
-        private void init(DotNetFile p)
+        private void Init(DotNetFile p)
         {
             file = p;
             dlls.Clear();
@@ -69,7 +68,9 @@ namespace DotNetClr
                     clrError("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
                     return;
                 }
+#if CLR_DEBUG
                 Console.WriteLine("[CLR] Loading: " + Path.GetFileName(fullPath));
+#endif
                 try
                 {
                     dlls.Add(fileName, new DotNetFile(fullPath));
@@ -336,9 +337,9 @@ namespace DotNetClr
                         throw new Exception("Attempt to branch to null");
 
 
-                    //#if CLR_DEBUG
+#if CLR_DEBUG
                     Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
-                    //#endif
+#endif
                     i = inst.RelPosition - 1;
                 }
                 else if (item.OpCodeName == "ldc.i4.0")
@@ -384,13 +385,10 @@ namespace DotNetClr
                 }
                 else if (item.OpCodeName == "brfalse.s")
                 {
-
-                    //0=false
-                    //1=true
                     if ((int)(stack[stack.Count - 1].value) == 0)
                     {
                         stack.Clear();
-                        PrintColor("Branching to " + item.Operand + " because FALSE", ConsoleColor.Green);
+                        //PrintColor("Branching to " + item.Operand + " because FALSE", ConsoleColor.Green);
                         // find the ILInstruction that is in this position
                         int i2 = item.Position + (int)item.Operand + 1;
                         ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
@@ -398,23 +396,19 @@ namespace DotNetClr
                         if (inst == null)
                             throw new Exception("Attempt to branch to null");
                         stack.Clear();
-                        Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
                         i = inst.RelPosition - 1;
                     }
                     else
                     {
-                        ;
                         stack.Clear();
                     }
                 }
                 else
                 {
                     Running = false;
-                    //#if CLR_DEBUG
-                    PrintColor("Unsupported instruction: " + item.OpCodeName, ConsoleColor.Red);
+                    PrintColor("Unsupported OpCode: " + item.OpCodeName, ConsoleColor.Red);
                     PrintColor("Application Terminated.", ConsoleColor.Red);
                     return null;
-                    //#endif
                 }
             }
             return null;

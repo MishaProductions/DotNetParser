@@ -48,8 +48,15 @@ namespace LibDotNetParser
         {
             var buffer = new List<char>();
             char current;
-            while ((current = reader.ReadChar()) != '\0')
-                buffer.Add(current);
+            try
+            {
+                while ((current = reader.ReadChar()) != '\0')
+                    buffer.Add(current);
+            }
+            catch
+            {
+
+            }
             return new string(buffer.ToArray());
         }
         public static string ReadNullTermString(this BinaryReader reader, int readLength)
