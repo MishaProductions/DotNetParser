@@ -65,7 +65,6 @@ namespace LibDotNetParser.CILApi
             {
                 case OpCodeOperandType.InlineNone:
                     {
-                        ret.Size = +0;
                         return ret;
                     }
                 case OpCodeOperandType.InlinePhi:
@@ -92,7 +91,7 @@ namespace LibDotNetParser.CILApi
                     {
                         byte fi = code[Offset + 1];
                         ret.Size = +1;
-                        ret.Operand = fi + 1;
+                        ret.Operand = fi;
                         return ret;
                     }
                 // 16 bit int
@@ -176,17 +175,10 @@ namespace LibDotNetParser.CILApi
                                 }
                                 #endregion
 
-                                var inst = new ILInstruction()
-                                {
-                                    OpCode = opCode.Value,
-                                    OpCodeName = opCode.Name,
-                                    OperandType = opCode.OpCodeOperandType,
-                                    Position = Offset,
-                                    Size = 4
-                                };
+                                ret.Size += 4;
 
 
-                                inst.Operand = new InlineMethodOperandData()
+                                ret.Operand = new InlineMethodOperandData()
                                 {
                                     NameSpace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
                                     ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs),
@@ -194,7 +186,7 @@ namespace LibDotNetParser.CILApi
                                     RVA = 0,
                                     Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName)
                                 };
-                                return inst;
+                                return ret;
                             }
                             else if (f == 6)//method
                             {
@@ -234,8 +226,8 @@ namespace LibDotNetParser.CILApi
                                     className = m.Parrent.Name;
                                     Namespace = m.Parrent.NameSpace;
                                 }
-                                inst.Size = 3;
-                                inst.Operand = new InlineMethodOperandData()
+                                ret.Size += 4;
+                                ret.Operand = new InlineMethodOperandData()
                                 {
                                     NameSpace = Namespace,
                                     ClassName = className,
@@ -244,7 +236,7 @@ namespace LibDotNetParser.CILApi
                                     Signature = m.Signature,
 
                                 };
-                                return inst;
+                                return ret;
                             }
 
                         }

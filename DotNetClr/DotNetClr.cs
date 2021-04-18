@@ -153,9 +153,10 @@ namespace DotNetClr
                     }
                     Console.Write(val);
                 }
-                else if (m.Name == "ClrHello")
+                else if (m.Name == "ClrTest")
                 {
-                    PrintColor("[CLR] Hello!", ConsoleColor.Green);
+                    PrintColor("[CLR] Test", ConsoleColor.Green);
+                    return new MethodArgStack() { type = StackItemType.Int32, value = 123 };
                 }
                 else if (m.Name == "ClrConcatString")
                 {
@@ -282,7 +283,7 @@ namespace DotNetClr
                     Console.WriteLine("[CLR] Returning from function");
 #endif
                     //Successful return
-                    CallStack.RemoveAt(CallStack.Count-1);
+                    CallStack.RemoveAt(CallStack.Count - 1);
                     try
                     {
                         return stack[0];
@@ -294,31 +295,15 @@ namespace DotNetClr
                 }
                 else if (item.OpCodeName == "stloc.0")
                 {
-                    try
-                    {
-                        var oldItem = stack[0];
-                        Localstack.Add(oldItem);
-                        stack.RemoveAt(0);
-                        ;
-                    }
-                    catch
-                    {
-
-                    }
+                    var oldItem = stack[stack.Count - 1];
+                    Localstack.Add(oldItem);
+                    stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "ldloc.0")
                 {
-                    try
-                    {
-                        var oldItem = Localstack[0];
-                        stack.Add(oldItem);
-                        Localstack.RemoveAt(0);
-                    }
-                    catch
-                    {
-
-                    }
-
+                    var oldItem = Localstack[0];
+                    stack.Add(oldItem);
+                    Localstack.RemoveAt(0);
                 }
                 else if (item.OpCodeName == "ldc.i4")
                 {
@@ -334,7 +319,7 @@ namespace DotNetClr
                 else if (item.OpCodeName == "ldc.i4.s")
                 {
                     //Push an int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
                 }
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
@@ -351,11 +336,10 @@ namespace DotNetClr
                         throw new Exception("Attempt to branch to null");
 
 
-#if CLR_DEBUG
+                    //#if CLR_DEBUG
                     Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
-#endif
-                    i = inst.RelPosition;
-                    continue;
+                    //#endif
+                    i = inst.RelPosition - 1;
                 }
                 else if (item.OpCodeName == "ldc.i4.0")
                 {
@@ -373,7 +357,7 @@ namespace DotNetClr
                         CallStack.Reverse();
                         foreach (var itm in CallStack)
                         {
-                            stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name+"()\n";
+                            stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
                         }
                         clrError("Null.", "System.NullRefrenceException", stackTrace);
                         return null;
@@ -383,8 +367,49 @@ namespace DotNetClr
                         throw new NotImplementedException();
                     }
                 }
+                else if (item.OpCodeName == "ceq")
+                {
+                    var numb1 = (int)stack[0].value;
+                    var numb2 = (int)stack[1].value;
+                    if (numb1 == numb2)
+                    {
+                        //push 1
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                    }
+                    else
+                    {
+                        //push 0
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                    }
+                }
+                else if (item.OpCodeName == "brfalse.s")
+                {
+
+                    //0=false
+                    //1=true
+                    if ((int)(stack[stack.Count - 1].value) == 0)
+                    {
+                        stack.Clear();
+                        PrintColor("Branching to " + item.Operand + " because FALSE", ConsoleColor.Green);
+                        // find the ILInstruction that is in this position
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        stack.Clear();
+                        Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
+                        i = inst.RelPosition - 1;
+                    }
+                    else
+                    {
+                        ;
+                        stack.Clear();
+                    }
+                }
                 else
                 {
+                    Running = false;
                     //#if CLR_DEBUG
                     PrintColor("Unsupported instruction: " + item.OpCodeName, ConsoleColor.Red);
                     PrintColor("Application Terminated.", ConsoleColor.Red);
