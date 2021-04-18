@@ -15,6 +15,8 @@ namespace DotNetClr
         private Dictionary<string, DotNetFile> dlls = new Dictionary<string, DotNetFile>();
         private List<MethodArgStack> stack = new List<MethodArgStack>();
         private List<MethodArgStack> Localstack = new List<MethodArgStack>();
+        private bool Running = false;
+        private List<CallStackItem> CallStack = new List<CallStackItem>();
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -78,12 +80,15 @@ namespace DotNetClr
                     return;
                 }
             }
+            Running = true;
             //Run the entry point
             RunMethod(file.EntryPoint, file);
         }
 
         private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file)
         {
+            if (!Running)
+                return null;
 #if CLR_DEBUG
             Console.WriteLine("===========================");
             Console.WriteLine($"[CLR] Running Method: {m.Parrent.NameSpace}.{m.Parrent.Name}.{m.Name}()");
@@ -170,6 +175,8 @@ namespace DotNetClr
                 return null;
             }
 
+            CallStack.Add(new CallStackItem() { method = m });
+
             //Now decompile the code and run it
             var decompiler = new IlDecompiler(m);
             var code = decompiler.Decompile();
@@ -178,6 +185,8 @@ namespace DotNetClr
             int i;
             for (i = 0; i < code.Length; i++)
             {
+                if (!Running)
+                    return null;
                 var item = code[i];
                 currentInstruction++;
                 if (item.OpCodeName == "ldstr")
@@ -272,6 +281,8 @@ namespace DotNetClr
 #if CLR_DEBUG
                     Console.WriteLine("[CLR] Returning from function");
 #endif
+                    //Successful return
+                    CallStack.RemoveAt(CallStack.Count-1);
                     try
                     {
                         return stack[0];
@@ -358,7 +369,13 @@ namespace DotNetClr
 
                     if (exp.type == StackItemType.ldnull)
                     {
-                        clrError("Null.", "System.NullRefrenceException", "In method "+m.Parrent.NameSpace+"."+m.Parrent.Name +"."+ m.Name+"()");
+                        string stackTrace = "";
+                        CallStack.Reverse();
+                        foreach (var itm in CallStack)
+                        {
+                            stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name+"()\n";
+                        }
+                        clrError("Null.", "System.NullRefrenceException", stackTrace);
                         return null;
                     }
                     else
@@ -387,6 +404,7 @@ namespace DotNetClr
 
         private void clrError(string message, string errorType, string stackStace = "")
         {
+            Running = false;
             PrintColor($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}", ConsoleColor.Red);
             PrintColor(stackStace, ConsoleColor.Red);
         }

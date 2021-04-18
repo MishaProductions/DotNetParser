@@ -38,14 +38,16 @@ namespace LibDotNetParser.CILApi
             byte opCodeb = code[Offset];
             var opCode = OpCodes.SingleOpCodes[opCodeb];
 
+            int size = 0;
             if (opCodeb == 0xFE)
             {
                 opCodeb = code[Offset + 1];
                 opCode = OpCodes.MultiOpCodes[opCodeb];
                 Offset++;
+                size++;
             }
 
-            ILInstruction ret = new ILInstruction() { OpCode = opCode.Value, OpCodeName = opCode.Name, OperandType = opCode.OpCodeOperandType, Position = Offset, RelPosition = relPostion };
+            ILInstruction ret = new ILInstruction() { OpCode = opCode.Value, OpCodeName = opCode.Name, OperandType = opCode.OpCodeOperandType, Position = Offset, RelPosition = relPostion, Size = size };
 
             if (relPostion == -1)
             {
@@ -63,7 +65,7 @@ namespace LibDotNetParser.CILApi
             {
                 case OpCodeOperandType.InlineNone:
                     {
-                        ret.Size = 0;
+                        ret.Size = +0;
                         return ret;
                     }
                 case OpCodeOperandType.InlinePhi:
@@ -75,21 +77,21 @@ namespace LibDotNetParser.CILApi
                 case OpCodeOperandType.ShortInlineVar:
                     {
                         byte fi = code[Offset + 1];
-                        ret.Size = 1;
+                        ret.Size = +1;
                         ret.Operand = fi;
                         return ret;
                     }
                 case OpCodeOperandType.ShortInlineBrTarget:
                     {
                         sbyte fi = (sbyte)code[Offset + 1];
-                        ret.Size = 1;
-                        ret.Operand = fi+1;
+                        ret.Size = +1;
+                        ret.Operand = fi + 1;
                         return ret;
                     }
                 case OpCodeOperandType.ShortInlineI:
                     {
                         byte fi = code[Offset + 1];
-                        ret.Size = 1;
+                        ret.Size = +1;
                         ret.Operand = fi + 1;
                         return ret;
                     }
@@ -105,15 +107,10 @@ namespace LibDotNetParser.CILApi
                         byte f = code[Offset + 4];
                         byte[] num2 = new byte[] { fi, s2, t, f };
                         var numb2 = BitConverter.ToInt32(num2, 0);
-                        return new ILInstruction()
-                        {
-                            OpCode = opCode.Value,
-                            OpCodeName = opCode.Name,
-                            OperandType = opCode.OpCodeOperandType,
-                            Operand = numb2,
-                            Position = Offset,
-                            Size = 4
-                        };
+
+                        ret.Size += 4;
+                        ret.Operand = numb2;
+                        return ret;
                     }
                 case OpCodeOperandType.InlineBrTarget:
                     break;
@@ -278,15 +275,9 @@ namespace LibDotNetParser.CILApi
                             //US stream
                             s = mainFile.Backend.ClrUsStream.GetByOffset((uint)numb);
                         }
-
-                        return new ILInstruction()
-                        {
-                            OpCode = opCode.Value,
-                            Operand = s,
-                            OpCodeName = opCode.Name,
-                            Position = Offset,
-                            Size = 4
-                        };
+                        ret.Size += 4;
+                        ret.Operand = s;
+                        return ret;
                     }
                 case OpCodeOperandType.InlineSwitch:
                     break;
@@ -308,15 +299,9 @@ namespace LibDotNetParser.CILApi
 
                         byte[] num2 = new byte[] { fi, s2, t, f, a, b, c, d };
                         var numb2 = BitConverter.ToInt64(num2, 0);
-                        return new ILInstruction()
-                        {
-                            OpCode = opCode.Value,
-                            OpCodeName = opCode.Name,
-                            OperandType = opCode.OpCodeOperandType,
-                            Operand = numb2,
-                            Position = Offset,
-                            Size = 8
-                        };
+                        ret.Size += 8;
+                        ret.Operand = numb2;
+                        return ret;
                     }
                 case OpCodeOperandType.InlineR:
                     break;

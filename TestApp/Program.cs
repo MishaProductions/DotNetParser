@@ -18,16 +18,16 @@ namespace TestApp
             Console.WriteLine("Calling function");
             main2();
 
-            Console.WriteLine("Printing 123 onto the screen");
-            Console.WriteLine(123);
+            Console.WriteLine("Printing 321 onto the screen");
+            Console.WriteLine(321);
             Console.WriteLine("End of program");
-            throw null;
         }
 
         public static void main2()
         {
             Console.Write("This number should be 255: ");
             Console.WriteLine(GetBig());
+            throw null;
         }
 
         private static byte GetBig() { return 255; }
