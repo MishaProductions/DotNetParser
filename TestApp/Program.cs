@@ -14,7 +14,6 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting test 1");
             //Equal test
             if (ClrTest() == 90)
             {
@@ -24,7 +23,6 @@ namespace TestApp
             {
                 Console.WriteLine("(1/4) Test failure. ");
             }
-            Console.WriteLine("Starting test 2");
             //Inequal test
             if (Program.ClrTest() != 123)
             {
@@ -34,9 +32,8 @@ namespace TestApp
             {
                 Console.WriteLine("(2/4) Test failure.");
             }
-            Console.WriteLine("Starting test 3 (addition)");
+            //Addition test
             var int2 = ClrTest() + 10;
-
             //Now, int2 should be 100
             if (int2 != 100)
             {
@@ -50,21 +47,50 @@ namespace TestApp
                 Console.Write(int2);
                 Console.WriteLine();
             }
-
-            Console.WriteLine("Starting test 4 (subtraction)");
+            //Subtraction test
             var int3 = ClrTest() - 10;
 
-            //Now, int2 should be 100
+            //Now, int3 should be 80
             if (int3 != 80)
             {
                 Console.Write("(4/4) Subtract test failure! Result: ");
-                Console.Write(int2);
+                Console.Write(int3);
                 Console.WriteLine();
             }
             else
             {
                 Console.Write("(4/4) Subtract test success! Result: ");
-                Console.Write(int2);
+                Console.Write(int3);
+                Console.WriteLine();
+            }
+            //Divide test
+            var int4 = ClrTest() / 30;
+            //Now, int4 should be 3
+            if (int4 != 3)
+            {
+                Console.Write("(5/5) Divide test failure! Result: ");
+                Console.Write(int4);
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("(5/5) Divide test success! Result: ");
+                Console.Write(int4);
+                Console.WriteLine();
+            }
+            //Multiply test
+            var int5 = ClrTest() * 3;
+            //Now, int5 should be 3
+            if (int5 != 270)
+            {
+                Console.Write("(5/5) Multiply test failure! Result: ");
+                Console.Write(int5);
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("(5/5) Multiply test success! Result: ");
+                Console.Write(int5);
                 Console.WriteLine();
             }
         }

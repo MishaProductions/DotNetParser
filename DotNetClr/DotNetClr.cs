@@ -196,7 +196,191 @@ namespace DotNetClr
                     return null;
                 var item = code[i];
                 currentInstruction++;
-                if (item.OpCodeName == "ldstr")
+                #region Ldloc / stloc
+                if (item.OpCodeName == "stloc.s")
+                {
+                    var oldItem = stack[stack.Count - 1];
+                    Localstack[(byte)item.Operand] = oldItem;
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldloc.s")
+                {
+                    var oldItem = Localstack[(byte)item.Operand];
+                    stack.Add(oldItem);
+                }
+                else if (item.OpCodeName == "stloc.0")
+                {
+                    var oldItem = stack[stack.Count - 1];
+                    Localstack[0] = oldItem;
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldloc.0")
+                {
+                    var oldItem = Localstack[0];
+                    stack.Add(oldItem);
+                    //Localstack[0] = null;
+                }
+                else if (item.OpCodeName == "stloc.1")
+                {
+                    var oldItem = stack[stack.Count - 1];
+
+                    Localstack[1] = oldItem;
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldloc.1")
+                {
+                    var oldItem = Localstack[1];
+                    stack.Add(oldItem);
+
+                   // Localstack[1] = null;
+                }
+                else if (item.OpCodeName == "stloc.2")
+                {
+                    var oldItem = stack[stack.Count - 1];
+
+                    Localstack[2] = oldItem;
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldloc.2")
+                {
+                    var oldItem = Localstack[2];
+                    stack.Add(oldItem);
+                    //Localstack[2] = null;
+                }
+                else if (item.OpCodeName == "stloc.3")
+                {
+                    var oldItem = stack[stack.Count - 1];
+
+                    Localstack[3] = oldItem;
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldloc.3")
+                {
+                    var oldItem = Localstack[3];
+                    stack.Add(oldItem);
+                    //Localstack[3] = null;
+                }
+                #endregion
+                #region ldc
+                else if (item.OpCodeName == "ldc.i4")
+                {
+                    //Puts an int32 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
+                }
+                //Push int32
+                else if (item.OpCodeName == "ldc.i4.1")
+                {
+                    //Puts an int32 with value 1 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                }
+                else if (item.OpCodeName == "ldc.i4.s")
+                {
+                    //Push an int32 onto the stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
+                }
+                else if (item.OpCodeName == "ldc.i4.3")
+                {
+                    //Puts an int32 with value 3 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)3 });
+                }
+                //Push int64
+                else if (item.OpCodeName == "ldc.i8")
+                {
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int64, value = (long)item.Operand });
+                }
+                else if (item.OpCodeName == "ldc.i4.0")
+                {
+                    //Push 0 as int32 onto the stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                }
+                #endregion
+                #region Math
+                else if (item.OpCodeName == "add")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    var result = numb1 + numb2;
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value= result });
+                }
+                else if (item.OpCodeName == "sub")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    var result = numb1 - numb2;
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                }
+                else if (item.OpCodeName == "div")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+
+                    //TODO: Check if dividing by zero
+                    var result = numb1 / numb2;
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                }
+                else if (item.OpCodeName == "mul")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    var result = numb1 * numb2;
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                }
+                else if (item.OpCodeName == "ceq")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    if (numb1 == numb2)
+                    {
+                        //push 1
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                    }
+                    else
+                    {
+                        //push 0
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                    }
+                }
+                #endregion
+                #region Branch instructions
+                else if (item.OpCodeName == "br.s")
+                {
+                    //find the ILInstruction that is in this position
+                    int i2 = item.Position + (int)item.Operand + 1;
+                    ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                    if (inst == null)
+                        throw new Exception("Attempt to branch to null");
+
+
+#if CLR_DEBUG
+                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
+#endif
+                    i = inst.RelPosition - 1;
+                }
+                else if (item.OpCodeName == "brfalse.s")
+                {
+                    if ((int)stack[stack.Count - 1].value == 0)
+                    {
+                        // find the ILInstruction that is in this position
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        stack.Clear();
+                        i = inst.RelPosition - 1;
+#if CLR_DEBUG
+                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is false.");
+#endif
+                    }
+                    else
+                    {
+                        stack.Clear();
+                    }
+                }
+                #endregion
+                #region Misc
+                else if (item.OpCodeName == "ldstr")
                 {
                     stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand });
 #if CLR_DEBUG
@@ -282,113 +466,6 @@ namespace DotNetClr
                 {
                     stack.Add(new MethodArgStack() { type = StackItemType.ldnull, value = null });
                 }
-                else if (item.OpCodeName == "ret")
-                {
-                    //Return from function
-#if CLR_DEBUG
-                    Console.WriteLine("[CLR] Returning from function");
-#endif
-                    ;
-                    //Successful return
-                    CallStack.RemoveAt(CallStack.Count - 1);
-
-                    if (stack.Count != 0)
-                        return stack[0];
-                    else return null;
-                }
-                #region Ldloc / stloc
-                else if (item.OpCodeName == "stloc.s")
-                {
-                    var oldItem = stack[stack.Count - 1];
-                    Localstack[(byte)item.Operand] = oldItem;
-                    stack.RemoveAt(stack.Count - 1);
-                }
-                else if (item.OpCodeName == "ldloc.s")
-                {
-                    var oldItem = Localstack[(byte)item.Operand];
-                    stack.Add(oldItem);
-                }
-                else if (item.OpCodeName == "stloc.0")
-                {
-                    var oldItem = stack[stack.Count - 1];
-                    Localstack[0] = oldItem;
-                    stack.RemoveAt(stack.Count - 1);
-                }
-                else if (item.OpCodeName == "ldloc.0")
-                {
-                    var oldItem = Localstack[0];
-                    stack.Add(oldItem);
-                    //Localstack[0] = null;
-                }
-                else if (item.OpCodeName == "stloc.1")
-                {
-                    var oldItem = stack[stack.Count - 1];
-
-                    Localstack[1] = oldItem;
-                    stack.RemoveAt(stack.Count - 1);
-                }
-                else if (item.OpCodeName == "ldloc.1")
-                {
-                    var oldItem = Localstack[1];
-                    stack.Add(oldItem);
-
-                   // Localstack[1] = null;
-                }
-                else if (item.OpCodeName == "stloc.2")
-                {
-                    var oldItem = stack[stack.Count - 1];
-
-                    Localstack[2] = oldItem;
-                    stack.RemoveAt(stack.Count - 1);
-                }
-                else if (item.OpCodeName == "ldloc.2")
-                {
-                    var oldItem = Localstack[2];
-                    stack.Add(oldItem);
-                    //Localstack[2] = null;
-                }
-                else if (item.OpCodeName == "stloc.3")
-                {
-                    var oldItem = stack[stack.Count - 1];
-
-                    Localstack[3] = oldItem;
-                    stack.RemoveAt(stack.Count - 1);
-                }
-                else if (item.OpCodeName == "ldloc.3")
-                {
-                    var oldItem = Localstack[3];
-                    stack.Add(oldItem);
-                    //Localstack[3] = null;
-                }
-                #endregion
-                #region ldc
-                else if (item.OpCodeName == "ldc.i4")
-                {
-                    //Puts an int32 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
-                }
-                //Push int32
-                else if (item.OpCodeName == "ldc.i4.1")
-                {
-                    //Puts an int32 with value 1 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
-                }
-                else if (item.OpCodeName == "ldc.i4.s")
-                {
-                    //Push an int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
-                }
-                //Push int64
-                else if (item.OpCodeName == "ldc.i8")
-                {
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int64, value = (long)item.Operand });
-                }
-                else if (item.OpCodeName == "ldc.i4.0")
-                {
-                    //Push 0 as int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
-                }
-                #endregion
                 else if (item.OpCodeName == "throw")
                 {
                     //Throw Exception
@@ -410,73 +487,21 @@ namespace DotNetClr
                         throw new NotImplementedException();
                     }
                 }
-                //Math
-                else if (item.OpCodeName == "add")
+                else if (item.OpCodeName == "ret")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    var result = numb1 + numb2;
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value= result });
-                }
-                else if (item.OpCodeName == "sub")
-                {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    var result = numb1 - numb2;
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
-                }
-                else if (item.OpCodeName == "ceq")
-                {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    if (numb1 == numb2)
-                    {
-                        //push 1
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
-                    }
-                    else
-                    {
-                        //push 0
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
-                    }
-                }
-                //Branch instructions
-                else if (item.OpCodeName == "br.s")
-                {
-                    //find the ILInstruction that is in this position
-                    int i2 = item.Position + (int)item.Operand + 1;
-                    ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                    if (inst == null)
-                        throw new Exception("Attempt to branch to null");
-
-
+                    //Return from function
 #if CLR_DEBUG
-                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
+                    Console.WriteLine("[CLR] Returning from function");
 #endif
-                    i = inst.RelPosition - 1;
-                }
-                else if (item.OpCodeName == "brfalse.s")
-                {
-                    if ((int)stack[stack.Count - 1].value == 0)
-                    {
-                        // find the ILInstruction that is in this position
-                        int i2 = item.Position + (int)item.Operand + 1;
-                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+                    ;
+                    //Successful return
+                    CallStack.RemoveAt(CallStack.Count - 1);
 
-                        if (inst == null)
-                            throw new Exception("Attempt to branch to null");
-                        stack.Clear();
-                        i = inst.RelPosition - 1;
-#if CLR_DEBUG
-                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is false.");
-#endif
-                    }
-                    else
-                    {
-                        stack.Clear();
-                    }
+                    if (stack.Count != 0)
+                        return stack[0];
+                    else return null;
                 }
+                #endregion
                 else
                 {
                     Running = false;
