@@ -108,6 +108,27 @@ namespace TestApp
                 Console.Write(int6);
                 Console.WriteLine();
             }
+            var i = ClrTest();
+            if (100 > i)
+            {
+                Console.WriteLine("Test success. 100 > 90");
+            }
+            else
+            {
+                Console.WriteLine("Test failure.");
+            }
+            if (100 < i)
+            {
+                Console.WriteLine("Test failure.");
+            }
+            else
+            {
+                Console.WriteLine("Test success.");
+            }
+            for (int i2 = 0; i2 < 100; i2++)
+            {
+                Console.WriteLine(i2);
+            }
         }
         /// <summary>
         /// Returns 90.

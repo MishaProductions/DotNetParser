@@ -182,20 +182,19 @@ namespace DotNetClr
                 return null;
             }
             #endregion
+            //Add this method to the callstack.
             CallStack.Add(new CallStackItem() { method = m });
 
             //Now decompile the code and run it
             var decompiler = new IlDecompiler(m);
             var code = decompiler.Decompile();
-
-            var currentInstruction = -1;
             int i;
             for (i = 0; i < code.Length; i++)
             {
                 if (!Running)
                     return null;
                 var item = code[i];
-                currentInstruction++;
+
                 #region Ldloc / stloc
                 if (item.OpCodeName == "stloc.s")
                 {
@@ -261,7 +260,7 @@ namespace DotNetClr
                     //Localstack[3] = null;
                 }
                 #endregion
-                #region ldc
+                #region ldc* opcodes
                 //Push int32
                 else if (item.OpCodeName == "ldc.i4")
                 {
@@ -387,6 +386,36 @@ namespace DotNetClr
                         stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
                     }
                 }
+                else if (item.OpCodeName == "cgt")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    if (numb1 > numb2)
+                    {
+                        //push 1
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                    }
+                    else
+                    {
+                        //push 0
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                    }
+                }
+                else if (item.OpCodeName == "clt")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    if (numb1 < numb2)
+                    {
+                        //push 1
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                    }
+                    else
+                    {
+                        //push 0
+                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                    }
+                }
                 #endregion
                 #region Branch instructions
                 else if (item.OpCodeName == "br.s")
@@ -418,6 +447,27 @@ namespace DotNetClr
                         i = inst.RelPosition - 1;
 #if CLR_DEBUG
                     Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is false.");
+#endif
+                    }
+                    else
+                    {
+                        stack.Clear();
+                    }
+                }
+                else if (item.OpCodeName == "brtrue.s")
+                {
+                    if ((int)stack[stack.Count - 1].value == 1)
+                    {
+                        // find the ILInstruction that is in this position
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        stack.Clear();
+                        i = inst.RelPosition - 1;
+#if CLR_DEBUG
+                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is true.");
 #endif
                     }
                     else

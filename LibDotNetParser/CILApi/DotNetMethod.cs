@@ -13,13 +13,15 @@ namespace LibDotNetParser.CILApi
         MethodAttr flags;
 
         /// <summary>
-        /// Function Signature. WIP
+        /// Function Signature.
         /// </summary>
         public string Signature
         {
             get;
             private set;
         }
+
+        public List<MethodArgStack> Parms = new List<MethodArgStack>();
         public string Name { get; private set; }
         public uint RVA { get { return BackendTabel.RVA; } }
         public uint Offset
@@ -68,13 +70,35 @@ namespace LibDotNetParser.CILApi
 
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);
             this.Signature = ParseMethodSignature(item.Signature, File, this.Name);
+            string sig = "";
+
+            var blobStreamReader = new BinaryReader(new MemoryStream(file.BlobStream));
+            blobStreamReader.BaseStream.Seek(item.Signature, SeekOrigin.Begin);
+            var length = blobStreamReader.ReadByte();
+            var type = blobStreamReader.ReadByte();
+            var parmaters = blobStreamReader.ReadByte();
+            var returnType = blobStreamReader.ReadByte();
+            if (type == 0)
+            {
+                //Static method
+                sig += "static ";
+            }
+
+            for (int i = 0; i < parmaters; i++)
+            {
+                var parm = blobStreamReader.ReadByte();
+                if (parm == 0x0E)
+                {
+                    Parms.Add(new MethodArgStack() { type = StackItemType.String});
+                }
+            }
+
         }
 
         private static string ElementTypeToString(byte elemType)
         {
             switch (elemType)
             {
-                
                 case 0x00:
                     return "END";
                 case 0x01:
