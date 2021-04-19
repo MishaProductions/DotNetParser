@@ -262,42 +262,83 @@ namespace DotNetClr
                 }
                 #endregion
                 #region ldc
+                //Push int32
                 else if (item.OpCodeName == "ldc.i4")
                 {
                     //Puts an int32 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
                 }
-                //Push int32
+                else if (item.OpCodeName == "ldc.i4.0")
+                {
+                    //Puts an 0 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                }
                 else if (item.OpCodeName == "ldc.i4.1")
                 {
                     //Puts an int32 with value 1 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
                 }
-                else if (item.OpCodeName == "ldc.i4.s")
+                else if (item.OpCodeName == "ldc.i4.2")
                 {
-                    //Push an int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
+                    //Puts an int32 with value 2 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)2 });
                 }
                 else if (item.OpCodeName == "ldc.i4.3")
                 {
                     //Puts an int32 with value 3 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)3 });
                 }
+                else if (item.OpCodeName == "ldc.i4.4")
+                {
+                    //Puts an int32 with value 4 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)4 });
+                }
+                else if (item.OpCodeName == "ldc.i4.5")
+                {
+                    //Puts an int32 with value 5 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)5 });
+                }
                 else if (item.OpCodeName == "ldc.i4.6")
                 {
                     //Puts an int32 with value 6 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)6 });
                 }
-                
+                else if (item.OpCodeName == "ldc.i4.7")
+                {
+                    //Puts an int32 with value 7 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)7 });
+                }
+                else if (item.OpCodeName == "ldc.i4.8")
+                {
+                    //Puts an int32 with value 3 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)7 });
+                }
+                else if (item.OpCodeName == "ldc.i4.m1")
+                {
+                    //Puts an int32 with value -1 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)-1 });
+                }
+                else if (item.OpCodeName == "ldc.i4.s")
+                {
+                    //Push an int32 onto the stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
+                }
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
                 {
                     stack.Add(new MethodArgStack() { type = StackItemType.Int64, value = (long)item.Operand });
                 }
-                else if (item.OpCodeName == "ldc.i4.0")
+                //push float64
+                else if (item.OpCodeName == "ldc.r4")
                 {
-                    //Push 0 as int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                    //Puts an float32 with value onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Float32, value = (float)item.Operand });
+                }
+                //Push float64
+                else if (item.OpCodeName == "ldc.r8")
+                {
+                    //Puts an float32 with value onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Float64, value = (float)item.Operand });
                 }
                 #endregion
                 #region Math

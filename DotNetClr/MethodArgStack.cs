@@ -13,5 +13,7 @@
         Int64,
         ldnull,
         NotImpl,
+        Float32,
+        Float64,
     }
 }
