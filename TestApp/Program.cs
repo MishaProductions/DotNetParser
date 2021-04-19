@@ -15,28 +15,46 @@ namespace TestApp
         static void Main(string[] args)
         {
             Console.WriteLine("Starting test 1");
-
             //Equal test
-            if (ClrTest() == 123)
+            if (ClrTest() == 90)
             {
-                Console.WriteLine("(1/2) Test success!");
+                Console.WriteLine("(1/3) Test success!");
             }
             else
             {
-                Console.WriteLine("(1/2) Test failure. ");
+                Console.WriteLine("(1/3) Test failure. ");
             }
             Console.WriteLine("Starting test 2");
-
             //Inequal test
-            if (ClrTest() != 90)
+            if (Program.ClrTest() != 123)
             {
-                Console.WriteLine("(1/2) Test success!");
+                Console.WriteLine("(2/3) Test success!");
             }
             else
             {
-                Console.WriteLine("(1/2) Test failure.");
+                Console.WriteLine("(2/3) Test failure.");
+            }
+            Console.WriteLine("Starting test 3");
+            var int2 = ClrTest() + 10;
+
+            //Now, int2 should be 100
+            if (int2 != 100)
+            {
+                Console.Write("(3/3) Add test failure! Result: ");
+                Console.Write(int2);
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("(3/3) Add test success! Result: ");
+                Console.Write(int2);
+                Console.WriteLine();
             }
         }
-        public static int ClrTest() { return 123; }
+        /// <summary>
+        /// Returns 90.
+        /// </summary>
+        /// <returns>90</returns>
+        public static int ClrTest() { return 90; }
     }
 }

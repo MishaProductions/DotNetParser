@@ -11,7 +11,7 @@ namespace DotNetParaser
     {
         static void Main()
         {
-            string exe = @"C:\Users\Misha\OneDrive\Source\C#\repos\DotNetParser\TestApp\bin\Debug\Confused\TestApp.exe";
+            string exe = @"TestApp.exe";
             var m = new DotNetFile(exe);
 
             var decompiler = new IlDecompiler(m.EntryPoint);

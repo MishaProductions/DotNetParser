@@ -72,9 +72,9 @@ namespace LibDotNetParser.CILApi
                     }
                 case OpCodeOperandType.InlinePhi:
                     //Never should be used
-                    break;
+                    throw new InvalidOperationException();
                 case OpCodeOperandType.InlineTok:
-                    break;
+                    throw new InvalidOperationException();
                 //8 bit int operand
                 case OpCodeOperandType.ShortInlineVar:
                     {
@@ -99,7 +99,7 @@ namespace LibDotNetParser.CILApi
                     }
                 // 16 bit int
                 case OpCodeOperandType.InlineVar:
-                    break;
+                    throw new NotImplementedException();
                 // 32 bit int
                 case OpCodeOperandType.InlineI:
                     {
@@ -115,9 +115,9 @@ namespace LibDotNetParser.CILApi
                         return ret;
                     }
                 case OpCodeOperandType.InlineBrTarget:
-                    break;
+                    throw new NotImplementedException();
                 case OpCodeOperandType.InlineField:
-                    break;
+                    throw new NotImplementedException();
                 case OpCodeOperandType.InlineMethod:
                     {
                         try
@@ -247,7 +247,7 @@ namespace LibDotNetParser.CILApi
                     }
                     break;
                 case OpCodeOperandType.InlineSig:
-                    break;
+                    throw new NotImplementedException();
                 case OpCodeOperandType.InlineString:
                     {
                         byte first = code[Offset + 1]; //1st index
@@ -275,11 +275,11 @@ namespace LibDotNetParser.CILApi
                         return ret;
                     }
                 case OpCodeOperandType.InlineSwitch:
-                    break;
+                    throw new NotImplementedException();
                 case OpCodeOperandType.ShortInlineR:
-                    break;
+                    throw new NotImplementedException();
                 case OpCodeOperandType.InlineType:
-                    break;
+                    throw new NotImplementedException();
                 // 64 bit int
                 case OpCodeOperandType.InlineI8:
                     {
@@ -299,10 +299,7 @@ namespace LibDotNetParser.CILApi
                         return ret;
                     }
                 case OpCodeOperandType.InlineR:
-                    break;
-
-
-
+                    throw new NotImplementedException();
                 default:
                     break;
             }
