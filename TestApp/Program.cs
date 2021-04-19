@@ -18,35 +18,52 @@ namespace TestApp
             //Equal test
             if (ClrTest() == 90)
             {
-                Console.WriteLine("(1/3) Test success!");
+                Console.WriteLine("(1/4) Test success!");
             }
             else
             {
-                Console.WriteLine("(1/3) Test failure. ");
+                Console.WriteLine("(1/4) Test failure. ");
             }
             Console.WriteLine("Starting test 2");
             //Inequal test
             if (Program.ClrTest() != 123)
             {
-                Console.WriteLine("(2/3) Test success!");
+                Console.WriteLine("(2/4) Test success!");
             }
             else
             {
-                Console.WriteLine("(2/3) Test failure.");
+                Console.WriteLine("(2/4) Test failure.");
             }
-            Console.WriteLine("Starting test 3");
+            Console.WriteLine("Starting test 3 (addition)");
             var int2 = ClrTest() + 10;
 
             //Now, int2 should be 100
             if (int2 != 100)
             {
-                Console.Write("(3/3) Add test failure! Result: ");
+                Console.Write("(3/4) Add test failure! Result: ");
                 Console.Write(int2);
                 Console.WriteLine();
             }
             else
             {
-                Console.Write("(3/3) Add test success! Result: ");
+                Console.Write("(3/4) Add test success! Result: ");
+                Console.Write(int2);
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("Starting test 4 (subtraction)");
+            var int3 = ClrTest() - 10;
+
+            //Now, int2 should be 100
+            if (int3 != 80)
+            {
+                Console.Write("(4/4) Subtract test failure! Result: ");
+                Console.Write(int2);
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("(4/4) Subtract test success! Result: ");
                 Console.Write(int2);
                 Console.WriteLine();
             }

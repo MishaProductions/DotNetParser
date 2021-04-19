@@ -297,6 +297,17 @@ namespace DotNetClr
                     else return null;
                 }
                 #region Ldloc / stloc
+                else if (item.OpCodeName == "stloc.s")
+                {
+                    var oldItem = stack[stack.Count - 1];
+                    Localstack[(byte)item.Operand] = oldItem;
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldloc.s")
+                {
+                    var oldItem = Localstack[(byte)item.Operand];
+                    stack.Add(oldItem);
+                }
                 else if (item.OpCodeName == "stloc.0")
                 {
                     var oldItem = stack[stack.Count - 1];
@@ -405,9 +416,14 @@ namespace DotNetClr
                     var numb1 = (int)stack[stack.Count - 2].value;
                     var numb2 = (int)stack[stack.Count - 1].value;
                     var result = numb1 + numb2;
-
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value= result });
-                    ;
+                }
+                else if (item.OpCodeName == "sub")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    var result = numb1 - numb2;
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
                 }
                 else if (item.OpCodeName == "ceq")
                 {
@@ -423,7 +439,6 @@ namespace DotNetClr
                         //push 0
                         stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
                     }
-                    ;
                 }
                 //Branch instructions
                 else if (item.OpCodeName == "br.s")
@@ -443,10 +458,8 @@ namespace DotNetClr
                 }
                 else if (item.OpCodeName == "brfalse.s")
                 {
-                    if ((int)(stack[stack.Count - 1].value) == 0)
+                    if ((int)stack[stack.Count - 1].value == 0)
                     {
-                        //PrintColor("Branching to " + item.Operand + " because FALSE", ConsoleColor.Green);
-
                         // find the ILInstruction that is in this position
                         int i2 = item.Position + (int)item.Operand + 1;
                         ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
@@ -455,6 +468,9 @@ namespace DotNetClr
                             throw new Exception("Attempt to branch to null");
                         stack.Clear();
                         i = inst.RelPosition - 1;
+#if CLR_DEBUG
+                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is false.");
+#endif
                     }
                     else
                     {
