@@ -125,8 +125,21 @@ namespace TestApp
             {
                 Console.WriteLine("Test success.");
             }
-            for (int i2 = 0; i2 < 100; i2++)
+            int i2;
+            for (i2 = 0; i2 < 100; i2++)
             {
+                Console.Write(i2);
+                Console.Write(" ");
+            }
+            if (i2 == 100)
+            {
+                Console.WriteLine();
+                Console.WriteLine("forloop test success");
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine("forloop test fail");
                 Console.WriteLine(i2);
             }
         }

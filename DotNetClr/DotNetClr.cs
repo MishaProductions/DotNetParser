@@ -1,4 +1,5 @@
 ﻿//#define CLR_DEBUG
+using LibDotNetParser;
 using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
@@ -203,6 +204,11 @@ namespace DotNetClr
                     stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "ldloc.s")
+                {
+                    var oldItem = Localstack[(byte)item.Operand];
+                    stack.Add(oldItem);
+                }
+                else if (item.OpCodeName == "ldloca.s")
                 {
                     var oldItem = Localstack[(byte)item.Operand];
                     stack.Add(oldItem);
