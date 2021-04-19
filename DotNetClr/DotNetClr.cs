@@ -7,6 +7,9 @@ using System.IO;
 
 namespace DotNetClr
 {
+    /// <summary>
+    /// DotNetCLR Class
+    /// </summary>
     public class DotNetClr
     {
         private DotNetFile file;
@@ -31,7 +34,9 @@ namespace DotNetClr
             dlls.Clear();
             dlls.Add("main_exe", p);
         }
-
+        /// <summary>
+        /// Starts the .NET Executable
+        /// </summary>
         public void Start()
         {
             try
@@ -110,7 +115,7 @@ namespace DotNetClr
             Console.WriteLine("FUNCTION Output");
 #endif
 
-
+            #region Internal methods
             //Make sure that RVA is not zero. If its zero, than its extern
             if (m.RVA == 0)
             {
@@ -159,11 +164,6 @@ namespace DotNetClr
                     }
                     Console.Write(val);
                 }
-                else if (m.Name == "ClrTest")
-                {
-                    PrintColor("[CLR] Test", ConsoleColor.Green);
-                    return new MethodArgStack() { type = StackItemType.Int32, value = 123 };
-                }
                 else if (m.Name == "ClrConcatString")
                 {
                     string returnVal = "";
@@ -181,7 +181,7 @@ namespace DotNetClr
                 }
                 return null;
             }
-
+            #endregion
             CallStack.Add(new CallStackItem() { method = m });
 
             //Now decompile the code and run it
@@ -232,7 +232,7 @@ namespace DotNetClr
                     var oldItem = Localstack[1];
                     stack.Add(oldItem);
 
-                   // Localstack[1] = null;
+                    // Localstack[1] = null;
                 }
                 else if (item.OpCodeName == "stloc.2")
                 {
@@ -283,6 +283,12 @@ namespace DotNetClr
                     //Puts an int32 with value 3 onto the arg stack
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)3 });
                 }
+                else if (item.OpCodeName == "ldc.i4.6")
+                {
+                    //Puts an int32 with value 6 onto the arg stack
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)6 });
+                }
+                
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
                 {
@@ -300,7 +306,7 @@ namespace DotNetClr
                     var numb1 = (int)stack[stack.Count - 2].value;
                     var numb2 = (int)stack[stack.Count - 1].value;
                     var result = numb1 + numb2;
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value= result });
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
                 }
                 else if (item.OpCodeName == "sub")
                 {
@@ -512,6 +518,7 @@ namespace DotNetClr
             }
             return null;
         }
+        #region Utils
         private void PrintColor(string s, ConsoleColor c)
         {
             var old = Console.ForegroundColor;
@@ -526,5 +533,6 @@ namespace DotNetClr
             PrintColor($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}", ConsoleColor.Red);
             PrintColor(stackStace, ConsoleColor.Red);
         }
+        #endregion
     }
 }

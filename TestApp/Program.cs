@@ -17,33 +17,33 @@ namespace TestApp
             //Equal test
             if (ClrTest() == 90)
             {
-                Console.WriteLine("(1/4) Test success!");
+                Console.WriteLine($"(1/6) Test success!");
             }
             else
             {
-                Console.WriteLine("(1/4) Test failure. ");
+                Console.WriteLine("(1/6) Test failure. ");
             }
             //Inequal test
             if (Program.ClrTest() != 123)
             {
-                Console.WriteLine("(2/4) Test success!");
+                Console.WriteLine("(2/6) Test success!");
             }
             else
             {
-                Console.WriteLine("(2/4) Test failure.");
+                Console.WriteLine("(2/6) Test failure.");
             }
             //Addition test
             var int2 = ClrTest() + 10;
             //Now, int2 should be 100
             if (int2 != 100)
             {
-                Console.Write("(3/4) Add test failure! Result: ");
+                Console.Write("(3/6) Add test failure! Result: ");
                 Console.Write(int2);
                 Console.WriteLine();
             }
             else
             {
-                Console.Write("(3/4) Add test success! Result: ");
+                Console.Write("(3/6) Add test success! Result: ");
                 Console.Write(int2);
                 Console.WriteLine();
             }
@@ -53,13 +53,13 @@ namespace TestApp
             //Now, int3 should be 80
             if (int3 != 80)
             {
-                Console.Write("(4/4) Subtract test failure! Result: ");
+                Console.Write("(4/6) Subtract test failure! Result: ");
                 Console.Write(int3);
                 Console.WriteLine();
             }
             else
             {
-                Console.Write("(4/4) Subtract test success! Result: ");
+                Console.Write("(4/6) Subtract test success! Result: ");
                 Console.Write(int3);
                 Console.WriteLine();
             }
@@ -68,13 +68,13 @@ namespace TestApp
             //Now, int4 should be 3
             if (int4 != 3)
             {
-                Console.Write("(5/5) Divide test failure! Result: ");
+                Console.Write("(5/6) Divide test failure! Result: ");
                 Console.Write(int4);
                 Console.WriteLine();
             }
             else
             {
-                Console.Write("(5/5) Divide test success! Result: ");
+                Console.Write("(5/6) Divide test success! Result: ");
                 Console.Write(int4);
                 Console.WriteLine();
             }
@@ -83,14 +83,29 @@ namespace TestApp
             //Now, int5 should be 3
             if (int5 != 270)
             {
-                Console.Write("(5/5) Multiply test failure! Result: ");
+                Console.Write("(5/6) Multiply test failure! Result: ");
                 Console.Write(int5);
                 Console.WriteLine();
             }
             else
             {
-                Console.Write("(5/5) Multiply test success! Result: ");
+                Console.Write("(5/6) Multiply test success! Result: ");
                 Console.Write(int5);
+                Console.WriteLine();
+            }
+            int int6 = ClrTest();
+            int6 += 1;
+
+            if (int6 == 91)
+            {
+                Console.Write("(6/6) Increment test success! Result: ");
+                Console.Write(int6);
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write("(6/6) Increment test failure. Result: ");
+                Console.Write(int6);
                 Console.WriteLine();
             }
         }
