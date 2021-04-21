@@ -50,7 +50,7 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                return (flags & MethodAttr.mdUnmanagedExport) != 0;
+                return RVA == 0;
             }
         }
         public DotNetType Parrent { get; }

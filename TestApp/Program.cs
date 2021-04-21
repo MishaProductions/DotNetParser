@@ -12,6 +12,7 @@ namespace TestApp
 {
     class Program
     {
+        public static string TestField = "Default Value.";
         static void Main(string[] args)
         {
             //Equal test
@@ -141,6 +142,26 @@ namespace TestApp
                 Console.WriteLine();
                 Console.WriteLine("forloop test fail");
                 Console.WriteLine(i2);
+            }
+
+            Console.WriteLine(TestField);
+
+            if (TestField== "Default Value.")
+            {
+                Console.WriteLine("Field test success");
+            }
+            else
+            {
+                Console.WriteLine("Field test failure");
+            }
+            TestField = "new value";
+            if (TestField == "new value")
+            {
+                Console.WriteLine("Field write test success");
+            }
+            else
+            {
+                Console.WriteLine("Field write test failure");
             }
         }
         /// <summary>

@@ -88,6 +88,18 @@ namespace DotNetClr
                 }
             }
             Running = true;
+            //Call contructor on main type
+            foreach (var item in file.EntryPointType.Methods)
+            {
+                if (item.Name == ".cctor")
+                {
+                    RunMethod(item, file);
+                    break;
+                }
+            }
+
+
+
             //Run the entry point
             RunMethod(file.EntryPoint, file);
         }
@@ -142,6 +154,17 @@ namespace DotNetClr
                         val = (string)s.value;
                     }
                     Console.WriteLine(val);
+                }
+                else if (m.Name == "op_Equality")
+                {
+                    if ((string)stack[0].value == (string)stack[1].value)
+                    {
+                        return new MethodArgStack() { type = StackItemType.Int32, value = 1 };
+                    }
+                    else
+                    {
+                        return new MethodArgStack() { type = StackItemType.Int32, value = 0 };
+                    }
                 }
                 else if (m.Name == "Clear")
                 {
@@ -493,6 +516,79 @@ namespace DotNetClr
                 else if (item.OpCodeName == "nop")
                 {
                     //Don't do anything
+                }
+                else if (item.OpCodeName == "ldsfld")
+                {
+                    //get value from feild
+                    DotNetField f2 = null;
+                    foreach (var f in m.Parrent.Fields)
+                    {
+                        if (f.IndexInTabel == (int)(byte)item.Operand)
+                        {
+                            f2 = f;
+                            break;
+                        }
+                    }
+
+                    if (f2 == null)
+                        throw new Exception("Cannot find the field.");
+
+                    StaticField f3 = null;
+                    foreach (var f in StaticFieldHolder.staticFields)
+                    {
+                        if (f.theField.Name == f2.Name && f.theField.ParrentType.FullName == f2.ParrentType.FullName)
+                        {
+                            f3 = f;
+                            break;
+                        }
+                    }
+                    if (f3 == null)
+                    {
+                        Running = false;
+                        string stackTrace = "";
+                        CallStack.Reverse();
+                        foreach (var itm in CallStack)
+                        {
+                            stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
+                        }
+                        clrError("Attempt to push null onto the stack.", "System.NullReferenceException", stackTrace);
+                        return null;
+                    }
+                    stack.Add(f3.value);
+                }
+                else if (item.OpCodeName == "stsfld")
+                {
+                    //write value to field.
+                    DotNetField f2 = null;
+                    foreach (var f in m.Parrent.Fields)
+                    {
+                        if (f.IndexInTabel == (int)(byte)item.Operand)
+                        {
+                            f2 = f;
+                            break;
+                        }
+                    }
+                    StaticField f3 = null;
+                    foreach (var f in StaticFieldHolder.staticFields)
+                    {
+                        if (f.theField.Name == f2.Name && f.theField.ParrentType.FullName == f2.ParrentType.FullName)
+                        {
+                            f3 = f;
+
+                            f.value = stack[stack.Count - 1];
+                            break;
+                        }
+                    }
+
+                    if (f3 == null)
+                    {
+                        //create field
+                        StaticFieldHolder.staticFields.Add(new StaticField() { theField = f2, value = stack[stack.Count - 1]});
+                    }
+                    if (f2 == null)
+                        throw new Exception("Cannot find the field.");
+                    f2.Value = stack[stack.Count - 1];
+                    stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "call")
                 {

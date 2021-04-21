@@ -117,7 +117,18 @@ namespace LibDotNetParser.CILApi
                 case OpCodeOperandType.InlineBrTarget:
                     throw new NotImplementedException();
                 case OpCodeOperandType.InlineField:
-                    throw new NotImplementedException();
+                    {
+                        byte fi = code[Offset + 1];
+                        byte s2 = code[Offset + 2];
+                        byte t = code[Offset + 3];
+                        byte f = code[Offset + 4];
+                        byte[] num2 = new byte[] { fi, s2, t, f };
+                        var numb2 = BitConverter.ToInt32(num2, 0);
+
+                        ret.Size += 4;
+                        ret.Operand = fi;
+                        return ret;
+                    }
                 case OpCodeOperandType.InlineMethod:
                     {
                         try

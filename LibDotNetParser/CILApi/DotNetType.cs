@@ -1,5 +1,6 @@
 ﻿using LibDotNetParser;
 using LibDotNetParser.DotNet.Tabels.Defs;
+using LibDotNetParser.PE;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -52,6 +53,15 @@ namespace LibDotNetParser.CILApi
             }
         }
 
+        private List<DotNetField> fields = new List<DotNetField>();
+        public List<DotNetField> Fields
+        {
+            get
+            {
+                return fields;
+            }
+        }
+
         public DotNetFile File { get; internal set; }
 
         /// <summary>
@@ -71,6 +81,41 @@ namespace LibDotNetParser.CILApi
             Name = this.file.ClrStringsStream.GetByOffset(item.Name);
             NameSpace = this.file.ClrStringsStream.GetByOffset(item.Namespace);
             InitMethods();
+            InitFields();
+        }
+
+        private void InitFields()
+        {
+            fields.Clear();
+            uint startIndex = type.FieldList;
+
+            int max;
+
+            if (file.Tabels.FieldTabel.Count <= NextTypeIndex)
+            {
+                //Happens when this is the last type
+                max = file.Tabels.FieldTabel.Count;
+            }
+            else
+            {
+                //Get the max value from the next type.
+                max = (int)file.Tabels.TypeDefTabel[file.Tabels.FieldTabel.Count - 1].FieldList;
+            }
+
+
+            for (uint i = startIndex - 1; i < max; i++)
+            {
+                if ((startIndex - 1) == max)
+                {
+                    //No methods for this type, contiune
+                    break;
+                }
+                if (file.Tabels.FieldTabel.Count != 0)
+                {
+                    var item = file.Tabels.FieldTabel[(int)i];
+                    fields.Add(new DotNetField(file, item, this, (int)i+1));
+                }
+            }
         }
 
         private void InitMethods()
@@ -82,11 +127,12 @@ namespace LibDotNetParser.CILApi
 
             if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
             {
+                //Happens when this is the last type
                 max = file.Tabels.MethodTabel.Count;
-               
             }
             else
             {
+                //Get the max value from the next type.
                 max = (int)file.Tabels.TypeDefTabel[file.Tabels.TypeDefTabel.Count - 1].MethodList;
             }
 

@@ -13,7 +13,7 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<Module> ModuleTabel { get; }
         public List<TypeRef> TypeRefTabel { get; }
         public List<TypeDef> TypeDefTabel { get; }
-        public List<FieldTabelRow> FieldTabel { get; }
+        public List<Field> FieldTabel { get; }
         public List<Method> MethodTabel { get; }
         public List<Param> ParmTabel { get; }
         public List<InterfaceImpl> InterfaceImplTable { get; }
@@ -46,7 +46,7 @@ namespace LibDotNetParser.DotNet.Tabels
             ModuleTabel = new List<Module>();
             TypeRefTabel = new List<TypeRef>();
             TypeDefTabel = new List<TypeDef>();
-            FieldTabel = new List<FieldTabelRow>();
+            FieldTabel = new List<Field>();
             MethodTabel = new List<Method>();
             ParmTabel = new List<Param>();
             InterfaceImplTable = new List<InterfaceImpl>();
@@ -110,7 +110,7 @@ namespace LibDotNetParser.DotNet.Tabels
             {
                 for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
                 {
-                    var m = new FieldTabelRow();
+                    var m = new Field();
                     m.Read(r);
                     FieldTabel.Add(m);
                 }

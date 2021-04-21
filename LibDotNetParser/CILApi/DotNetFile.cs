@@ -50,6 +50,30 @@ namespace LibDotNetParser.CILApi
                 return m;
             }
         }
+
+        public DotNetType EntryPointType
+        {
+            get
+            {
+                var c = peFile.ClrHeader.EntryPointToken;
+                var entryPoint = c & 0xFF;
+
+                DotNetType m = null;
+                foreach (var item in Types)
+                {
+                    foreach (var m2 in item.Methods)
+                    {
+                        if (m2.BackendTabel == peFile.Tabels.MethodTabel[(int)entryPoint - 1])
+                        {
+                            m = m2.Parrent;
+                            break;
+                        }
+                    }
+                }
+
+                return m;
+            }
+        }
         public DotNetFile(string Path)
         {
             peFile = new PEFile(Path);

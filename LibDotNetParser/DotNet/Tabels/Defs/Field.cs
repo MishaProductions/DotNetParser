@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LibDotNetParser.DotNet.Tabels.Defs
 {
-    public class FieldTabelRow : IMetadataTableRow
+    public class Field : IMetadataTableRow
     {
         public ushort Flags { get; private set; }
 

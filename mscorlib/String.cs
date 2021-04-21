@@ -16,6 +16,8 @@ namespace System
             return ClrConcatString(s);
         }
 
+        public extern static bool op_Equality(string a, string b);
+
         private static extern string ClrConcatString(params string[] s);
     }
 }
