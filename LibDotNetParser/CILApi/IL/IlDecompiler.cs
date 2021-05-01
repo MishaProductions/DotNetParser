@@ -198,7 +198,7 @@ namespace LibDotNetParser.CILApi
                                     ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs),
                                     FunctionName = funcName,
                                     RVA = 0,
-                                    Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName)
+                                    Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
                                 };
                                 return ret;
                             }
@@ -290,7 +290,18 @@ namespace LibDotNetParser.CILApi
                 case OpCodeOperandType.ShortInlineR:
                     throw new NotImplementedException();
                 case OpCodeOperandType.InlineType:
-                    throw new NotImplementedException();
+                    {
+                        byte fi = code[Offset + 1];
+                        byte s2 = code[Offset + 2];
+                        byte t = code[Offset + 3];
+                        byte f = code[Offset + 4];
+                        byte[] num2 = new byte[] { fi, s2, t, f };
+                        var numb2 = BitConverter.ToInt32(num2, 0);
+
+                        ret.Size += 4;
+                        ret.Operand = fi;
+                        return ret;
+                    }
                 // 64 bit int
                 case OpCodeOperandType.InlineI8:
                     {

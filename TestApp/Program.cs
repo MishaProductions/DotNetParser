@@ -10,28 +10,42 @@ using System.Threading.Tasks;
 
 namespace TestApp
 {
+    class MyObject
+    {
+        public string WelcomeMessage;
+        public MyObject()
+        {
+            WelcomeMessage = "lol";
+            Console.WriteLine("constructor end....");
+        }
+        public void Hello()
+        {
+            Console.WriteLine(WelcomeMessage);
+        }
+    }
     class Program
     {
         public static string TestField = "Default Value.";
+        public const string ConstString = "Constant String.";
         static void Main(string[] args)
         {
             //Equal test
             if (ClrTest() == 90)
             {
-                Console.WriteLine($"(1/6) Test success!");
+                Console.WriteLine($"(1/6) Equal Test success!");
             }
             else
             {
-                Console.WriteLine("(1/6) Test failure. ");
+                Console.WriteLine("(1/6) Equal Test failure. ");
             }
             //Inequal test
             if (Program.ClrTest() != 123)
             {
-                Console.WriteLine("(2/6) Test success!");
+                Console.WriteLine("(2/6) Inequal Test success!");
             }
             else
             {
-                Console.WriteLine("(2/6) Test failure.");
+                Console.WriteLine("(2/6) Inequal Test failure.");
             }
             //Addition test
             var int2 = ClrTest() + 10;
@@ -146,7 +160,7 @@ namespace TestApp
 
             Console.WriteLine(TestField);
 
-            if (TestField== "Default Value.")
+            if (TestField == "Default Value.")
             {
                 Console.WriteLine("Field test success");
             }
@@ -163,6 +177,9 @@ namespace TestApp
             {
                 Console.WriteLine("Field write test failure");
             }
+            MyObject obj = new MyObject();
+            obj.WelcomeMessage = "Hello!";
+            obj.Hello();
         }
         /// <summary>
         /// Returns 90.

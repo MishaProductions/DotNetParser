@@ -106,6 +106,8 @@ namespace DotNetClr
 
         private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file)
         {
+            if (m.Name == ".ctor" && m.Parrent.FullName == "System.Object")
+                return null;
             if (!Running)
                 return null;
 #if CLR_DEBUG
@@ -139,7 +141,7 @@ namespace DotNetClr
                         Console.WriteLine();
                         return null;
                     }
-                    var s = stack[0];
+                    var s = stack[stack.Count-1];
                     string val = "<NULL>";
                     if (s.type == StackItemType.Int32)
                     {
@@ -583,7 +585,7 @@ namespace DotNetClr
                     if (f3 == null)
                     {
                         //create field
-                        StaticFieldHolder.staticFields.Add(new StaticField() { theField = f2, value = stack[stack.Count - 1]});
+                        StaticFieldHolder.staticFields.Add(new StaticField() { theField = f2, value = stack[stack.Count - 1] });
                     }
                     if (f2 == null)
                         throw new Exception("Cannot find the field.");
@@ -604,7 +606,7 @@ namespace DotNetClr
                             {
                                 foreach (var meth in item3.Methods)
                                 {
-                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature)
+                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == call.NameSpace + "." + call.ClassName)
                                     {
                                         m2 = meth;
                                         break;
@@ -654,8 +656,8 @@ namespace DotNetClr
                         }
                     }
 
-                    //Clear the stack, and if the return value is not null, add it to the stack
-                    stack.Clear();
+                    if (m.AmountOfParms != 0)
+                        stack.Clear();
                     if (returnValue != null)
                     {
                         stack.Add(returnValue);
@@ -700,12 +702,164 @@ namespace DotNetClr
                         return stack[0];
                     else return null;
                 }
+                else if (item.OpCodeName == "newobj")
+                {
+                    var call = (InlineMethodOperandData)item.Operand;
+                    //Local/Defined method
+                    DotNetMethod m2 = null;
+                    foreach (var item2 in dlls)
+                    {
+                        foreach (var item3 in item2.Value.Types)
+                        {
+                            foreach (var meth in item3.Methods)
+                            {
+                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == call.NameSpace + "." + call.ClassName)
+                                {
+                                    m2 = meth;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (m2 == null)
+                    {
+                        Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
+                        return null;
+                    }
+
+                    MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = new ObjectValueHolder() };
+                    stack.Add(a);
+                    //Call the contructor
+                    RunMethod(m2, m.Parrent.File);
+                }
+                else if (item.OpCodeName == "stfld")
+                {
+                    //write value to field.
+                    DotNetField f2 = null;
+                    foreach (var f in m.Parrent.Fields)
+                    {
+                        if (f.IndexInTabel == (byte)item.Operand)
+                        {
+                            f2 = f;
+                            break;
+                        }
+                    }
+                    if (f2 == null)
+                    {
+                        //Resolve recursively
+                        foreach (var type in file.Types)
+                        {
+                            foreach (var field in type.Fields)
+                            {
+                                if (field.IndexInTabel == (byte)item.Operand)
+                                {
+                                    f2 = field;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    var obj = stack[0];
+                    if (obj.type != StackItemType.Object) throw new InvalidOperationException();
+
+                    var data = (ObjectValueHolder)obj.value;
+                    if (data.Fields.ContainsKey(f2.Name))
+                    {
+                        data.Fields[f2.Name] = stack[stack.Count - 1];
+                    }
+                    else
+                    {
+                        data.Fields.Add(f2.Name, stack[stack.Count - 1]);
+                    }
+                    obj.value = data;
+                    stack[0] = obj;
+                }
+                else if (item.OpCodeName == "ldfld")
+                {
+                    //write value to field.
+                    DotNetField f2 = null;
+                    foreach (var f in m.Parrent.Fields)
+                    {
+                        if (f.IndexInTabel == (byte)item.Operand)
+                        {
+                            f2 = f;
+                            break;
+                        }
+                    }
+                    if (f2 == null)
+                    {
+                        //Resolve recursively
+                        foreach (var type in file.Types)
+                        {
+                            foreach (var field in type.Fields)
+                            {
+                                if (field.IndexInTabel == (byte)item.Operand)
+                                {
+                                    f2 = field;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    var obj = stack[0];
+                    if (obj.type != StackItemType.Object) throw new InvalidOperationException();
+
+                    var data = (ObjectValueHolder)obj.value;
+                    if (data.Fields.ContainsKey(f2.Name))
+                    {
+                        stack.Add(data.Fields[f2.Name]);
+                    }
+                    else
+                    {
+                        throw new Exception("Attempt to read from a nonexistent or null field.");
+                    }
+                }
+                else if (item.OpCodeName == "ldarg.0")
+                {
+                    //TODO
+                }
+                else if (item.OpCodeName == "callvirt")
+                {
+                    var call = (InlineMethodOperandData)item.Operand;
+                    //Local/Defined method
+                    DotNetMethod m2 = null;
+                    foreach (var item2 in dlls)
+                    {
+                        foreach (var item3 in item2.Value.Types)
+                        {
+                            foreach (var meth in item3.Methods)
+                            {
+                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == call.NameSpace + "." + call.ClassName)
+                                {
+                                    m2 = meth;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (m2 == null)
+                    {
+                        Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
+                        return null;
+                    }
+                    RunMethod(m2,m2.File);
+                    ;
+                }
                 #endregion
                 else
                 {
                     Running = false;
                     PrintColor("Unsupported OpCode: " + item.OpCodeName, ConsoleColor.Red);
                     PrintColor("Application Terminated.", ConsoleColor.Red);
+                    CallStack.Reverse();
+                    string stackTrace = "";
+                    foreach (var itm in CallStack)
+                    {
+                        stackTrace += "At " + itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
+                    }
+                    PrintColor(stackTrace, ConsoleColor.Red);
                     return null;
                 }
             }

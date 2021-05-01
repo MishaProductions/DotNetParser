@@ -31,6 +31,7 @@ namespace LibDotNetParser.CILApi
                 return (uint)BinUtil.RVAToOffset(RVA, file.PeHeader.Sections);
             }
         }
+        public int AmountOfParms { get; private set; }
         public DotNetFile File
         {
             get
@@ -69,7 +70,9 @@ namespace LibDotNetParser.CILApi
             this.file2 = parrent.File;
 
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);
-            this.Signature = ParseMethodSignature(item.Signature, File, this.Name);
+            var sig2 = ParseMethodSignature(item.Signature, File, this.Name);
+            this.Signature = sig2.Signature;
+            this.AmountOfParms = sig2.AmountOfParms;
             string sig = "";
 
             var blobStreamReader = new BinaryReader(new MemoryStream(file.BlobStream));
@@ -206,11 +209,10 @@ namespace LibDotNetParser.CILApi
             return code.ToArray();
         }
 
-        internal static string ParseMethodSignature(uint signature, DotNetFile file, string FunctionName)
+        internal static MethodSignatureInfo ParseMethodSignature(uint signature, DotNetFile file, string FunctionName)
         {
-            string sig="";
-
-            var blobStreamReader = new BinaryReader(new MemoryStream(file.Backend.BlobStream));
+            string sig=""; 
+             var blobStreamReader = new BinaryReader(new MemoryStream(file.Backend.BlobStream));
             blobStreamReader.BaseStream.Seek(signature, SeekOrigin.Begin);
             var length = blobStreamReader.ReadByte();
             var type = blobStreamReader.ReadByte();
@@ -221,7 +223,7 @@ namespace LibDotNetParser.CILApi
                 //Static method
                 sig += "static ";
             }
-            
+            MethodSignatureInfo info = new MethodSignatureInfo();
             sig += ElementTypeToString(returnType);
             sig += " " + FunctionName;
             sig += "(";
@@ -229,10 +231,13 @@ namespace LibDotNetParser.CILApi
             {
                 var parm = blobStreamReader.ReadByte();
                 sig += ElementTypeToString(parm) + ",";
+                info.AmountOfParms++;
             }
             sig = sig.TrimEnd(','); //Remove the last ,
             sig += ");";
-            return sig;
+            info.Signature = sig;
+            return info;
         }
     }
+    class MethodSignatureInfo { public int AmountOfParms; public string Signature; }
 }
