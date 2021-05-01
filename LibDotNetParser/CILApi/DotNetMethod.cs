@@ -32,6 +32,8 @@ namespace LibDotNetParser.CILApi
             }
         }
         public int AmountOfParms { get; private set; }
+        public StackItemType StartParm { get; private set; }
+        public StackItemType EndParm { get; private set; }
         public DotNetFile File
         {
             get
@@ -73,6 +75,8 @@ namespace LibDotNetParser.CILApi
             var sig2 = ParseMethodSignature(item.Signature, File, this.Name);
             this.Signature = sig2.Signature;
             this.AmountOfParms = sig2.AmountOfParms;
+            this.StartParm = sig2.FirstParm;
+            this.EndParm = sig2.LastParm;
             string sig = "";
 
             var blobStreamReader = new BinaryReader(new MemoryStream(file.BlobStream));
@@ -231,6 +235,36 @@ namespace LibDotNetParser.CILApi
             {
                 var parm = blobStreamReader.ReadByte();
                 sig += ElementTypeToString(parm) + ",";
+                if (i == 0)
+                {
+                    if (ElementTypeToString(parm) == "string")
+                    {
+                        info.FirstParm = StackItemType.String;
+                    }
+                    else if (ElementTypeToString(parm) == "int")
+                    {
+                        info.FirstParm = StackItemType.Int32;
+                    }
+                    else if (ElementTypeToString(parm) == "long")
+                    {
+                        info.FirstParm = StackItemType.Int64;
+                    }
+                }
+                else if (i == parmaters)
+                {
+                    if (ElementTypeToString(parm) == "string")
+                    {
+                        info.LastParm = StackItemType.String;
+                    }
+                    else if (ElementTypeToString(parm) == "int")
+                    {
+                        info.LastParm = StackItemType.Int32;
+                    }
+                    else if (ElementTypeToString(parm) == "long")
+                    {
+                        info.LastParm = StackItemType.Int64;
+                    }
+                }
                 info.AmountOfParms++;
             }
             sig = sig.TrimEnd(','); //Remove the last ,
@@ -239,5 +273,5 @@ namespace LibDotNetParser.CILApi
             return info;
         }
     }
-    class MethodSignatureInfo { public int AmountOfParms; public string Signature; }
+    class MethodSignatureInfo { public int AmountOfParms; public string Signature; public StackItemType FirstParm; public StackItemType LastParm; }
 }

@@ -180,6 +180,15 @@ namespace TestApp
             MyObject obj = new MyObject();
             obj.WelcomeMessage = "Hello!";
             obj.Hello();
+            TestField = "newr value";
+            if (TestField == "newr value")
+            {
+                Console.WriteLine("Field write test success (pass 2)");
+            }
+            else
+            {
+                Console.WriteLine("Field write test failure (pass 2)");
+            }
         }
         /// <summary>
         /// Returns 90.

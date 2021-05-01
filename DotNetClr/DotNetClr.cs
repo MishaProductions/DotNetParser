@@ -141,7 +141,7 @@ namespace DotNetClr
                         Console.WriteLine();
                         return null;
                     }
-                    var s = stack[stack.Count-1];
+                    var s = stack[stack.Count - 1];
                     string val = "<NULL>";
                     if (s.type == StackItemType.Int32)
                     {
@@ -159,7 +159,7 @@ namespace DotNetClr
                 }
                 else if (m.Name == "op_Equality")
                 {
-                    if ((string)stack[0].value == (string)stack[1].value)
+                    if ((string)stack[stack.Count - 2].value == (string)stack[stack.Count-1].value)
                     {
                         return new MethodArgStack() { type = StackItemType.Int32, value = 1 };
                     }
@@ -596,10 +596,11 @@ namespace DotNetClr
                 {
                     var call = (InlineMethodOperandData)item.Operand;
                     MethodArgStack returnValue;
+
+                    DotNetMethod m2 = null;
                     if (call.RVA != 0)
                     {
                         //Local/Defined method
-                        DotNetMethod m2 = null;
                         foreach (var item2 in dlls)
                         {
                             foreach (var item3 in item2.Value.Types)
@@ -628,7 +629,6 @@ namespace DotNetClr
                     else
                     {
                         //Attempt to resolve it
-                        DotNetMethod m2 = null;
                         foreach (var item2 in dlls)
                         {
                             foreach (var item3 in item2.Value.Types)
@@ -656,8 +656,38 @@ namespace DotNetClr
                         }
                     }
 
-                    if (m.AmountOfParms != 0)
-                        stack.Clear();
+                    if (m2.AmountOfParms == 0)
+                    {
+                        //no need to do anything
+                    }
+                    else
+                    {
+                        int StartParmIndex = -1;
+                        int EndParmIndex = -1;
+                        for (int i3 = 0; i3 < stack.Count; i3++)
+                        {
+                            var stackitm = stack[i3];
+                            if (stackitm.type == m2.StartParm && EndParmIndex == -1)
+                            {
+                                StartParmIndex = i3;
+                            }
+                            if (stackitm.type == m2.EndParm && StartParmIndex != -1)
+                            {
+                                EndParmIndex = i3;
+                            }
+                        }
+                        if (StartParmIndex == -1)
+                            continue;
+                        
+                        if (m2.AmountOfParms == 1)
+                        {
+                            stack.RemoveAt(StartParmIndex);
+                        }
+                        else
+                        {
+                            stack.RemoveRange(StartParmIndex, EndParmIndex - StartParmIndex);
+                        }
+                    }
                     if (returnValue != null)
                     {
                         stack.Add(returnValue);
@@ -774,6 +804,7 @@ namespace DotNetClr
                     }
                     obj.value = data;
                     stack[0] = obj;
+                    stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "ldfld")
                 {
@@ -844,7 +875,7 @@ namespace DotNetClr
                         Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
                         return null;
                     }
-                    RunMethod(m2,m2.File);
+                    RunMethod(m2, m2.File);
                     ;
                 }
                 #endregion
