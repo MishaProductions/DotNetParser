@@ -11,6 +11,7 @@ namespace LibDotNetParser.CILApi
         public Method BackendTabel;
 
         MethodAttr flags;
+        MethodImp implFlags;
 
         /// <summary>
         /// Function Signature.
@@ -49,6 +50,14 @@ namespace LibDotNetParser.CILApi
             }
         }
 
+        public bool IsInternalCall
+        {
+            get
+            {
+                return (implFlags & MethodImp.miInternalCall) != 0;
+            }
+        }
+
         public bool IsExtern
         {
             get
@@ -69,6 +78,7 @@ namespace LibDotNetParser.CILApi
             this.BackendTabel = item;
             this.Parrent = parrent;
             this.flags = (MethodAttr)item.Flags;
+            this.implFlags = (MethodImp)item.ImplFlags;
             this.file2 = parrent.File;
 
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);

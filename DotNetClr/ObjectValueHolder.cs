@@ -2,7 +2,7 @@
 using LibDotNetParser;
 using System.Collections.Generic;
 
-namespace DotNetClr
+namespace libDotNetClr
 {
     internal class ObjectValueHolder
     {

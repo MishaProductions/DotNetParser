@@ -1,25 +1,27 @@
-﻿namespace System
+﻿using System.Runtime.CompilerServices;
+
+namespace System
 {
     /// <summary>
     /// Console class
     /// </summary>
     public static class Console
     {
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void WriteLine(string str);
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void WriteLine(int num);
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void WriteLine(long num);
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void WriteLine();
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void Write(string str);
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void Write(int num);
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void Write(long num);
-        //Implemented in the CLR
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void Clear();
     }
 }

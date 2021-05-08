@@ -1,4 +1,6 @@
 ﻿using Cosmos.System.FileSystem;
+using Cosmos.System.FileSystem.VFS;
+using libDotNetClr;
 using LibDotNetParser;
 using LibDotNetParser.CILApi;
 using System;
@@ -13,7 +15,7 @@ namespace TesterKernel
         {
             //Init
             CosmosVFS fs = new Sys.FileSystem.CosmosVFS();
-            Sys.FileSystem.VFS.VFSManager.RegisterVFS(fs);
+            VFSManager.RegisterVFS(fs);
             Console.Clear();
 
             try
@@ -42,7 +44,7 @@ namespace TesterKernel
                 Console.WriteLine("Running program:");
 
 
-                DotNetClr.DotNetClr clr = new DotNetClr.DotNetClr(fl, @"0:\framework");
+                DotNetClr clr = new DotNetClr(fl, @"0:\framework");
                 clr.Start();
                 Console.WriteLine("Program exec complete.");
             }

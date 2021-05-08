@@ -8,7 +8,7 @@ namespace System
     {
         public Object()
         {
-
+            //
         }
         ~Object()
         {

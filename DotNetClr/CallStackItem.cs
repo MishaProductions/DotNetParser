@@ -1,7 +1,7 @@
 ﻿//#define CLR_DEBUG
 using LibDotNetParser.CILApi;
 
-namespace DotNetClr
+namespace libDotNetClr
 {
     public class CallStackItem
     {

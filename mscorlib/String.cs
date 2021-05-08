@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System
@@ -11,13 +12,14 @@ namespace System
         {
             return s == null || s == "";
         }
-        public static string Concat(params string[] s)
+
+        public static string Concat(string a, string b)
         {
-            return ClrConcatString(s);
+            return ClrConcatString(a,b);
         }
-
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool op_Equality(string a, string b);
-
-        private static extern string ClrConcatString(params string[] s);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern string ClrConcatString(string a, string b);
     }
 }

@@ -7,11 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibDotNetParser", "LibDotNe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TesterKernel", "TesterKernel\TesterKernel.csproj", "{0B54933E-1BDB-4BF3-BBFC-AAFB7806DCA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{B6E06C06-B2C1-46EB-B182-0F449E892F88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetparserTester", "TestApp\DotNetparserTester.csproj", "{B6E06C06-B2C1-46EB-B182-0F449E892F88}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetParser", "DotNetParser\DotNetParser.csproj", "{D9732EFD-8AE7-427F-9962-DF7B77DBF5AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetParserRunner", "DotNetParser\DotNetParserRunner.csproj", "{D9732EFD-8AE7-427F-9962-DF7B77DBF5AC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
+	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetClr", "DotNetClr\DotNetClr.csproj", "{67155BFC-F7B3-4494-A467-45319D9E5E8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libDotNetClr", "DotNetClr\libDotNetClr.csproj", "{67155BFC-F7B3-4494-A467-45319D9E5E8C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{F496622B-19BA-48AC-AB0A-5FA5BFF85CD0}"
 EndProject
@@ -21,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{040BA7EA-78B6-49D5-BC58-6CE2979CE786}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +91,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{8F344CC5-DB3B-437D-A492-B41F5BD0160B} = {040BA7EA-78B6-49D5-BC58-6CE2979CE786}
+		{67155BFC-F7B3-4494-A467-45319D9E5E8C} = {040BA7EA-78B6-49D5-BC58-6CE2979CE786}
 		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {F496622B-19BA-48AC-AB0A-5FA5BFF85CD0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
