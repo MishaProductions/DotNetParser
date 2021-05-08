@@ -1,17 +1,30 @@
-﻿using libDotNetClr;
+using libDotNetClr;
 using LibDotNetParser;
 using LibDotNetParser.CILApi;
-using LibDotNetParser.CILApi.IL;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 
-namespace DotNetParserRunner
+namespace UnitTests
 {
-    class Program
+    [TestClass]
+    public class UnitTest1
     {
+        [TestMethod]
+        public void MainTest()
+        {
+            DoTest();
+            if (NumbOfFailedTests >= 1)
+            {
+                Console.WriteLine("Tests have failed, exiting now");
+                Assert.IsTrue(false);
+            }
+        }
+
+
         static int NumbOfSuccesssTests = 0;
         static int NumbOfFailedTests = 0;
-        static void Main()
+        static void DoTest()
         {
             string exe = @"DotNetparserTester.exe";
             var m = new DotNetFile(exe);
@@ -34,8 +47,6 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
 
             clr.Start();
-            if (NumbOfFailedTests >= 1)
-                Environment.Exit(1);
         }
         private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue)
         {
