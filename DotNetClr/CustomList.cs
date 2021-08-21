@@ -20,7 +20,7 @@ namespace libDotNetClr
             get { return backend[index]; }
             set
             {
-                backend[index] = value; 
+                backend[index] = value;
                 if (value == null)
                 {
                     Console.WriteLine("***Setting a value to null on stack***");

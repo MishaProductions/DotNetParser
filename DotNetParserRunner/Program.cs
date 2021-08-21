@@ -10,10 +10,10 @@ namespace DotNetParserRunner
     class Program
     {
         static int NumbOfSuccesssTests = 0;
-        private static int NumbOfFailedTests = 0;
+        static int NumbOfFailedTests = 0;
         static void Main()
         {
-            string exe = @"DotNetparserTester.exe";
+            string exe = @"DotNetParser.exe";
             var m = new DotNetFile(exe);
 
             var decompiler = new IlDecompiler(m.EntryPoint);
@@ -34,11 +34,11 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
 
             clr.Start();
-            //Console.ReadLine();
+            Console.ReadLine();
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);
         }
-        private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
 
@@ -46,7 +46,7 @@ namespace DotNetParserRunner
             NumbOfSuccesssTests++;
         }
 
-        private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue)
         {
             if (NumbOfFailedTests == 0)
                 PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Green);
@@ -54,7 +54,7 @@ namespace DotNetParserRunner
                 PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Red);
         }
 
-        private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
 

@@ -48,7 +48,7 @@ namespace UnitTests
 
             clr.Start();
         }
-        private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
 
@@ -56,7 +56,7 @@ namespace UnitTests
             NumbOfSuccesssTests++;
         }
 
-        private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             if (NumbOfFailedTests == 0)
                 PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Green);
@@ -64,7 +64,7 @@ namespace UnitTests
                 PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Red);
         }
 
-        private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
 

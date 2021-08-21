@@ -182,6 +182,85 @@ namespace DotNetparserTester
                 TestFail("Field write test (pass 2)");
             }
             TestsComplete();
+
+            //string[] stringArray = new string[8];
+            //if (stringArray.Length == 8)
+            //{
+            //    TestSuccess("Create array");
+            //}
+            //else
+            //{
+            //    TestSuccess("Create array, len should be 8 but it is "+stringArray.Length);
+            //}
+
+            //Test Data types
+
+            if (string.IsNullOrEmpty(null))
+                TestSuccess("string.IsNullOrEmpty(null) test");
+            else
+                TestSuccess("string.IsNullOrEmpty(null) == false");
+
+            //Test byte
+            var byteStr = ((byte)255).ToString();
+            if (byteStr == "255")
+            {
+                TestSuccess("Byte.ToString test");
+            }
+            else
+            {
+                //This also tests the concat function
+                TestFail("Byte.ToString test fail, ToString returned " + byteStr+ " when it should be 255");
+            }
+            //Test sbyte
+            var sbyteStr = ((sbyte)-50).ToString();
+            if (sbyteStr == "-50")
+            {
+                TestSuccess("SByte.ToString test");
+            }
+            else
+            {
+                TestFail("SByte.ToString test fail, ToString returned " + sbyteStr + " when it should be -50.\0");
+            }
+            //Test ushort
+            var ushortStr = ((ushort)52).ToString();
+            if (ushortStr == "52")
+            {
+                TestSuccess("UInt16.ToString test");
+            }
+            else
+            {
+                TestFail("UInt16.ToString test fail, ToString returned " + ushortStr + " when it should be 52.\0");
+            }
+            //Test short
+            var shortStr = ((short)-5200).ToString();
+            if (shortStr == "-5200")
+            {
+                TestSuccess("Int16.ToString test");
+            }
+            else
+            {
+                TestFail("Int16.ToString test fail, ToString returned " + shortStr + " when it should be -5200.\0");
+            }
+            //Test int
+            var intStr = (-520000).ToString();
+            if (intStr == "-520000")
+            {
+                TestSuccess("Int32.ToString test");
+            }
+            else
+            {
+                TestFail("Int32.ToString test fail, ToString returned " + intStr + " when it should be -520000.\0");
+            }
+            //Test uint
+            var uintStr = (uint.MaxValue).ToString();
+            if (uintStr == "4294967295")
+            {
+                TestSuccess("UInt32.ToString test");
+            }
+            else
+            {
+                TestFail("UInt32.ToString test fail, ToString returned " + uintStr + " when it should be 4294967295.\0");
+            }
         }
         /// <summary>
         /// Returns 90.
@@ -215,6 +294,8 @@ namespace DotNetparserTester
         public static extern void TestFail(string TestName);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void TestsComplete();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public static extern void DebuggerBreak();
 #endif
     }
 }

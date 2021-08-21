@@ -66,6 +66,7 @@ namespace LibDotNetParser
             }
             catch
             {
+                Console.WriteLine("No clr header!");
                 ContainsMetadata = false;
                 return;
             }
@@ -81,7 +82,6 @@ namespace LibDotNetParser
 
 
             ClrMetaDataHeader = new MetadataHeader();
-
             ClrMetaDataHeader.Signature = r.ReadUInt32();
             ClrMetaDataHeader.MajorVersion = r.ReadUInt16();
             ClrMetaDataHeader.MinorVersion = r.ReadUInt16();

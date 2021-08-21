@@ -4,6 +4,7 @@ using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace libDotNetClr
@@ -42,10 +43,67 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("Write", InternalMethod_Console_Write);
             RegisterCustomInternalMethod("Clear", InternalMethod_Console_Clear);
             RegisterCustomInternalMethod("Concat", InternalMethod_String_Concat);
+            RegisterCustomInternalMethod("Internal__System_Byte_ToString", InternalMethod_Byte_ToString);
+            RegisterCustomInternalMethod("Internal__System_SByte_ToString", Internal__System_SByte_ToString);
+            RegisterCustomInternalMethod("Internal__System_UInt16_ToString", Internal__System_UInt16_ToString);
+            RegisterCustomInternalMethod("Internal__System_Int16_ToString", Internal__System_Int16_ToString);
+            RegisterCustomInternalMethod("Internal__System_Int32_ToString", Internal__System_Int32_ToString);
+            RegisterCustomInternalMethod("Internal__System_UInt32_ToString", Internal__System_UInt32_ToString); 
+
+
             RegisterCustomInternalMethod("op_Equality", InternalMethod_String_op_Equality);
+            RegisterCustomInternalMethod("DebuggerBreak", DebuggerBreak);
+        }
+        private void DebuggerBreak(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            Debugger.Break();
         }
         #region Implemention of internal methods
-        private void InternalMethod_Console_Writeline(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        #region ToString() for numbers
+        private void Internal__System_UInt32_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((uint)(int)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        private void Internal__System_Int32_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        private void Internal__System_Int16_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        private void Internal__System_UInt16_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((ushort)(int)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        private void Internal__System_SByte_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((sbyte)(int)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        private void InternalMethod_Byte_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        #endregion
+        private void InternalMethod_Console_Writeline(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             if (stack.Count == 0)
             {
@@ -68,7 +126,7 @@ namespace libDotNetClr
             }
             Console.WriteLine(val);
         }
-        private void InternalMethod_Console_Write(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private void InternalMethod_Console_Write(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             if (stack.Count == 0)
                 throw new Exception("No items on stack for Console.Write!!");
@@ -88,22 +146,21 @@ namespace libDotNetClr
             }
             Console.Write(val);
         }
-        private void InternalMethod_Console_Clear(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private void InternalMethod_Console_Clear(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             Console.Clear();
         }
-        private void InternalMethod_String_Concat(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private void InternalMethod_String_Concat(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             string returnVal = "";
-            foreach (var item in stack)
+            for (int i = Stack.Length - method.AmountOfParms; i < Stack.Length; i++)
             {
-                if (item.type == StackItemType.String)
-                    returnVal += (string)item.value;
+                returnVal += (string)Stack[i].value;
             }
 
             returnValue = new MethodArgStack() { type = StackItemType.String, value = (string)returnVal };
         }
-        private void InternalMethod_String_op_Equality(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private void InternalMethod_String_op_Equality(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             if ((string)stack[stack.Count - 2].value == (string)stack[stack.Count - 1].value)
             {
@@ -121,7 +178,7 @@ namespace libDotNetClr
         /// </summary>
         /// <param name="Stack">The CLR stack.</param>
         /// <returns>Return value. Return null if function returns void.</returns>
-        public delegate void ClrCustomInternalMethod(MethodArgStack[] Stack, ref MethodArgStack returnValue);
+        public delegate void ClrCustomInternalMethod(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method);
         /// <summary>
         /// Registers a custom internal method.
         /// </summary>
@@ -131,6 +188,7 @@ namespace libDotNetClr
         {
             if (CustomInternalMethods.ContainsKey(name))
                 throw new Exception("Internal method already registered!");
+
             CustomInternalMethods.Add(name, method);
         }
         #endregion
@@ -172,7 +230,8 @@ namespace libDotNetClr
                 else
                 {
                     clrError("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
-                    return;
+                    continue;
+                    //return;
                 }
 #if CLR_DEBUG
                 Console.WriteLine("[CLR] Loading: " + Path.GetFileName(fullPath));
@@ -238,7 +297,7 @@ namespace libDotNetClr
                     if (item.Key == m.Name)
                     {
                         MethodArgStack a = null;
-                        item.Value.Invoke(stack.ToArray(), ref a);
+                        item.Value.Invoke(stack.ToArray(), ref a, m);
 
                         //Don't forget to remove item parms
                         if (m.AmountOfParms == 0)
@@ -456,7 +515,7 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldc.i4.8")
                 {
                     //Puts an int32 with value 3 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)7 });
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)8 });
                 }
                 else if (item.OpCodeName == "ldc.i4.m1")
                 {
@@ -466,7 +525,7 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldc.i4.s")
                 {
                     //Push an int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(byte)item.Operand });
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(sbyte)(byte)item.Operand });
                 }
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
@@ -593,8 +652,21 @@ namespace libDotNetClr
                 {
                     var s = stack[stack.Count - 1];
                     stack.RemoveAt(stack.Count - 1);
+                    bool exec = false;
+                    if (s.value == null)
+                        exec = true;
+                    else
+                    {
+                        try
+                        {
+                            if ((int)s.value == 0)
+                                exec = true;
+                        }
+                        catch { }
+                    }
 
-                    if ((int)s.value == 0)
+
+                    if (exec)
                     {
                         // find the ILInstruction that is in this position
                         int i2 = item.Position + (int)item.Operand + 1;
@@ -610,6 +682,8 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "brtrue.s")
                 {
+                    if (stack[stack.Count - 1].value == null)
+                        continue;
                     if ((int)stack[stack.Count - 1].value == 1)
                     {
                         // find the ILInstruction that is in this position
@@ -842,7 +916,7 @@ namespace libDotNetClr
                             {
                                 stack.RemoveAt(StartParmIndex);
                             }
-                            catch { }
+                            catch (Exception x) { }
                         }
                         else
                         {
@@ -926,7 +1000,7 @@ namespace libDotNetClr
 
                     if (m2 == null)
                     {
-                        Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
+                        Console.WriteLine($"Cannot resolve called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
                         return null;
                     }
 
@@ -1034,6 +1108,16 @@ namespace libDotNetClr
                     else
                         stack.Add(oldStack[0]);
                 }
+                else if (item.OpCodeName == "ldarg.1")
+                {
+                    if (oldStack.Count == 0)
+                        continue;
+
+                    if (stack.Count != 0)
+                        stack[1] = oldStack[1];
+                    else
+                        stack.Add(oldStack[1]);
+                }
                 else if (item.OpCodeName == "callvirt")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
@@ -1061,6 +1145,14 @@ namespace libDotNetClr
                     }
                     RunMethod(m2, m2.File, stack);
                     ;
+                }
+                #endregion
+                #region Arrays
+                else if (item.OpCodeName == "newarr")
+                {
+                    var arrayLen = stack[stack.Count - 1];
+
+                    stack.Add(new MethodArgStack() { type = StackItemType.Array, ArrayItems = new object[(int)arrayLen.value], ArrayLen = (int)arrayLen.value });
                 }
                 #endregion
                 else

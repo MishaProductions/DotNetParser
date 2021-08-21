@@ -9,6 +9,9 @@ namespace LibDotNetParser
 
         public DotNetType ObjectType;
         public DotNetMethod ObjectContructor;
+
+        public int ArrayLen;
+        public object[] ArrayItems;
     }
 
     public enum StackItemType
@@ -20,6 +23,7 @@ namespace LibDotNetParser
         NotImpl,
         Float32,
         Float64,
-        Object
+        Object,
+        Array
     }
 }

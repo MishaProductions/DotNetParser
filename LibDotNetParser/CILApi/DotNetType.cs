@@ -99,7 +99,7 @@ namespace LibDotNetParser.CILApi
             else
             {
                 //Get the max value from the next type.
-                max = (int)file.Tabels.TypeDefTabel[file.Tabels.FieldTabel.Count - 1].FieldList;
+                max = (int)file.Tabels.TypeDefTabel[NextTypeIndex - 1].FieldList;
             }
 
 
@@ -112,8 +112,13 @@ namespace LibDotNetParser.CILApi
                 }
                 if (file.Tabels.FieldTabel.Count != 0)
                 {
-                    var item = file.Tabels.FieldTabel[(int)i];
-                    fields.Add(new DotNetField(file, item, this, (int)i+1));
+                    Field f;
+                    if ((int)i == file.Tabels.FieldTabel.Count)
+                        f = file.Tabels.FieldTabel[(int)i - 1];
+                    else
+                       f = file.Tabels.FieldTabel[(int)i];
+                    //var item = file.Tabels.FieldTabel[(int)i -1 ];
+                    fields.Add(new DotNetField(file, f, this, (int)i+1));
                 }
             }
         }
@@ -146,8 +151,12 @@ namespace LibDotNetParser.CILApi
                 }
                 if (file.Tabels.MethodTabel.Count != 1)
                 {
-                    var item = file.Tabels.MethodTabel[(int)i];
-                    methods.Add(new DotNetMethod(file, item, this));
+                    Method m;
+                    if ((int)i != file.Tabels.MethodTabel.Count)
+                        m= file.Tabels.MethodTabel[(int)i];
+                    else
+                        m = file.Tabels.MethodTabel[(int)i - 1];
+                    methods.Add(new DotNetMethod(file, m, this));
                 }
             }
         }

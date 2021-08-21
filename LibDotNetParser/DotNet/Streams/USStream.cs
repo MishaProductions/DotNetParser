@@ -51,8 +51,8 @@ namespace LibDotNetParser.DotNet.Streams
             //The US Stream starts with a null byte, so skip it
             for (int i = 1; i < _dataSize; i++)
             {
-                var lenNotProper = _reader.ReadByte();
-                _reader.BaseStream.Position--;
+                //var lenNotProper = _reader.ReadByte();
+                //_reader.BaseStream.Position--;
 
                 var len = Read7BitInt(_reader);
                 var str = "";
@@ -65,8 +65,11 @@ namespace LibDotNetParser.DotNet.Streams
                     try
                     {
                         char c = _reader.ReadChar();
+                        if (c == '\u0001')
+                            break;
                         if (c != '\0')
                             str += c;
+                       
                     }
                     catch (System.IO.EndOfStreamException)
                     {
@@ -86,7 +89,7 @@ namespace LibDotNetParser.DotNet.Streams
                 {
                     //is odd
                 }
-                var x =  i - lenNotProper - 1;// - _dataSize;
+                var x = i - len - 1;
 
 
                 strings.Add((uint)x, str);
@@ -98,35 +101,24 @@ namespace LibDotNetParser.DotNet.Streams
 
         private int Read7BitInt(BinaryReader r)
         {
-            int size = 0;
-            int temp = 0;
-
-            while (true)
-            {
-                temp += r.ReadByte() & 0x7F;
-                size++;
-
-                try
-                {
-                    var b = r.ReadByte();
-                    if (b > 127)
-                    {
-                        temp <<= 7;
-                    }
-                    else
-                    {
-                        r.BaseStream.Position -= size;
-                        break;
-                    }
-                }
-                catch(EndOfStreamException)
-                {
-                    r.BaseStream.Position -= size;
-                    return temp;
-                }
-            }
-
-            return temp;
+            ReadInt32Bit7(r, out int result);
+            return result;
         }
+
+        public void ReadInt32Bit7(BinaryReader r, out Int32 result)
+        {
+            // Endianness does not matter, as this value is stored byte by byte.
+            // While the highest bit is set, the integer requires another of a maximum of 5 bytes.
+            result = 0;
+            for (int i = 0; i < sizeof(Int32) + 1; i++)
+            {
+                byte readByte = r.ReadByte();
+                result |= (readByte & 0b01111111) << i * 7;
+                if ((readByte & 0b10000000) == 0)
+                    return;
+            }
+            throw new ArgumentException("Invalid 7-bit encoded Int32.");
+        }
+
     }
 }
