@@ -6,13 +6,13 @@ Feel free to contribute.
 Yes, it will., but only a small amount of .NET Features are working.
 
 # What is working/implemented?
-- [X]If/while/for statements
-- [X]Console.Write/Writeline
-- [X]Classes
-- [X]Fields
-- [X]sbyte/byte/ushort/short/int/uint
-- [X]Adding/Subtracting/Multiplying/Dividing
-- [X]string.Length
+- [X] If/while/for statements
+- [X] Console.Write/Writeline
+- [X] Classes
+- [X] Fields
+- [X] sbyte/byte/ushort/short/int/uint
+- [X] Adding/Subtracting/Multiplying/Dividing
+- [X] string.Length
 - [X] Loading sepreate DLLS
 
 # Building
