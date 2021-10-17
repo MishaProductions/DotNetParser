@@ -9,6 +9,8 @@ namespace LibDotNetParser.CILApi
         private DotNetMethod m;
         private DotNetFile mainFile;
         private byte[] code;
+        private List<DotNetFile> ContextTypes = new List<DotNetFile>();
+
         public IlDecompiler(DotNetMethod method)
         {
             if (method == null)
@@ -17,6 +19,11 @@ namespace LibDotNetParser.CILApi
             m = method;
             mainFile = m.File;
             code = m.GetBody();
+            AddRefernce(m.Parrent.File);
+        }
+        public void AddRefernce(DotNetFile f)
+        {
+            ContextTypes.Add(f);
         }
 
         public ILInstruction[] Decompile()
@@ -26,11 +33,15 @@ namespace LibDotNetParser.CILApi
             for (int i = 0; i < code.Length; i++)
             {
                 var instruction = GetInstructionAtOffset(i, Instructions);
-                inr.Add(instruction);
+                if (instruction != null)
+                {
+                    inr.Add(instruction);
 
 
-                i += instruction.Size;
-                Instructions++;
+                    i += instruction.Size;
+                    Instructions++;
+                }
+
             }
 
             return inr.ToArray();
@@ -162,7 +173,7 @@ namespace LibDotNetParser.CILApi
 
                                     classs = tt.Name;
                                     Namespace = tt.Namespace;
-
+                                    
                                 }
                                 //Type REF
                                 else if (tabel == MemberRefParentType.TypeRef)
@@ -170,6 +181,8 @@ namespace LibDotNetParser.CILApi
                                     var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
 
                                     classs = tt.TypeName;
+
+                                    
                                     Namespace = tt.TypeNamespace;
                                 }
                                 //Module Ref
@@ -190,14 +203,45 @@ namespace LibDotNetParser.CILApi
                                 #endregion
 
                                 ret.Size += 4;
+                                var anamespace=mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
+                                var typeName = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
+
+                                //Now, resolve this method
+                                //TODO: Resolve the method properly by first
+                                //1) resolve the type of the method
+                                //2) search for the method in the type
+                                //3) get method RVA
+                                
+                                //For now, resolve it by name
+
+                                DotNetMethod m = null;
+                                foreach (var type in ContextTypes)
+                                {
+                                    foreach (var item in type.Types)
+                                    {
+                                        foreach (var meth in item.Methods)
+                                        {
+                                            if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace)
+                                            {
+                                                m = meth;
+                                            }
+                                        }
+                                    }
+
+                                }
+                                uint rva = 0;
+                                if (m != null)
+                                    rva = m.RVA;
+                                else
+                                    Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
 
 
                                 ret.Operand = new InlineMethodOperandData()
                                 {
-                                    NameSpace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace),
-                                    ClassName = mainFile.Backend.ClrStringsStream.GetByOffset(classs),
+                                    NameSpace = anamespace,
+                                    ClassName = typeName,
                                     FunctionName = funcName,
-                                    RVA = 0,
+                                    RVA = rva,
                                     Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
                                 };
                                 return ret;

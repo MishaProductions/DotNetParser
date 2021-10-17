@@ -1,9 +1,4 @@
-﻿using mscorlib;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace System
+﻿namespace System
 {
     public struct Byte
     {
@@ -17,7 +12,7 @@ namespace System
 
         public override string ToString()
         {
-            return FormatUtils.Internal__System_Byte_ToString(); //this will magicly return our value
+            return NumberFormatUtils.Internal__System_Byte_ToString(); //this will magicly return our value
         }
     }
 }

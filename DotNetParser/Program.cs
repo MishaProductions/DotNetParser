@@ -18,6 +18,7 @@ namespace DotNetParserRunner
 
             var decompiler = new IlDecompiler(m.EntryPoint);
             Console.WriteLine("Decompile of Main function:");
+
             var ilFormater = new ILFormater(decompiler.Decompile());
             var outputString = ilFormater.Format();
 

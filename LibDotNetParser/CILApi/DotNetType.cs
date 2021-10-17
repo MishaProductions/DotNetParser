@@ -83,7 +83,10 @@ namespace LibDotNetParser.CILApi
             InitMethods();
             InitFields();
         }
-
+        public override string ToString()
+        {
+            return $"Type {NameSpace}.{Name}";
+        }
         private void InitFields()
         {
             fields.Clear();
@@ -91,32 +94,29 @@ namespace LibDotNetParser.CILApi
 
             int max;
 
-            if (file.Tabels.FieldTabel.Count <= NextTypeIndex)
+            if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
             {
                 //Happens when this is the last type
-                max = file.Tabels.FieldTabel.Count;
+                max = file.Tabels.TypeDefTabel.Count - 1;
             }
             else
             {
                 //Get the max value from the next type.
-                max = (int)file.Tabels.TypeDefTabel[NextTypeIndex - 1].FieldList;
+                max = (int)file.Tabels.TypeDefTabel[NextTypeIndex].FieldList;
+                max--;
             }
 
-
+            if (file.Tabels.FieldTabel.Count < max)
+            {
+                //No more fields for this type
+                return;
+            }
             for (uint i = startIndex - 1; i < max; i++)
             {
-                if ((startIndex - 1) == max)
-                {
-                    //No methods for this type, contiune
-                    break;
-                }
                 if (file.Tabels.FieldTabel.Count != 0)
                 {
                     Field f;
-                    if ((int)i == file.Tabels.FieldTabel.Count)
-                        f = file.Tabels.FieldTabel[(int)i - 1];
-                    else
-                       f = file.Tabels.FieldTabel[(int)i];
+                    f = file.Tabels.FieldTabel[(int)i];
                     //var item = file.Tabels.FieldTabel[(int)i -1 ];
                     fields.Add(new DotNetField(file, f, this, (int)i+1));
                 }
@@ -138,9 +138,10 @@ namespace LibDotNetParser.CILApi
             else
             {
                 //Get the max value from the next type.
-                max = (int)file.Tabels.TypeDefTabel[file.Tabels.TypeDefTabel.Count - 1].MethodList;
+                max = (int)file.Tabels.TypeDefTabel[NextTypeIndex].MethodList;
+                max--;
             }
-
+            Console.WriteLine("Method list size for type: " + FullName+"index: "+startIndex+" max:"+max);
 
             for (uint i = startIndex - 1; i < max; i++)
             {
@@ -159,11 +160,6 @@ namespace LibDotNetParser.CILApi
                     methods.Add(new DotNetMethod(file, m, this));
                 }
             }
-        }
-
-        public override string ToString()
-        {
-            return FullName;
         }
     }
 }

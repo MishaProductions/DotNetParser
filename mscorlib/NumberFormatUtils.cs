@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace mscorlib
+namespace System
 {
-    internal class FormatUtils
+    internal class NumberFormatUtils
     {
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -25,5 +25,7 @@ namespace mscorlib
         public static extern string Internal__System_Int32_ToString();
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern string Internal__System_UInt32_ToString();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public static extern string Internal__System_Char_ToString();
     }
 }

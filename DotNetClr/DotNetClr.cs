@@ -48,12 +48,36 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("Internal__System_UInt16_ToString", Internal__System_UInt16_ToString);
             RegisterCustomInternalMethod("Internal__System_Int16_ToString", Internal__System_Int16_ToString);
             RegisterCustomInternalMethod("Internal__System_Int32_ToString", Internal__System_Int32_ToString);
-            RegisterCustomInternalMethod("Internal__System_UInt32_ToString", Internal__System_UInt32_ToString); 
+            RegisterCustomInternalMethod("Internal__System_UInt32_ToString", Internal__System_UInt32_ToString);
+            RegisterCustomInternalMethod("Internal__System_Char_ToString", Internal__System_Char_ToString);
 
 
             RegisterCustomInternalMethod("op_Equality", InternalMethod_String_op_Equality);
             RegisterCustomInternalMethod("DebuggerBreak", DebuggerBreak);
+            RegisterCustomInternalMethod("strLen", Internal__System_String_Get_Length);
+            RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
         }
+
+        private void Internal__System_Char_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            ;
+        }
+
+        private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = (string)Stack[Stack.Length - 2].value;
+            var index = (int)Stack[Stack.Length - 1].value;
+
+            returnValue = new MethodArgStack() { type = StackItemType.String, value = str[index] };
+        }
+
+        private void Internal__System_String_Get_Length(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var stringToRead = Stack[Stack.Length - 1];
+            var str = (string)stringToRead.value;
+            returnValue = new MethodArgStack() { type = StackItemType.Int32, value = str.Length };
+        }
+
         private void DebuggerBreak(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             Debugger.Break();
@@ -162,7 +186,36 @@ namespace libDotNetClr
         }
         private void InternalMethod_String_op_Equality(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            if ((string)stack[stack.Count - 2].value == (string)stack[stack.Count - 1].value)
+            var a = stack[stack.Count - 2].value;
+            var b = stack[stack.Count - 1].value;
+            string first = "";
+            string second = "";
+            if (a is string)
+            {
+                first = (string)a;
+            }
+            else if (a is int)
+            {
+                first = ((char)(int)a).ToString();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+            if (b is string)
+            {
+                second = (string)b;
+            }
+            else if (b is int)
+            {
+                second = ((char)(int)b).ToString();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            if (first == second)
             {
                 returnValue = new MethodArgStack() { type = StackItemType.Int32, value = 1 };
             }
@@ -227,24 +280,33 @@ namespace libDotNetClr
                 {
                     fullPath = Path.Combine(EXEPath, fileName + ".dll");
                 }
+                else if (File.Exists(fileName + ".exe"))
+                {
+                    fullPath = fileName + ".exe";
+                }
+                else if (File.Exists(fileName + ".dll"))
+                {
+                    fullPath = fileName + ".dll";
+                }
                 else
                 {
-                    clrError("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
-                    continue;
-                    //return;
+                    Console.WriteLine("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
+                    Console.WriteLine("DotNetParser will not be stopped.");
+                  //  return;
                 }
 #if CLR_DEBUG
                 Console.WriteLine("[CLR] Loading: " + Path.GetFileName(fullPath));
 #endif
-                try
-                {
+                //try
+                //{
                     dlls.Add(fileName, new DotNetFile(fullPath));
-                }
-                catch (Exception x)
-                {
-                    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
-                    return;
-                }
+                //}
+               // catch (Exception x)
+                //{
+                //    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
+                 //   throw;
+                //    return;
+                //}
             }
             Running = true;
             //Call contructor on main type
@@ -351,6 +413,10 @@ namespace libDotNetClr
 
             //Now decompile the code and run it
             var decompiler = new IlDecompiler(m);
+            foreach (var item in dlls)
+            {
+                decompiler.AddRefernce(item.Value);
+            }
             var code = decompiler.Decompile();
             int i;
             for (i = 0; i < code.Length; i++)
@@ -584,12 +650,40 @@ namespace libDotNetClr
                 {
                     if (stack.Count < 2)
                         throw new Exception("There has to be 2 or more items on the stack for ceq instruction to work!");
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
+                    var numb1 = stack[stack.Count - 2].value;
+                    var numb2 = stack[stack.Count - 1].value;
+                    int Numb1 = 0;
+                    int Numb2 = 0;
+
+                    if (numb1 is int)
+                    {
+                        Numb1 = (int)numb1;
+                    }
+                    else if (numb1 is char)
+                    {
+                        Numb1 = (int)(char)numb1;
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
+
+                    if (numb2 is int)
+                    {
+                        Numb2 = (int)numb2;
+                    }
+                    else if (numb2 is char)
+                    {
+                        Numb2 = (int)(char)numb2;
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
 
                     stack.RemoveRange(stack.Count - 2, 2);
                     ;
-                    if (numb1 == numb2)
+                    if (Numb1 == Numb2)
                     {
                         //push 1
                         stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
@@ -1000,7 +1094,7 @@ namespace libDotNetClr
 
                     if (m2 == null)
                     {
-                        Console.WriteLine($"Cannot resolve called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
+                       clrError($"Cannot resolve called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}","");
                         return null;
                     }
 
@@ -1041,6 +1135,11 @@ namespace libDotNetClr
                                 }
                             }
                         }
+                    }
+                    if (f2 == null)
+                    {
+                        clrError("Failed to resolve field for writing.","");
+                        return null;
                     }
                     var obj = stack[stack.Count - 2];
                     if (obj.type != StackItemType.Object) throw new InvalidOperationException();
@@ -1140,11 +1239,10 @@ namespace libDotNetClr
 
                     if (m2 == null)
                     {
-                        Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
+                       clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
                         return null;
                     }
-                    RunMethod(m2, m2.File, stack);
-                    ;
+                    stack.Add(RunMethod(m2, m2.File, stack));
                 }
                 #endregion
                 #region Arrays

@@ -17,6 +17,7 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
 		<IlcSystemModule>noruntime</IlcSystemModule>
+		<RootNamespace>System</RootNamespace>
 	</PropertyGroup>
 
 </Project>

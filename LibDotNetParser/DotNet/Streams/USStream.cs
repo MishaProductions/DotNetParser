@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -20,7 +21,7 @@ namespace LibDotNetParser.DotNet.Streams
         public string GetByOffset(uint offset)
         {
             if (!_strings.ContainsKey(offset))
-                return "<BUG> No string at offset: " + offset;
+                throw new Exception("User string not found: " + offset);
             return _strings[offset];
         }
 
@@ -43,57 +44,61 @@ namespace LibDotNetParser.DotNet.Streams
 
         public USStream Read()
         {
-            //Don't ask me how this works becuase idk
             var strings = new Dictionary<uint, string>();
             uint CurrentString = 1;
             _reader.BaseStream.Position = 1;
 
             //The US Stream starts with a null byte, so skip it
+            bool eightByteStart = false;
             for (int i = 1; i < _dataSize; i++)
             {
-                //var lenNotProper = _reader.ReadByte();
-                //_reader.BaseStream.Position--;
+                var len = _reader.ReadByte();
+                if (len == 0x80)
+                {
+                    eightByteStart = true;
+                    continue;
+                }
 
-                var len = Read7BitInt(_reader);
-                var str = "";
-
-                if (len == 0) //Ignore zero sized strings
+                //Ignore zero sized strings
+                if (len == 0)
                     continue;
 
-                for (int i2 = 0; i2 < len; i2++)
+                var ActualStringLen = len % 2 == 0 ? len - 2 : len - 1;
+
+                List<byte> bytes = new List<byte>();
+                for (int i2 = 0; i2 < ActualStringLen; i2++)
                 {
                     try
                     {
-                        char c = _reader.ReadChar();
-                        if (c == '\u0001')
-                            break;
-                        if (c != '\0')
-                            str += c;
-                       
+                        byte a = _reader.ReadByte();
+                        bytes.Add(a);
                     }
                     catch (System.IO.EndOfStreamException)
                     {
-
+                        throw new Exception("Error while reading US stream table: End of stream. Please open an issue on github.");
                     }
                 }
 
+                var nullBytes = len - ActualStringLen;
+                for (int i3 = 0; i3 < nullBytes; i3++)
+                {
+                    var b = _reader.ReadByte();
+                    if (b != 0)
+                    {
+                        //throw new Exception("Expected null byte.");
+                    }
+                }
                 i = (int)_reader.BaseStream.Position;
 
-                if (len % 2 == 0)
-                {
-                    //When string is even, there is an additional null byte
-                    i++;
-                    _reader.BaseStream.Position++;
-                }
-                else
-                {
-                    //is odd
-                }
                 var x = i - len - 1;
+                if (eightByteStart)
+                {
+                    x--;
+                    eightByteStart = false;
+                }
 
-
-                strings.Add((uint)x, str);
-
+                string s = Encoding.Unicode.GetString(bytes.ToArray());
+                strings.Add((uint)x, s);
                 CurrentString++;
             }
             return new USStream(strings);

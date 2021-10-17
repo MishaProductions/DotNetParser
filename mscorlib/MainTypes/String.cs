@@ -5,9 +5,16 @@ using System.Text;
 
 namespace System
 {
-    public sealed class String
+    public class String
     {
-        public readonly int Length;
+        public char get_Chars(int index)
+        {
+            return String_get_Chars_1(index);
+        }
+        public int get_Length()
+        {
+            return strLen();
+        }
         public static bool IsNullOrEmpty(string s)
         {
             if (s == null)
@@ -18,6 +25,9 @@ namespace System
 
             return false;
         }
+
+        //Internal calls
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern string Concat(string a, string b);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -25,5 +35,9 @@ namespace System
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool op_Equality(string a, string b);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int strLen();
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static char String_get_Chars_1(int i);
     }
 }

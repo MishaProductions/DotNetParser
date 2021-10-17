@@ -183,6 +183,7 @@ namespace DotNetparserTester
             }
             TestsComplete();
 
+            //TODO5
             //string[] stringArray = new string[8];
             //if (stringArray.Length == 8)
             //{
@@ -209,7 +210,7 @@ namespace DotNetparserTester
             else
             {
                 //This also tests the concat function
-                TestFail("Byte.ToString test fail, ToString returned " + byteStr+ " when it should be 255");
+                TestFail("Byte.ToString test fail, ToString returned " + byteStr + " when it should be 255");
             }
             //Test sbyte
             var sbyteStr = ((sbyte)-50).ToString();
@@ -219,7 +220,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("SByte.ToString test fail, ToString returned " + sbyteStr + " when it should be -50.\0");
+                TestFail("SByte.ToString test fail, ToString returned " + sbyteStr + " when it should be -50.");
             }
             //Test ushort
             var ushortStr = ((ushort)52).ToString();
@@ -229,7 +230,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("UInt16.ToString test fail, ToString returned " + ushortStr + " when it should be 52.\0");
+                TestFail("UInt16.ToString test fail, ToString returned " + ushortStr + " when it should be 52.");
             }
             //Test short
             var shortStr = ((short)-5200).ToString();
@@ -239,7 +240,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("Int16.ToString test fail, ToString returned " + shortStr + " when it should be -5200.\0");
+                TestFail("Int16.ToString test fail, ToString returned " + shortStr + " when it should be -5200.");
             }
             //Test int
             var intStr = (-520000).ToString();
@@ -249,7 +250,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("Int32.ToString test fail, ToString returned " + intStr + " when it should be -520000.\0");
+                TestFail("Int32.ToString test fail, ToString returned " + intStr + " when it should be -520000.");
             }
             //Test uint
             var uintStr = (uint.MaxValue).ToString();
@@ -259,7 +260,38 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("UInt32.ToString test fail, ToString returned " + uintStr + " when it should be 4294967295.\0");
+                TestFail("UInt32.ToString test fail, ToString returned " + uintStr + " when it should be 4294967295.");
+            }
+
+            //Test strings
+            var testString = "TEST";
+            if (testString.Length == 4)
+            {
+                TestSuccess("String.Length == 4 test");
+            }
+            else
+            {
+                TestFail("String.Length == 4 test fail, testString.Length should be 4, but it is " + testString.Length.ToString());
+            }
+            var c = testString[0];
+            if (c == 'T')
+            {
+                TestSuccess("Get char in string test.");
+            }
+            else
+            {
+                TestFail("Get char in string test. Wanted 'T' but got "+c);
+            }
+            string superLongString = "Hello there, this is a super duper long string. This is used to see how good my crappy unicode string tabel implementation is";
+            Console.WriteLine(superLongString);
+
+            if ('A'.ToString() == "A")
+            {
+                TestSuccess("Char.ToString() test");
+            }
+            else
+            {
+                TestFail("Char.ToString() test");
             }
         }
         /// <summary>

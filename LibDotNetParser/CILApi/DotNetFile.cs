@@ -5,6 +5,7 @@ namespace LibDotNetParser.CILApi
     public class DotNetFile
     {
         PEFile peFile;
+        List<DotNetType> t = new List<DotNetType>();
         public PEFile Backend
         {
             get { return peFile; }
@@ -13,14 +14,6 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                List<DotNetType> t = new List<DotNetType>();
-                int i = 0;
-                foreach (var item in peFile.Tabels.TypeDefTabel)
-                {
-                    t.Add(new DotNetType(this, item, i + 1));
-                    i++;
-                }
-
                 return t;
             }
         }
@@ -79,6 +72,18 @@ namespace LibDotNetParser.CILApi
             peFile = new PEFile(Path);
             if (!peFile.ContainsMetadata)
                 throw new System.Exception("EXE File has no .NET Metadata");
+
+            FindTypes();
+        }
+
+        private void FindTypes()
+        {
+            int i = 0;
+            foreach (var item in peFile.Tabels.TypeDefTabel)
+            {
+                t.Add(new DotNetType(this, item, i + 1));
+                i++;
+            }
         }
 
         public DotNetFile(byte[] file)

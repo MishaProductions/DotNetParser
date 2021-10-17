@@ -116,8 +116,8 @@ namespace LibDotNetParser
 
             //Parse the #US Stream
             var bytes2 = GetStreamBytes("#US", r);
+            File.WriteAllBytes("strings", bytes2);
             ClrUsStream = new USStreamReader(bytes2).Read();
-
 
 
             #endregion
