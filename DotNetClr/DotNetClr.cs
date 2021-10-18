@@ -57,10 +57,12 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("strLen", Internal__System_String_Get_Length);
             RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
         }
-
+        #region Implemention of internal methods
+        #region ToString() for numbers
         private void Internal__System_Char_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            ;
+            var c = Stack[Stack.Length - 1].value;
+            returnValue = new MethodArgStack() { value = ((char)(int)c).ToString(), type = StackItemType.Char};
         }
 
         private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -80,10 +82,8 @@ namespace libDotNetClr
 
         private void DebuggerBreak(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            Debugger.Break();
+            Console.WriteLine("DebuggerBreak() not supported");
         }
-        #region Implemention of internal methods
-        #region ToString() for numbers
         private void Internal__System_UInt32_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
@@ -266,11 +266,25 @@ namespace libDotNetClr
                 file = null;
                 return;
             }
+            InitAssembly(file);
+
+
+
+            //Run the entry point
+            RunMethod(file.EntryPoint, file, stack);
+        }
+        private void InitAssembly(DotNetFile file)
+        {
             //Resolve all of the DLLS
             foreach (var item in file.Backend.Tabels.AssemblyRefTabel)
             {
                 var fileName = file.Backend.ClrStringsStream.GetByOffset(item.Name);
                 string fullPath = "";
+                if (dlls.ContainsKey(fileName))
+                {
+                    PrintColor("[WARN] Assembly already loaded: " + fileName, ConsoleColor.Yellow);
+                    continue;
+                }
 
                 if (File.Exists(Path.Combine(EXEPath, fileName + ".exe")))
                 {
@@ -290,40 +304,57 @@ namespace libDotNetClr
                 }
                 else
                 {
-                    Console.WriteLine("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
-                    Console.WriteLine("DotNetParser will not be stopped.");
-                  //  return;
+                    //Console.WriteLine("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
+                    //Console.WriteLine("DotNetParser will not be stopped.");
+                    //  return;
                 }
 #if CLR_DEBUG
                 Console.WriteLine("[CLR] Loading: " + Path.GetFileName(fullPath));
 #endif
                 //try
                 //{
-                    dlls.Add(fileName, new DotNetFile(fullPath));
+                if (!string.IsNullOrEmpty(fullPath))
+                {
+                    var file2 = new DotNetFile(fullPath);
+                    InitAssembly(file2);
+                    dlls.Add(fileName,file2);
+                    PrintColor("[OK] Loaded assembly: " + fileName, ConsoleColor.Green);
+                }
+                   
+                else
+                {
+                    PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
+                }
+
                 //}
-               // catch (Exception x)
+                // catch (Exception x)
                 //{
                 //    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
-                 //   throw;
+                //   throw;
                 //    return;
                 //}
             }
             Running = true;
             //Call contructor on main type
-            foreach (var item in file.EntryPointType.Methods)
+            if (file.EntryPointType != null)
             {
-                if (item.Name == ".cctor")
+                foreach (var item in file.EntryPointType.Methods)
                 {
-                    RunMethod(item, file, stack);
-                    break;
+                    if (item.Name == ".cctor")
+                    {
+                        RunMethod(item, file, stack);
+                        break;
+                    }
                 }
             }
-
-
-
-            //Run the entry point
-            RunMethod(file.EntryPoint, file, stack);
         }
+        /// <summary>
+        /// Runs a method
+        /// </summary>
+        /// <param name="m">The method</param>
+        /// <param name="file">The file of the method</param>
+        /// <param name="oldStack">Old stack</param>
+        /// <returns>Returns the return value</returns>
         private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file, CustomList<MethodArgStack> oldStack)
         {
             if (m.Name == ".ctor" && m.Parrent.FullName == "System.Object")
@@ -1094,7 +1125,7 @@ namespace libDotNetClr
 
                     if (m2 == null)
                     {
-                       clrError($"Cannot resolve called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}","");
+                        clrError($"Cannot resolve called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
                         return null;
                     }
 
@@ -1138,7 +1169,7 @@ namespace libDotNetClr
                     }
                     if (f2 == null)
                     {
-                        clrError("Failed to resolve field for writing.","");
+                        clrError("Failed to resolve field for writing.", "");
                         return null;
                     }
                     var obj = stack[stack.Count - 2];
@@ -1239,7 +1270,7 @@ namespace libDotNetClr
 
                     if (m2 == null)
                     {
-                       clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
+                        clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
                         return null;
                     }
                     stack.Add(RunMethod(m2, m2.File, stack));

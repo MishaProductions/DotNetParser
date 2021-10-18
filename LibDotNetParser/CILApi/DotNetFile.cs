@@ -50,7 +50,8 @@ namespace LibDotNetParser.CILApi
             {
                 var c = peFile.ClrHeader.EntryPointToken;
                 var entryPoint = c & 0xFF;
-
+                if (entryPoint == 0)
+                    return null; //No entry point
                 DotNetType m = null;
                 foreach (var item in Types)
                 {

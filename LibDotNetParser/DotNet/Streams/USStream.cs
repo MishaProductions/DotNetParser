@@ -52,7 +52,10 @@ namespace LibDotNetParser.DotNet.Streams
             bool eightByteStart = false;
             for (int i = 1; i < _dataSize; i++)
             {
-                var len = _reader.ReadByte();
+                var o = _reader.BaseStream.Position;
+                var nb = Read7BitInt(_reader);
+                _reader.BaseStream.Position = o;
+                    var len = _reader.ReadByte();
                 if (len == 0x80)
                 {
                     eightByteStart = true;
@@ -66,12 +69,20 @@ namespace LibDotNetParser.DotNet.Streams
                 var ActualStringLen = len % 2 == 0 ? len - 2 : len - 1;
 
                 List<byte> bytes = new List<byte>();
-                for (int i2 = 0; i2 < ActualStringLen; i2++)
+                bool end = false;
+                for (int i2 = 0; i2 < ActualStringLen/2; i2++)
                 {
                     try
                     {
                         byte a = _reader.ReadByte();
+                        byte b = _reader.ReadByte();
+                        if (a + b == 0)
+                        {
+                            end = true;
+                            break;
+                        }
                         bytes.Add(a);
+                        bytes.Add(b);
                     }
                     catch (System.IO.EndOfStreamException)
                     {
@@ -80,12 +91,15 @@ namespace LibDotNetParser.DotNet.Streams
                 }
 
                 var nullBytes = len - ActualStringLen;
-                for (int i3 = 0; i3 < nullBytes; i3++)
+                if (!end)
                 {
-                    var b = _reader.ReadByte();
-                    if (b != 0)
+                    for (int i3 = 0; i3 < nullBytes; i3++)
                     {
-                        //throw new Exception("Expected null byte.");
+                        var b = _reader.ReadByte();
+                        if (b != 0)
+                        {
+                            //throw new Exception("Expected null byte.");
+                        }
                     }
                 }
                 i = (int)_reader.BaseStream.Position;

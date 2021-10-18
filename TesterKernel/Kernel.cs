@@ -36,7 +36,6 @@ namespace TesterKernel
                 Console.WriteLine("Decompiltion of Main function:");
                 Console.WriteLine("");
 
-
                 var ilFormater = new ILFormater(decompiler.Decompile());
                 var outputString = ilFormater.Format();
                 Console.WriteLine(outputString);
@@ -50,7 +49,7 @@ namespace TesterKernel
             }
             catch(Exception x)
             {
-                Console.WriteLine("Caught: "+x.Message);
+                Console.WriteLine("Caught error: "+x.Message);
             }
         }
 

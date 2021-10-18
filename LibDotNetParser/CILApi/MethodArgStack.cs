@@ -24,6 +24,7 @@ namespace LibDotNetParser
         Float32,
         Float64,
         Object,
-        Array
+        Array,
+        Char
     }
 }
