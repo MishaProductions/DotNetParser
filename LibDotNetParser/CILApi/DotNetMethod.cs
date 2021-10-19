@@ -6,12 +6,12 @@ namespace LibDotNetParser.CILApi
 {
     public class DotNetMethod
     {
-        private PEFile file;
-        private DotNetFile file2;
-        public Method BackendTabel;
+        private readonly PEFile file;
+        private readonly DotNetFile file2;
+        private readonly MethodAttr flags;
+        private readonly MethodImp implFlags;
 
-        MethodAttr flags;
-        MethodImp implFlags;
+        public Method BackendTabel;
 
         /// <summary>
         /// Function Signature.

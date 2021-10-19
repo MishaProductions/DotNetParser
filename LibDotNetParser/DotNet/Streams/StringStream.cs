@@ -8,11 +8,9 @@ namespace LibDotNetParser.DotNet.Streams
 {
     public class StringsStream
     {
-        byte[] data;
-        BinaryReader r;
+        private BinaryReader r;
         public StringsStream(byte[] data)
         {
-            this.data = data;
             r = new BinaryReader(new MemoryStream(data));
         }
 

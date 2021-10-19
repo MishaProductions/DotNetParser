@@ -14,7 +14,7 @@ namespace TesterKernel
         protected override void BeforeRun()
         {
             //Init
-            CosmosVFS fs = new Sys.FileSystem.CosmosVFS();
+            var fs = new Sys.FileSystem.CosmosVFS();
             VFSManager.RegisterVFS(fs);
             Console.Clear();
 
@@ -43,7 +43,7 @@ namespace TesterKernel
                 Console.WriteLine("Running program:");
 
 
-                DotNetClr clr = new DotNetClr(fl, @"0:\framework");
+                var clr = new DotNetClr(fl, @"0:\framework");
                 clr.Start();
                 Console.WriteLine("Program exec complete.");
             }

@@ -49,10 +49,11 @@ namespace DotNetParserRunner
 
         private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            if (NumbOfFailedTests == 0)
-                PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Green);
-            else
-                PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Red);
+            Console.WriteLine();
+            PrintWithColor("All Tests Completed.", ConsoleColor.DarkYellow);
+            Console.WriteLine();
+            PrintWithColor("Passed tests: "+NumbOfSuccesssTests, ConsoleColor.Green);
+            PrintWithColor("Failed tests: " + NumbOfFailedTests, ConsoleColor.Red);
         }
 
         private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)

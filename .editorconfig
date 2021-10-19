@@ -2,3 +2,6 @@
 
 # CS0626: Method, operator, or accessor is marked external and has no attributes on it
 dotnet_diagnostic.CS0626.severity = none
+
+# IDE0044: Add readonly modifier
+dotnet_style_readonly_field = true

@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LibDotNetParser.CILApi
 {
     public class DotNetFile
     {
-        PEFile peFile;
-        List<DotNetType> t = new List<DotNetType>();
+        private readonly PEFile peFile;
+        private readonly List<DotNetType> types = new List<DotNetType>();
+        private DotNetType entryType;
+        private DotNetMethod entryMethod;
         public PEFile Backend
         {
             get { return peFile; }
@@ -14,7 +17,7 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                return t;
+                return types;
             }
         }
         /// <summary>
@@ -24,23 +27,7 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                var c = peFile.ClrHeader.EntryPointToken;
-                var entryPoint = c & 0xFF;
-
-                DotNetMethod m = null;
-                foreach (var item in Types)
-                {
-                    foreach (var m2 in item.Methods)
-                    {
-                        if (m2.BackendTabel == peFile.Tabels.MethodTabel[(int)entryPoint -1])
-                        {
-                            m = m2;
-                            break;
-                        }
-                    }
-                }
-
-                return m;
+                return entryMethod;
             }
         }
 
@@ -48,33 +35,66 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                var c = peFile.ClrHeader.EntryPointToken;
-                var entryPoint = c & 0xFF;
-                if (entryPoint == 0)
-                    return null; //No entry point
-                DotNetType m = null;
-                foreach (var item in Types)
-                {
-                    foreach (var m2 in item.Methods)
-                    {
-                        if (m2.BackendTabel == peFile.Tabels.MethodTabel[(int)entryPoint - 1])
-                        {
-                            m = m2.Parrent;
-                            break;
-                        }
-                    }
-                }
-
-                return m;
+                return entryType;
             }
         }
         public DotNetFile(string Path)
         {
+            if (string.IsNullOrEmpty(Path))
+            {
+                throw new ArgumentException(nameof(Path));
+            }
+
             peFile = new PEFile(Path);
             if (!peFile.ContainsMetadata)
+            {
                 throw new System.Exception("EXE File has no .NET Metadata");
+            }
 
             FindTypes();
+            InitEntryType();
+        }
+        public DotNetFile(byte[] file)
+        {
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
+            peFile = new PEFile(file);
+            if (!peFile.ContainsMetadata)
+            {
+                throw new System.Exception("EXE File has no .NET Metadata");
+            }
+
+            FindTypes();
+            InitEntryType();
+        }
+
+        private void InitEntryType()
+        {
+            var c = peFile.ClrHeader.EntryPointToken;
+            var entryPoint = c & 0xFF;
+            if (entryPoint == 0)
+            {
+                //No entry point
+                entryType = null;
+                entryMethod = null;
+                return;
+            }
+
+            foreach (var item in Types)
+            {
+                foreach (var m2 in item.Methods)
+                {
+                    if (m2.BackendTabel == peFile.Tabels.MethodTabel[(int)entryPoint - 1])
+                    {
+                        entryType = m2.Parrent;
+                        entryMethod = m2;
+                        break;
+                    }
+                }
+            }
         }
 
         private void FindTypes()
@@ -82,16 +102,9 @@ namespace LibDotNetParser.CILApi
             int i = 0;
             foreach (var item in peFile.Tabels.TypeDefTabel)
             {
-                t.Add(new DotNetType(this, item, i + 1));
+                types.Add(new DotNetType(this, item, i + 1));
                 i++;
             }
-        }
-
-        public DotNetFile(byte[] file)
-        {
-            peFile = new PEFile(file);
-            if (!peFile.ContainsMetadata)
-                throw new System.Exception("EXE File has no .NET Metadata");
         }
     }
 }

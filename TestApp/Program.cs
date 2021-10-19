@@ -181,18 +181,6 @@ namespace DotNetparserTester
             {
                 TestFail("Field write test (pass 2)");
             }
-            TestsComplete();
-
-            //TODO5
-            //string[] stringArray = new string[8];
-            //if (stringArray.Length == 8)
-            //{
-            //    TestSuccess("Create array");
-            //}
-            //else
-            //{
-            //    TestSuccess("Create array, len should be 8 but it is "+stringArray.Length);
-            //}
 
             //Test Data types
 
@@ -293,6 +281,24 @@ namespace DotNetparserTester
             {
                 TestFail("Char.ToString() test");
             }
+            Console.WriteLine("Starting part 2 of Test suite");
+            string[] stringArray = new string[8];
+            if (stringArray.Length == 8)
+            {
+                TestSuccess("Create array");
+            }
+            else
+            {
+                TestSuccess("Create array, len should be 8 but it is " + stringArray.Length);
+            }
+            //TODO
+            //stringArray[0] = "a";
+            //stringArray[1] = "b";
+
+
+
+            TestsComplete();
+            throw null;
         }
         /// <summary>
         /// Returns 90.

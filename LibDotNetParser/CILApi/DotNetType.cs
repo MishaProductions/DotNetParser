@@ -12,10 +12,10 @@ namespace LibDotNetParser.CILApi
 {
     public class DotNetType
     {
-        private PEFile file;
-        private TypeDef type;
-        private TypeFlags flags;
-        private int NextTypeIndex;
+        private readonly PEFile file;
+        private readonly TypeDef type;
+        private readonly TypeFlags flags;
+        private readonly int NextTypeIndex;
 
         public string Name { get; private set; }
         public string NameSpace { get; private set; }
@@ -141,7 +141,6 @@ namespace LibDotNetParser.CILApi
                 max = (int)file.Tabels.TypeDefTabel[NextTypeIndex].MethodList;
                 max--;
             }
-            Console.WriteLine("Method list size for type: " + FullName+"index: "+startIndex+" max:"+max);
 
             for (uint i = startIndex - 1; i < max; i++)
             {
