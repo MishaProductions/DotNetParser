@@ -9,7 +9,7 @@ namespace DotNetParserRunner
 {
     class Program
     {
-        static int NumbOfSuccesssTests = 0;
+        private static int NumbOfSuccesssTests = 0;
         private static int NumbOfFailedTests = 0;
         static void Main()
         {
