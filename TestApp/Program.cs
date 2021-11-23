@@ -295,10 +295,19 @@ namespace DotNetparserTester
             //stringArray[0] = "a";
             //stringArray[1] = "b";
 
-
+            Console.WriteLine("Reflection tests");
+            var stringType = obj.GetType();
+            var ret = stringType.FullName;
+            if (ret == "DotNetparserTester.MyObject")
+            {
+                TestSuccess("obj.GetType().FullName is correct");
+            }
+            else
+            {
+                TestFail("obj.GetType().FullName is incorrect. Expected DotNetparserTester.MyObject, but got " + ret);
+            }
 
             TestsComplete();
-            throw null;
         }
         /// <summary>
         /// Returns 90.

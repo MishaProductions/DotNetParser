@@ -23,6 +23,8 @@
         <Profile>VMware</Profile>
         <Description>Use VMware Player or Workstation to deploy and debug.</Description>
         <PxeInterface>192.168.0.8</PxeInterface>
+        <CompileVBEMultiboot>False</CompileVBEMultiboot>
+        <VBEResolution>a</VBEResolution>
     </PropertyGroup>
 
     <ItemGroup>

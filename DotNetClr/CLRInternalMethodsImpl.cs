@@ -28,6 +28,18 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("DebuggerBreak", DebuggerBreak);
             RegisterCustomInternalMethod("strLen", Internal__System_String_Get_Length);
             RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
+            RegisterCustomInternalMethod("GetObjType", GetObjType);
+        }
+
+        private void GetObjType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var obj = Stack[Stack.Length - 1];
+
+            //Create the type object
+
+            MethodArgStack a = CreateType("System", "Type");
+            WriteStringToType(a, "internal__fullname", obj.ObjectType.FullName);
+            returnValue = a;
         }
         #region Making custom internal methods
         /// <summary>
@@ -221,5 +233,37 @@ namespace libDotNetClr
             Console.WriteLine("DebuggerBreak() not supported");
         }
         #endregion
+
+        private MethodArgStack CreateType(string nameSpace, string TypeName)
+        {
+            DotNetType ttype = null;
+            foreach (var dll in dlls)
+            {
+                foreach (var type in dll.Value.Types)
+                {
+                    if (type.NameSpace == nameSpace && type.Name == TypeName)
+                    {
+                        ttype = type;
+                    }
+                }
+            }
+            if (ttype == null)
+            {
+                clrError("Internal: Cannot resolve type: " + nameSpace + "." + TypeName+" Error at CLRInternalMethodsImpl::CreateType", "TypeNotFound");
+                return null;
+            }
+
+            
+            //TODO: Do we need to resolve the constructor?
+            MethodArgStack a = new MethodArgStack() { ObjectContructor = null, ObjectType = ttype, type = StackItemType.Object, value = new ObjectValueHolder() };
+            return a;
+        }
+
+
+        private void WriteStringToType(MethodArgStack objectInstance, string property, string value)
+        {
+            var d = (ObjectValueHolder)objectInstance.value;
+            d.Fields.Add(property, new MethodArgStack() { type = StackItemType.String, value = value });
+        }
     }
 }
