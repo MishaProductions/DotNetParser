@@ -13,9 +13,10 @@ namespace DotNetparserTester
             WelcomeMessage = "lol";
             Console.WriteLine("constructor end....");
         }
-        public void Hello()
+        public void Hello(string SecondMessage)
         {
             Console.WriteLine(WelcomeMessage);
+            Console.WriteLine(SecondMessage);
         }
 
         public class SubClass
@@ -310,7 +311,7 @@ namespace DotNetparserTester
             Console.WriteLine("Reflection tests");
             MyObject obj = new MyObject();
             obj.WelcomeMessage = "Hello!";
-            obj.Hello();
+            obj.Hello("Hi again!");
             var ret = obj.GetType().FullName;
             if (ret == "DotNetparserTester.MyObject")
             {

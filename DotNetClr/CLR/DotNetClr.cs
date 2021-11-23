@@ -1213,7 +1213,7 @@ namespace libDotNetClr
                         newParams.Add(objectToCallOn);
                     if (StartParmIndex != -1 && EndParmIndex != 1)
                     {
-                        for (int x = StartParmIndex - 1; x < EndParmIndex; x++)
+                        for (int x = StartParmIndex; x < EndParmIndex - 1; x++)
                         {
                             newParams.Add(stack[x]);
                         }

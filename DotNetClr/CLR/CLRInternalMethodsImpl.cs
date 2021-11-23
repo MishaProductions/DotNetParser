@@ -86,8 +86,8 @@ namespace libDotNetClr
 
         private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var str = (string)Stack[Stack.Length - 1].value;
-            var index = (int)Stack[Stack.Length - 2].value;
+            var str = (string)Stack[Stack.Length - 2].value;
+            var index = (int)Stack[Stack.Length - 1].value;
 
             returnValue = new MethodArgStack() { type = StackItemType.String, value = str[index] };
         }
