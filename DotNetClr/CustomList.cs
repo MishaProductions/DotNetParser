@@ -3,6 +3,7 @@ using LibDotNetParser;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace libDotNetClr
 {
@@ -41,28 +42,12 @@ namespace libDotNetClr
         }
         public void Add(T a)
         {
-#if STACK_DEBUG
-            if (a == null)
-            {
-                Console.WriteLine("***Adding a null item to the stack***");
-                throw new Exception();
-            }
-
-            if (a is MethodArgStack a2)
-            {
-                if (a2.type == StackItemType.Int32)
-                {
-                    Console.WriteLine("Adding a " + a2.type + " to the stack: " + (int)a2.value);
-                }
-                else
-                    Console.WriteLine("Adding a " + a2.type + " to the stack");
-            }
-#endif
             backend.Add(a);
         }
 
         public void RemoveAt(int m)
         {
+            var a = backend[m];
             backend.RemoveAt(m);
         }
         public void RemoveRange(int index, int count)

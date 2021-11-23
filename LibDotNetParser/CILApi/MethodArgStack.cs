@@ -12,6 +12,37 @@ namespace LibDotNetParser
 
         public int ArrayLen;
         public object[] ArrayItems;
+
+        public override string ToString()
+        {
+            switch (type)
+            {
+                case StackItemType.String:
+                    return (string)value;
+                case StackItemType.Int32:
+                    return ((int)value).ToString();
+                case StackItemType.Int64:
+                    return ((ulong)value).ToString();
+                case StackItemType.ldnull:
+                    return "NULL";
+                case StackItemType.NotImpl:
+                    return "Not implemented";
+                case StackItemType.Float32:
+                    return ((float)value).ToString();
+                case StackItemType.Float64:
+                    return ((decimal)value).ToString();
+                case StackItemType.Object:
+                    return "Object: "+ObjectType.FullName;
+                case StackItemType.Array:
+                    return "Array";
+                case StackItemType.Char:
+                    return ((char)value).ToString();
+                case StackItemType.ObjectRef:
+                    return "Object refrence to " + ObjectType.FullName;
+                default:
+                    return "Unknown";
+            }
+        }
     }
 
     public enum StackItemType
@@ -25,6 +56,7 @@ namespace LibDotNetParser
         Float64,
         Object,
         Array,
-        Char
+        Char,
+        ObjectRef
     }
 }

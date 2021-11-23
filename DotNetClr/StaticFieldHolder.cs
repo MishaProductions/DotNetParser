@@ -14,5 +14,9 @@ namespace libDotNetClr
     {
         public MethodArgStack value;
         public DotNetField theField;
+        public override string ToString()
+        {
+            return "Field: " + theField.ToString() + ", Value: " + theField.ToString();
+        }
     }
 }

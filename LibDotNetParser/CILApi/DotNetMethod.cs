@@ -66,6 +66,8 @@ namespace LibDotNetParser.CILApi
             }
         }
         public DotNetType Parrent { get; }
+        public bool HasReturnValue { get; }
+
         /// <summary>
         /// Internal use only
         /// </summary>
@@ -95,6 +97,7 @@ namespace LibDotNetParser.CILApi
             var type = blobStreamReader.ReadByte();
             var parmaters = blobStreamReader.ReadByte();
             var returnType = blobStreamReader.ReadByte();
+            HasReturnValue = returnType != 1;
             if (type == 0)
             {
                 //Static method
@@ -106,7 +109,7 @@ namespace LibDotNetParser.CILApi
                 var parm = blobStreamReader.ReadByte();
                 if (parm == 0x0E)
                 {
-                    Parms.Add(new MethodArgStack() { type = StackItemType.String});
+                    Parms.Add(new MethodArgStack() { type = StackItemType.String });
                 }
             }
 
@@ -225,13 +228,14 @@ namespace LibDotNetParser.CILApi
 
         internal static MethodSignatureInfo ParseMethodSignature(uint signature, DotNetFile file, string FunctionName)
         {
-            string sig=""; 
-             var blobStreamReader = new BinaryReader(new MemoryStream(file.Backend.BlobStream));
+            string sig = "";
+            var blobStreamReader = new BinaryReader(new MemoryStream(file.Backend.BlobStream));
             blobStreamReader.BaseStream.Seek(signature, SeekOrigin.Begin);
             var length = blobStreamReader.ReadByte();
             var type = blobStreamReader.ReadByte();
             var parmaters = blobStreamReader.ReadByte();
             var returnType = blobStreamReader.ReadByte();
+
             if (type == 0)
             {
                 //Static method
@@ -277,10 +281,19 @@ namespace LibDotNetParser.CILApi
                 }
                 info.AmountOfParms++;
             }
+
+            if (parmaters == 1)
+            {
+                info.LastParm = info.FirstParm;
+            }
             sig = sig.TrimEnd(','); //Remove the last ,
             sig += ");";
             info.Signature = sig;
             return info;
+        }
+        public override string ToString()
+        {
+            return $"{Name} in {Parrent.FullName}";
         }
     }
     class MethodSignatureInfo { public int AmountOfParms; public string Signature; public StackItemType FirstParm; public StackItemType LastParm; }

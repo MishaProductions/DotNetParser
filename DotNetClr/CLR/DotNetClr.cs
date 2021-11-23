@@ -84,68 +84,20 @@ namespace libDotNetClr
                 file = null;
                 return;
             }
-            InitAssembly(file);
-
+            InitAssembly(file, true);
+            PrintColor("Jumping to entry point", ConsoleColor.DarkMagenta);
             //Run the entry point
             RunMethod(file.EntryPoint, file, stack);
         }
-        private void InitAssembly(DotNetFile file)
+        private void InitAssembly(DotNetFile file, bool InitCorLib)
         {
+            if (InitCorLib)
+                ResolveDLL("mscorlib"); //Always resolve mscorlib, incase the exe uses .net core
             //Resolve all of the DLLS
             foreach (var item in file.Backend.Tabels.AssemblyRefTabel)
             {
                 var fileName = file.Backend.ClrStringsStream.GetByOffset(item.Name);
-                string fullPath = "";
-                if (dlls.ContainsKey(fileName))
-                {
-                    PrintColor("[WARN] Assembly already loaded: " + fileName, ConsoleColor.Yellow);
-                    continue;
-                }
-
-                if (File.Exists(Path.Combine(EXEPath, fileName + ".exe")))
-                {
-                    fullPath = Path.Combine(EXEPath, fileName + ".exe");
-                }
-                else if (File.Exists(Path.Combine(EXEPath, fileName + ".dll")))
-                {
-                    fullPath = Path.Combine(EXEPath, fileName + ".dll");
-                }
-                else if (File.Exists(fileName + ".exe"))
-                {
-                    fullPath = fileName + ".exe";
-                }
-                else if (File.Exists(fileName + ".dll"))
-                {
-                    fullPath = fileName + ".dll";
-                }
-                else
-                {
-                    //Console.WriteLine("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
-                    //Console.WriteLine("DotNetParser will not be stopped.");
-                    //  return;
-                }
-                //try
-                //{
-                if (!string.IsNullOrEmpty(fullPath))
-                {
-                    var file2 = new DotNetFile(fullPath);
-                    InitAssembly(file2);
-                    dlls.Add(fileName, file2);
-                    PrintColor("[OK] Loaded assembly: " + fileName, ConsoleColor.Green);
-                }
-
-                else
-                {
-                    PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
-                }
-
-                //}
-                // catch (Exception x)
-                //{
-                //    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
-                //   throw;
-                //    return;
-                //}
+                ResolveDLL(fileName);
             }
             Running = true;
             //Call all static contructors
@@ -157,11 +109,64 @@ namespace libDotNetClr
                     {
                         if (m.Name == ".cctor" && m.IsStatic)
                         {
-                            RunMethod(m, file, stack, false);
+                            RunMethod(m, file, stack);
                         }
                     }
                 }
             }
+        }
+        private void ResolveDLL(string fileName)
+        {
+            string fullPath = "";
+            if (dlls.ContainsKey(fileName))
+            {
+                //already loaded
+                return;
+            }
+
+            if (File.Exists(Path.Combine(EXEPath, fileName + ".exe")))
+            {
+                fullPath = Path.Combine(EXEPath, fileName + ".exe");
+            }
+            else if (File.Exists(Path.Combine(EXEPath, fileName + ".dll")))
+            {
+                fullPath = Path.Combine(EXEPath, fileName + ".dll");
+            }
+            else if (File.Exists(fileName + ".exe"))
+            {
+                fullPath = fileName + ".exe";
+            }
+            else if (File.Exists(fileName + ".dll"))
+            {
+                fullPath = fileName + ".dll";
+            }
+            else
+            {
+                //Console.WriteLine("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
+                //Console.WriteLine("DotNetParser will not be stopped.");
+                //  return;
+            }
+            //try
+            //{
+            if (!string.IsNullOrEmpty(fullPath))
+            {
+                var file2 = new DotNetFile(fullPath);
+                InitAssembly(file2, false);
+                dlls.Add(fileName, file2);
+                PrintColor("[OK] Loaded assembly: " + fileName, ConsoleColor.Green);
+            }
+
+            else
+            {
+                PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
+            }
+            //}
+            // catch (Exception x)
+            //{
+            //    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
+            //   throw;
+            //    return;
+            //}
         }
         /// <summary>
         /// Runs a method
@@ -170,7 +175,7 @@ namespace libDotNetClr
         /// <param name="file">The file of the method</param>
         /// <param name="oldStack">Old stack</param>
         /// <returns>Returns the return value</returns>
-        private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file, CustomList<MethodArgStack> oldStack, bool addToCallStack = true)
+        private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file, CustomList<MethodArgStack> parms, bool addToCallStack = true)
         {
             if (m.Name == ".ctor" && m.Parrent.FullName == "System.Object")
                 return null;
@@ -258,7 +263,6 @@ namespace libDotNetClr
                 if (!Running)
                     return null;
                 var item = code[i];
-
                 #region Ldloc / stloc
                 if (item.OpCodeName == "stloc.s")
                 {
@@ -697,7 +701,6 @@ namespace libDotNetClr
                     }
                     if (f3 == null)
                     {
-                        Running = false;
                         clrError("Attempt to push null onto the stack. Source instruction: ldsfld", "System.NullReferenceException");
                         return null;
                     }
@@ -713,6 +716,23 @@ namespace libDotNetClr
                         {
                             f2 = f;
                             break;
+                        }
+                    }
+                    if (f2 == null)
+                    {
+                        foreach (var dll in dlls)
+                        {
+                            foreach (var type in dll.Value.Types)
+                            {
+                                foreach (var f in type.Fields)
+                                {
+                                    if (f.IndexInTabel == (int)(byte)item.Operand)
+                                    {
+                                        f2 = f;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                     StaticField f3 = null;
@@ -769,6 +789,10 @@ namespace libDotNetClr
                     }
                     else
                     {
+                        if (call.NameSpace == "System" && call.ClassName == "Object" && call.FunctionName == ".ctor")
+                        {
+                            continue; //Ignore
+                        }
                         //Attempt to resolve it
                         foreach (var item2 in dlls)
                         {
@@ -793,16 +817,21 @@ namespace libDotNetClr
                     //Extract the parms
                     int StartParmIndex = -1;
                     int EndParmIndex = -1;
-                    for (int i3 = 0; i3 < stack.Count; i3++)
+                    for (int i4 = stack.Count - 1; i4 >= 0; i4--)
                     {
-                        var stackitm = stack[i3];
-                        if (stackitm.type == m2.StartParm && EndParmIndex == -1)
+                        var stackitm = stack[i4];
+                        if (stackitm.type == m2.EndParm | stackitm.type == StackItemType.ldnull && StartParmIndex == -1)
                         {
-                            StartParmIndex = i3;
+                            EndParmIndex = i4;
+                            if (m2.AmountOfParms == 1)
+                            {
+                                StartParmIndex = i4;
+                                break;
+                            }
                         }
-                        if (stackitm.type == m2.EndParm && StartParmIndex != -1)
+                        if (stackitm.type == m2.StartParm | stackitm.type == StackItemType.ldnull && EndParmIndex != -1)
                         {
-                            EndParmIndex = i3;
+                            StartParmIndex = i4;
                         }
                     }
                     CustomList<MethodArgStack> newParms = new CustomList<MethodArgStack>();
@@ -813,54 +842,77 @@ namespace libDotNetClr
                             var itm5 = stack[i5];
                             newParms.Add(itm5);
                         }
+                        if (StartParmIndex == 1 && EndParmIndex == 1)
+                        {
+                            newParms.Add(stack[StartParmIndex]);
+                        }
                     }
                     if (StartParmIndex == 0 && EndParmIndex == 0 && m2.AmountOfParms == 1)
                     {
                         newParms.Add(stack[0]);
                     }
                     //Call it
+                    var oldStack = stack;
                     returnValue = RunMethod(m2, m.Parrent.File, newParms, addToCallStack);
-                    if (m2.AmountOfParms == 0)
-                    {
-                        //no need to do anything
-                    }
-                    else
-                    {
-                        //Re extract the parms after running the function
-                        for (int i3 = 0; i3 < stack.Count; i3++)
-                        {
-                            var stackitm = stack[i3];
-                            if (stackitm.type == m2.StartParm && EndParmIndex == -1)
-                            {
-                                StartParmIndex = i3;
-                            }
-                            if (stackitm.type == m2.EndParm && StartParmIndex != -1)
-                            {
-                                EndParmIndex = i3;
-                            }
-                        }
-                        if (StartParmIndex == -1)
-                            continue;
+                    stack = oldStack;
+                    //if (m2.AmountOfParms == 0)
+                    //{
+                    //    //no need to do anything
+                    //}
+                    //else
+                    //{
+                    //    //Re extract the parms after running the function
+                    //    for (int i3 = 0; i3 < stack.Count; i3++)
+                    //    {
+                    //        var stackitm = stack[i3];
+                    //        if (stackitm.type == m2.StartParm && EndParmIndex == -1)
+                    //        {
+                    //            StartParmIndex = i3;
+                    //        }
+                    //        if (stackitm.type == m2.EndParm && StartParmIndex != -1)
+                    //        {
+                    //            EndParmIndex = i3;
+                    //        }
+                    //    }
+                    //    if (StartParmIndex == -1)
+                    //    {
+                    //        if (returnValue != null)
+                    //        {
+                    //            stack.Add(returnValue);
+                    //        }
+                    //        continue;
+                    //    }
 
-                        if (m2.AmountOfParms == 1 && stack.Count - 1 >= m2.AmountOfParms)
-                        {
-                            try
-                            {
-                                stack.RemoveAt(StartParmIndex);
-                            }
-                            catch (Exception) { }
-                        }
-                        else
-                        {
-                            var numb = EndParmIndex - StartParmIndex;
-                            if (numb == -1)
-                                continue;
-                            if (stack.Count < numb)
-                                continue;
-
-                            stack.RemoveRange(StartParmIndex, numb);
-                        }
-                    }
+                    //    if (m2.AmountOfParms == 1 && stack.Count - 1 >= m2.AmountOfParms)
+                    //    {
+                    //        try
+                    //        {
+                    //            stack.RemoveAt(StartParmIndex);
+                    //        }
+                    //        catch (Exception) { }
+                    //    }
+                    //    else
+                    //    {
+                    //        var numb = EndParmIndex - StartParmIndex;
+                    //        if (numb == -1)
+                    //        {
+                    //            if (returnValue != null)
+                    //            {
+                    //                stack.Add(returnValue);
+                    //            }
+                    //            continue;
+                    //        }
+                    //        if (stack.Count < numb)
+                    //        {
+                    //            if (returnValue != null)
+                    //            {
+                    //                stack.Add(returnValue);
+                    //            }
+                    //            continue;
+                    //        }
+                    //        stack.RemoveRange(StartParmIndex, numb);
+                    //    }
+                    //}
                     if (returnValue != null)
                     {
                         stack.Add(returnValue);
@@ -893,7 +945,7 @@ namespace libDotNetClr
 #endif
                     //Successful return
                     MethodArgStack a = null;
-                    if (stack.Count != 0)
+                    if (stack.Count != 0 && m.HasReturnValue)
                     {
                         a = stack[stack.Count - 1];
                         if (addToCallStack)
@@ -916,7 +968,7 @@ namespace libDotNetClr
                         {
                             foreach (var meth in item3.Methods)
                             {
-                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == call.NameSpace + "." + call.ClassName)
+                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature)
                                 {
                                     m2 = meth;
                                     break;
@@ -927,7 +979,7 @@ namespace libDotNetClr
 
                     if (m2 == null)
                     {
-                        clrError($"Cannot resolve called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
+                        clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
 
@@ -974,8 +1026,24 @@ namespace libDotNetClr
                         clrError("Failed to resolve field for writing.", "");
                         return null;
                     }
-                    var obj = stack[stack.Count - 2];
-                    if (obj.type != StackItemType.Object) throw new InvalidOperationException();
+                    MethodArgStack obj = null;
+                    //TODO: do we need to do this? Probably not
+                    foreach (var t in stack)
+                    {
+                        if (t.type == StackItemType.Object)
+                        {
+                            if (t.ObjectType == f2.ParrentType)
+                            {
+                                obj = t;
+                                break;
+                            }
+                        }
+                    }
+                    if (obj == null)
+                    {
+                        clrError("Failed to find correct type in the stack", "");
+                        return null;
+                    }
 
                     var data = (ObjectValueHolder)obj.value;
                     if (data.Fields.ContainsKey(f2.Name))
@@ -992,7 +1060,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldfld")
                 {
-                    //write value to field.
+                    //read value from field.
                     DotNetField f2 = null;
                     foreach (var f in m.Parrent.Fields)
                     {
@@ -1017,8 +1085,25 @@ namespace libDotNetClr
                             }
                         }
                     }
-                    var obj = stack[stack.Count - 1];
-                    if (obj.type != StackItemType.Object) throw new InvalidOperationException();
+                    MethodArgStack obj = stack[stack.Count - 1];
+                    //TODO: do we need to do this? Probably not
+                    foreach (var t in stack)
+                    {
+                        if (t.type == StackItemType.Object)
+                        {
+                            if (t.ObjectType == f2.ParrentType)
+                            {
+                                obj = t;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (obj == null)
+                    {
+                        clrError("Object to read from not found!", "CLR internal error");
+                        return null;
+                    }
 
                     var data = (ObjectValueHolder)obj.value;
                     if (data.Fields.ContainsKey(f2.Name))
@@ -1027,28 +1112,26 @@ namespace libDotNetClr
                     }
                     else
                     {
-                        throw new Exception("Attempt to read from a nonexistent or null field.");
+                        clrError("Reading from non existant field on object " + obj.ObjectType.FullName + ", field name is " + f2.Name, "CLR internal error");
                     }
                 }
                 else if (item.OpCodeName == "ldarg.0")
                 {
-                    if (oldStack.Count == 0)
+                    if (parms.Count == 0)
                         continue;
 
-                    if (stack.Count != 0)
-                        stack[0] = oldStack[0];
-                    else
-                        stack.Add(oldStack[0]);
+                    var prevItem = stack[stack.Count - 1];
+                    if (parms[0] != prevItem)
+                        stack.Add(parms[0]);
                 }
                 else if (item.OpCodeName == "ldarg.1")
                 {
-                    if (oldStack.Count == 0)
+                    if (parms.Count == 0)
                         continue;
 
-                    if (stack.Count != 0)
-                        stack[1] = oldStack[1];
-                    else
-                        stack.Add(oldStack[1]);
+                    var prevItem = stack[stack.Count - 1];
+                    if (parms[1] != prevItem)
+                        stack.Add(parms[1]);
                 }
                 else if (item.OpCodeName == "callvirt")
                 {
@@ -1061,7 +1144,11 @@ namespace libDotNetClr
                         {
                             foreach (var meth in item3.Methods)
                             {
-                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == call.NameSpace + "." + call.ClassName)
+                                var fullName = call.NameSpace + "." + call.ClassName;
+                                if (string.IsNullOrEmpty(call.NameSpace))
+                                    fullName = call.ClassName;
+
+                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == fullName)
                                 {
                                     m2 = meth;
                                     break;
@@ -1070,12 +1157,78 @@ namespace libDotNetClr
                         }
                     }
 
+                    int StartParmIndex = -1;
+                    int EndParmIndex = -1;
+                    for (int i4 = stack.Count - 1; i4 >= 0; i4--)
+                    {
+                        var stackitm = stack[i4];
+                        if (stackitm.type == m2.EndParm | stackitm.type == StackItemType.ldnull && StartParmIndex == -1)
+                        {
+                            EndParmIndex = i4;
+                            if (m2.AmountOfParms == 1)
+                            {
+                                StartParmIndex = i4;
+                                break;
+                            }
+                        }
+                        if (stackitm.type == m2.StartParm | stackitm.type == StackItemType.ldnull && EndParmIndex != -1)
+                        {
+                            StartParmIndex = i4;
+                        }
+                    }
+                    MethodArgStack objectToCallOn = null;
+                    if (m2.AmountOfParms > 0)
+                    {
+                        objectToCallOn = stack[StartParmIndex - 1];
+                    }
+                    else
+                    {
+                        //find the object
+                        for (int x = stack.Count - 1; x >= 0; x--)
+                        {
+                            var itm = stack[x];
+                            if (itm.type == StackItemType.Object)
+                            {
+                                objectToCallOn = itm;
+                                break;
+                            }
+                        }
+                    }
+                    if (objectToCallOn == null)
+                    {
+                        objectToCallOn = stack[stack.Count - 1];
+                    }
+
                     if (m2 == null)
                     {
                         clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
                         return null;
                     }
-                    stack.Add(RunMethod(m2, m2.File, stack, addToCallStack));
+                    int oldLen = stack.Count;
+                    var ancientStack = stack;
+
+                    //Create a list of parameters
+                    var newParams = new CustomList<MethodArgStack>();
+                    if (objectToCallOn != null)
+                        newParams.Add(objectToCallOn);
+                    if (StartParmIndex != -1 && EndParmIndex != 1)
+                    {
+                        for (int x = StartParmIndex - 1; x < EndParmIndex; x++)
+                        {
+                            newParams.Add(stack[x]);
+                        }
+                    }
+                    if (StartParmIndex == EndParmIndex && StartParmIndex != -1)
+                    {
+                        newParams.Add(stack[StartParmIndex]);
+                    }
+
+                    var returnValue = RunMethod(m2, m2.File, newParams, addToCallStack);
+                    stack = ancientStack;
+                    if (returnValue != null)
+                    {
+                        stack.Add(returnValue);
+                    }
                 }
                 #endregion
                 #region Arrays
@@ -1090,7 +1243,7 @@ namespace libDotNetClr
                     var arr = stack[stack.Count - 1];
                     if (arr.type != StackItemType.Array)
                     {
-                        throw new Exception("Expected array, but got something else.");
+                        throw new Exception(" Expected array, but got something else.");
                     }
 
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = arr.ArrayLen });
@@ -1103,9 +1256,36 @@ namespace libDotNetClr
                     throw new NotImplementedException();
                 }
                 #endregion
+                #region Reflection
+                else if (item.OpCodeName == "ldtoken")
+                {
+                    var index = (int)item.Operand & 0xFF;
+
+                    var typeRef = file.Backend.Tabels.TypeRefTabel[index - 1];
+                    var name = file.Backend.ClrStringsStream.GetByOffset(typeRef.TypeName);
+                    var Typenamespace = file.Backend.ClrStringsStream.GetByOffset(typeRef.TypeNamespace);
+                    bool found = false;
+                    foreach (var dll in dlls)
+                    {
+                        foreach (var t in dll.Value.Types)
+                        {
+                            if (t.Name == name && t.NameSpace == Typenamespace)
+                            {
+                                stack.Add(new MethodArgStack() { type = StackItemType.ObjectRef, ObjectType = t });
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found)
+                    {
+                        clrError("Unable to resolve type: " + Typenamespace + "." + name, "CLR internal error");
+                        return null;
+                    }
+                }
+                #endregion
                 else
                 {
-                    Running = false;
                     clrError("Unsupported opcode: " + item.OpCodeName, "Internal");
                     return null;
                 }
@@ -1120,9 +1300,9 @@ namespace libDotNetClr
         /// <returns></returns>
         private bool ThrowIfStackIsZero(CustomList<MethodArgStack> stack, string instruction)
         {
-           if (stack.Count == 0)
+            if (stack.Count == 0)
             {
-                clrError("Fatal error: The "+instruction+" requires more than 1 items on the stack.", "Internal");
+                clrError("Fatal error: The " + instruction + " requires more than 1 items on the stack.", "Internal");
                 return true;
             }
             return false;
@@ -1138,7 +1318,7 @@ namespace libDotNetClr
 
         private void clrError(string message, string errorType)
         {
-            Running = false;
+            //Running = false;
             PrintColor($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}", ConsoleColor.Red);
 
             CallStack.Reverse();
@@ -1147,9 +1327,11 @@ namespace libDotNetClr
             {
                 stackTrace += "at " + itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
             }
-            stackTrace = stackTrace.Substring(0, stackTrace.Length - 1); //Remove last \n
-
-            PrintColor(stackTrace, ConsoleColor.Red);
+            if (stackTrace.Length > 0)
+            {
+                stackTrace = stackTrace.Substring(0, stackTrace.Length - 1); //Remove last \n
+                PrintColor(stackTrace, ConsoleColor.Red);
+            }
         }
 
         public void RunMethodInDLL(string NameSpace, string TypeName, string MethodName)

@@ -13,6 +13,7 @@ namespace DotNetParserRunner
         private static int NumbOfFailedTests = 0;
         static void Main()
         {
+            string il2cpu = @"C:\Users\Misha\AppData\Roaming\Cosmos User Kit\Build\IL2CPU\IL2CPU.dll";
             string exe = @"DotNetparserTester.exe";
             var m = new DotNetFile(exe);
 

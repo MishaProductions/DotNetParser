@@ -17,6 +17,20 @@ namespace DotNetparserTester
         {
             Console.WriteLine(WelcomeMessage);
         }
+
+        public class SubClass
+        {
+            public string Message;
+            public SubClass()
+            {
+                Message = "Hello from the subclass!";
+                Console.WriteLine("SubClass contructor");
+            }
+            public void HelloFromSubClass()
+            {
+                Console.WriteLine(Message);
+            }
+        }
     }
     class Program
     {
@@ -169,9 +183,6 @@ namespace DotNetparserTester
             {
                 TestFail("Field write test");
             }
-            MyObject obj = new MyObject();
-            obj.WelcomeMessage = "Hello!";
-            obj.Hello();
             TestField = "newr value";
             if (TestField == "newr value")
             {
@@ -184,6 +195,7 @@ namespace DotNetparserTester
 
             //Test Data types
 
+            //TODO: fix this test
             if (string.IsNullOrEmpty(null))
                 TestSuccess("string.IsNullOrEmpty(null) test");
             else
@@ -268,7 +280,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("Get char in string test. Wanted 'T' but got "+c);
+                TestFail("Get char in string test. Wanted 'T' but got " + c);
             }
             string superLongString = "Hello there, this is a super duper long string. This is used to see how good my crappy unicode string tabel implementation is";
             Console.WriteLine(superLongString);
@@ -296,8 +308,10 @@ namespace DotNetparserTester
             //stringArray[1] = "b";
 
             Console.WriteLine("Reflection tests");
-            var stringType = obj.GetType();
-            var ret = stringType.FullName;
+            MyObject obj = new MyObject();
+            obj.WelcomeMessage = "Hello!";
+            obj.Hello();
+            var ret = obj.GetType().FullName;
             if (ret == "DotNetparserTester.MyObject")
             {
                 TestSuccess("obj.GetType().FullName is correct");
@@ -305,6 +319,21 @@ namespace DotNetparserTester
             else
             {
                 TestFail("obj.GetType().FullName is incorrect. Expected DotNetparserTester.MyObject, but got " + ret);
+            }
+
+            Console.WriteLine("Testing subclasses");
+            MyObject.SubClass subClass = new MyObject.SubClass();
+            subClass.HelloFromSubClass();
+
+            var strType = typeof(string);
+            var FUllName = strType.FullName;
+            if (FUllName == "System.String")
+            {
+                TestSuccess("typeof(string).FullName == System.String");
+            }
+            else
+            {
+                TestFail("Full type name of string is "+ FUllName+", not System.String");
             }
 
             TestsComplete();

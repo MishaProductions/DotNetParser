@@ -4,7 +4,7 @@ using System.Text;
 
 namespace System
 {
-    public struct Void
+    public struct RuntimeTypeHandle
     {
     }
 }

@@ -85,7 +85,7 @@ namespace LibDotNetParser.CILApi
         }
         public override string ToString()
         {
-            return $"Type {NameSpace}.{Name}";
+            return $"Type {FullName}";
         }
         private void InitFields()
         {
@@ -97,7 +97,7 @@ namespace LibDotNetParser.CILApi
             if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
             {
                 //Happens when this is the last type
-                max = file.Tabels.TypeDefTabel.Count - 1;
+                max = (int)file.Tabels.TypeDefTabel[file.Tabels.TypeDefTabel.Count - 1].FieldList;
             }
             else
             {

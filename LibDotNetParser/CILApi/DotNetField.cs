@@ -29,5 +29,9 @@ namespace LibDotNetParser.CILApi
             flags = (FieldAttribs)BackendTabel.Flags;
             Name = file.ClrStringsStream.GetByOffset(backend.Name);
         }
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

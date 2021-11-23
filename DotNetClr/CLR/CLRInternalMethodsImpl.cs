@@ -29,12 +29,27 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("strLen", Internal__System_String_Get_Length);
             RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
             RegisterCustomInternalMethod("GetObjType", GetObjType);
+            RegisterCustomInternalMethod("Type_FromRefernce", GetTypeFromRefrence);
+        }
+
+        private void GetTypeFromRefrence(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var re = Stack[Stack.Length - 1];
+            if (re.type != StackItemType.ObjectRef) throw new InvalidOperationException();
+
+            var type = CreateType("System", "Type");
+            var typeToRead= CreateType(re.ObjectType);
+            WriteStringToType(type, "internal__fullname", typeToRead.ObjectType.FullName);
+            returnValue = type;
         }
 
         private void GetObjType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var obj = Stack[Stack.Length - 1];
 
+            //TODO: Remove this hack
+            if (obj.type != StackItemType.Object) obj = Stack[0];
+            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
             //Create the type object
 
             MethodArgStack a = CreateType("System", "Type");
@@ -71,8 +86,8 @@ namespace libDotNetClr
 
         private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var str = (string)Stack[Stack.Length - 2].value;
-            var index = (int)Stack[Stack.Length - 1].value;
+            var str = (string)Stack[Stack.Length - 1].value;
+            var index = (int)Stack[Stack.Length - 2].value;
 
             returnValue = new MethodArgStack() { type = StackItemType.String, value = str[index] };
         }
@@ -181,6 +196,11 @@ namespace libDotNetClr
             string returnVal = "";
             for (int i = Stack.Length - method.AmountOfParms; i < Stack.Length; i++)
             {
+               if (Stack[i].type != StackItemType.String)
+                {
+                    clrError("fatal error see InternalMethod_String_Concat method", "******BIG FATAL ERROR********");
+                    return;
+                }
                 returnVal += (string)Stack[i].value;
             }
 

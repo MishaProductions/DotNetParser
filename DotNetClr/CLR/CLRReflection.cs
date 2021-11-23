@@ -23,10 +23,12 @@ namespace libDotNetClr
                 clrError("Internal: Cannot resolve type: " + nameSpace + "." + TypeName + " Error at CLRInternalMethodsImpl::CreateType", "TypeNotFound");
                 return null;
             }
-
-
+            return CreateType(ttype);
+        }
+        private MethodArgStack CreateType(DotNetType type)
+        {
             //TODO: Do we need to resolve the constructor?
-            MethodArgStack a = new MethodArgStack() { ObjectContructor = null, ObjectType = ttype, type = StackItemType.Object, value = new ObjectValueHolder() };
+            MethodArgStack a = new MethodArgStack() { ObjectContructor = null, ObjectType = type, type = StackItemType.Object, value = new ObjectValueHolder() };
             return a;
         }
         private void WriteStringToType(MethodArgStack objectInstance, string property, string value)

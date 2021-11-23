@@ -60,6 +60,11 @@ namespace LibDotNetParser.CILApi
                 Offset++;
                 size++;
             }
+            if (opCode == null)
+            {
+                Console.WriteLine("ILDecompiler failed decompilation.");
+                opCode = OpCodes.SingleOpCodes[0];
+            }
 
             ILInstruction ret = new ILInstruction() { OpCode = opCode.Value, OpCodeName = opCode.Name, OperandType = opCode.OpCodeOperandType, Position = Offset, RelPosition = relPostion, Size = size };
 
@@ -184,7 +189,7 @@ namespace LibDotNetParser.CILApi
 
                                     classs = tt.Name;
                                     Namespace = tt.Namespace;
-                                    
+
                                 }
                                 //Type REF
                                 else if (tabel == MemberRefParentType.TypeRef)
@@ -193,7 +198,7 @@ namespace LibDotNetParser.CILApi
 
                                     classs = tt.TypeName;
 
-                                    
+
                                     Namespace = tt.TypeNamespace;
                                 }
                                 //Module Ref
@@ -214,7 +219,7 @@ namespace LibDotNetParser.CILApi
                                 #endregion
 
                                 ret.Size += 4;
-                                var anamespace=mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
+                                var anamespace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
                                 var typeName = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
 
                                 //Now, resolve this method
@@ -222,7 +227,7 @@ namespace LibDotNetParser.CILApi
                                 //1) resolve the type of the method
                                 //2) search for the method in the type
                                 //3) get method RVA
-                                
+
                                 //For now, resolve it by name
 
                                 DotNetMethod m = null;
@@ -244,7 +249,17 @@ namespace LibDotNetParser.CILApi
                                 if (m != null)
                                     rva = m.RVA;
                                 else
-                                    Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                {
+                                    //Ignore if it is system object constructor
+                                    if (anamespace == "System" && typeName == "Object" && funcName == ".ctor")
+                                    {
+
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                    }
+                                }
 
 
                                 ret.Operand = new InlineMethodOperandData()
