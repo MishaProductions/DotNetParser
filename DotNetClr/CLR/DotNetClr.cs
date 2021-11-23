@@ -16,13 +16,29 @@ namespace libDotNetClr
     {
         private DotNetFile file;
         private string EXEPath;
+        /// <summary>
+        /// Is the CLR running?
+        /// </summary>
         private bool Running = false;
-
+        /// <summary>
+        /// Loaded DLLS
+        /// </summary>
         private Dictionary<string, DotNetFile> dlls = new Dictionary<string, DotNetFile>();
+        /// <summary>
+        /// Stack
+        /// </summary>
         private CustomList<MethodArgStack> stack = new CustomList<MethodArgStack>();
+        /// <summary>
+        /// Stack used in stdloc.0 instructions
+        /// </summary>
         private MethodArgStack[] Localstack = new MethodArgStack[256];
+        /// <summary>
+        /// Callstack
+        /// </summary>
         private List<CallStackItem> CallStack = new List<CallStackItem>();
-
+        /// <summary>
+        /// List of custom internal methods
+        /// </summary>
         private Dictionary<string, ClrCustomInternalMethod> CustomInternalMethods = new Dictionary<string, ClrCustomInternalMethod>();
         public DotNetClr(DotNetFile exe, string DllPath)
         {
@@ -70,8 +86,6 @@ namespace libDotNetClr
             }
             InitAssembly(file);
 
-
-
             //Run the entry point
             RunMethod(file.EntryPoint, file, stack);
         }
@@ -110,9 +124,6 @@ namespace libDotNetClr
                     //Console.WriteLine("DotNetParser will not be stopped.");
                     //  return;
                 }
-#if CLR_DEBUG
-                Console.WriteLine("[CLR] Loading: " + Path.GetFileName(fullPath));
-#endif
                 //try
                 //{
                 if (!string.IsNullOrEmpty(fullPath))
@@ -165,26 +176,6 @@ namespace libDotNetClr
                 return null;
             if (!Running)
                 return null;
-#if CLR_DEBUG
-            Console.WriteLine("===========================");
-            Console.WriteLine($"[CLR] Running Method: {m.Parrent.NameSpace}.{m.Parrent.Name}.{m.Name}()");
-            if (stack.Count != 0)
-                Console.WriteLine("Following items are on the stack:");
-            foreach (var item in stack)
-            {
-                if (item.type == StackItemType.String)
-                {
-                    Console.WriteLine("String: \"" + (string)item.value + "\"");
-                }
-                else if (item.type == StackItemType.Int32)
-                {
-                    Console.WriteLine("Int32: " + (int)item.value);
-                }
-            }
-            Console.WriteLine("===========================");
-            Console.WriteLine("FUNCTION Output");
-#endif
-
             #region Internal methods
             //Make sure that RVA is not zero. If its zero, than its extern
             if (m.IsInternalCall)
@@ -218,7 +209,12 @@ namespace libDotNetClr
                                 }
                             }
                             if (StartParmIndex == -1)
-                                continue;
+                            {
+                                if (m.AmountOfParms == 1)
+                                    return a;
+                                else
+                                    clrError("Failed to find parameters after exectuting an internal method!", "internal CLR error");
+                            }
 
                             if (m.AmountOfParms == 1)
                             {
@@ -234,7 +230,7 @@ namespace libDotNetClr
                     }
                 }
 
-                clrError("Cannot find internal method: " + m.Name, "");
+                clrError("Cannot find internal method: " + m.Name, "internal CLR error");
                 return null;
             }
             else if (m.RVA == 0)
@@ -266,31 +262,23 @@ namespace libDotNetClr
                 #region Ldloc / stloc
                 if (item.OpCodeName == "stloc.s")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on stack and putting it onto var stack at index "+(byte)item.Operand);
-#endif
+                    if (ThrowIfStackIsZero(stack, "stloc.s")) return null;
 
-                    if (stack.Count == 0)
-                        throw new Exception("Error in stloc.s: stack count is 0, which is ilegal!");
                     var oldItem = stack[stack.Count - 1];
                     Localstack[(byte)item.Operand] = oldItem;
                     stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "stloc.0")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on stack and putting it onto var stack at index 0");
-#endif
                     if (ThrowIfStackIsZero(stack, "stloc.0")) return null;
+
                     var oldItem = stack[stack.Count - 1];
                     Localstack[0] = oldItem;
                     stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "stloc.1")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on stack and putting it onto var stack at index 1");
-#endif
+                    if (ThrowIfStackIsZero(stack, "stloc.1")) return null;
                     var oldItem = stack[stack.Count - 1];
 
                     Localstack[1] = oldItem;
@@ -298,9 +286,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "stloc.2")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on stack and putting it onto var stack at index 2");
-#endif
+                    if (ThrowIfStackIsZero(stack, "stloc.2")) return null;
                     var oldItem = stack[stack.Count - 1];
 
                     Localstack[2] = oldItem;
@@ -308,9 +294,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "stloc.3")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on stack and putting it onto var stack at index 3");
-#endif
+                    if (ThrowIfStackIsZero(stack, "stloc.3")) return null;
                     var oldItem = stack[stack.Count - 1];
 
                     Localstack[3] = oldItem;
@@ -318,34 +302,22 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldloc.s")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on var and putting it onto object stack at index " + (byte)item.Operand);
-#endif
                     var oldItem = Localstack[(byte)item.Operand];
                     stack.Add(oldItem);
                 }
                 else if (item.OpCodeName == "ldloca.s")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on var and putting it onto object stack at index " + (ushort)item.Operand);
-#endif
                     var oldItem = Localstack[(byte)item.Operand];
                     stack.Add(oldItem);
                 }
                 else if (item.OpCodeName == "ldloc.0")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on var and putting it onto object stack at index 0");
-#endif
                     var oldItem = Localstack[0];
                     stack.Add(oldItem);
                     // Localstack[0] = null;
                 }
                 else if (item.OpCodeName == "ldloc.1")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on var and putting it onto object stack at index 1");
-#endif
                     var oldItem = Localstack[1];
                     stack.Add(oldItem);
 
@@ -353,18 +325,12 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldloc.2")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on var and putting it onto object stack at index 2");
-#endif
                     var oldItem = Localstack[2];
                     stack.Add(oldItem);
                     //Localstack[2] = null;
                 }
                 else if (item.OpCodeName == "ldloc.3")
                 {
-#if CLR_DEBUG
-                    Console.WriteLine("[Debug] Removing object on var and putting it onto object stack at index 3");
-#endif
                     var oldItem = Localstack[3];
                     stack.Add(oldItem);
                     //Localstack[3] = null;
@@ -453,6 +419,8 @@ namespace libDotNetClr
                 #region conv* opcodes
                 else if (item.OpCodeName == "conv.i4")
                 {
+                    if (ThrowIfStackIsZero(stack, "conv.i4")) return null;
+
                     var numb = stack[stack.Count - 1];
                     if (numb.type == StackItemType.Int32)
                     {
@@ -599,13 +567,7 @@ namespace libDotNetClr
                 {
                     if (stack.Count == 0)
                     {
-                        string stackTrace = "";
-                        CallStack.Reverse();
-                        foreach (var itm in CallStack)
-                        {
-                            stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
-                        }
-                        clrError("Do not know if I should branch, because there is nothing on the stack. Instruction: brfalse.s", "Internal", stackTrace);
+                        clrError("Do not know if I should branch, because there is nothing on the stack. Instruction: brfalse.s", "Internal");
                         return null;
                     }
                     var s = stack[stack.Count - 1];
@@ -736,13 +698,7 @@ namespace libDotNetClr
                     if (f3 == null)
                     {
                         Running = false;
-                        string stackTrace = "";
-                        CallStack.Reverse();
-                        foreach (var itm in CallStack)
-                        {
-                            stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
-                        }
-                        clrError("Attempt to push null onto the stack. Source instruction: ldsfld", "System.NullReferenceException", stackTrace);
+                        clrError("Attempt to push null onto the stack. Source instruction: ldsfld", "System.NullReferenceException");
                         return null;
                     }
                     stack.Add(f3.value);
@@ -921,16 +877,7 @@ namespace libDotNetClr
 
                     if (exp.type == StackItemType.ldnull)
                     {
-                        string stackTrace = "";
-                        CallStack.Reverse();
-                        foreach (var itm in CallStack)
-                        {
-                            stackTrace += "at "+itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "();\n";
-                        }
-
-                        stackTrace = stackTrace.Substring(0, stackTrace.Length - 1); //Remove last \n
-
-                        clrError("Object reference not set to an instance of an object.", "System.NullReferenceException", stackTrace);
+                        clrError("Object reference not set to an instance of an object.", "System.NullReferenceException");
                         return null;
                     }
                     else
@@ -1159,15 +1106,7 @@ namespace libDotNetClr
                 else
                 {
                     Running = false;
-                    PrintColor("Unsupported OpCode: " + item.OpCodeName, ConsoleColor.Red);
-                    PrintColor("Application Terminated.", ConsoleColor.Red);
-                    CallStack.Reverse();
-                    string stackTrace = "";
-                    foreach (var itm in CallStack)
-                    {
-                        stackTrace += "At " + itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
-                    }
-                    PrintColor(stackTrace, ConsoleColor.Red);
+                    clrError("Unsupported opcode: " + item.OpCodeName, "Internal");
                     return null;
                 }
             }
@@ -1183,13 +1122,7 @@ namespace libDotNetClr
         {
            if (stack.Count == 0)
             {
-                string stackTrace = "";
-                CallStack.Reverse();
-                foreach (var itm in CallStack)
-                {
-                    stackTrace += itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
-                }
-                clrError("Fatal error: The "+instruction+" requires more than 1 items on the stack.", "Internal", stackTrace);
+                clrError("Fatal error: The "+instruction+" requires more than 1 items on the stack.", "Internal");
                 return true;
             }
             return false;
@@ -1203,11 +1136,40 @@ namespace libDotNetClr
             Console.ForegroundColor = old;
         }
 
-        private void clrError(string message, string errorType, string stackStace = "")
+        private void clrError(string message, string errorType)
         {
-            //Running = false;
+            Running = false;
             PrintColor($"A {errorType} has occured in {file.Backend.ClrStringsStream.GetByOffset(file.Backend.Tabels.ModuleTabel[0].Name)}. The error is: {message}", ConsoleColor.Red);
-            PrintColor(stackStace, ConsoleColor.Red);
+
+            CallStack.Reverse();
+            string stackTrace = "";
+            foreach (var itm in CallStack)
+            {
+                stackTrace += "at " + itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
+            }
+            stackTrace = stackTrace.Substring(0, stackTrace.Length - 1); //Remove last \n
+
+            PrintColor(stackTrace, ConsoleColor.Red);
+        }
+
+        public void RunMethodInDLL(string NameSpace, string TypeName, string MethodName)
+        {
+            stack.Clear();
+            foreach (var dll in dlls)
+            {
+                foreach (var type in dll.Value.Types)
+                {
+                    foreach (var method in type.Methods)
+                    {
+                        if (type.NameSpace == NameSpace && type.Name == TypeName && method.Name == MethodName)
+                        {
+                            RunMethod(method, dll.Value, stack);
+                            break;
+                        }
+                    }
+                }
+            }
+            throw new Exception("Cannot find the method!");
         }
         #endregion
     }
