@@ -6,7 +6,7 @@
 # build leftovers
 TesterKernel/bin/
 LibDotNetParser/bin/
-DotNetParser/bin/
+TestAppRunner/bin/
 TestApp/bin/
 DotNetClr/bin/
 mscorlib/bin/
@@ -18,7 +18,7 @@ TesterKernel/isoFiles/
 .vs/
 TesterKernel/obj/
 LibDotNetParser/obj/
-DotNetParser/obj/
+TestAppRunner/obj/
 TestApp/obj/
 DotNetClr/obj/
 mscorlib/obj/

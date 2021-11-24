@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibDotNetParser", "LibDotNetParser\LibDotNetParser.csproj", "{8F344CC5-DB3B-437D-A492-B41F5BD0160B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TesterKernel", "TesterKernel\TesterKernel.csproj", "{0B54933E-1BDB-4BF3-BBFC-AAFB7806DCA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetparserTester", "TestApp\DotNetparserTester.csproj", "{B6E06C06-B2C1-46EB-B182-0F449E892F88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{B6E06C06-B2C1-46EB-B182-0F449E892F88}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libDotNetClr", "DotNetClr\libDotNetClr.csproj", "{67155BFC-F7B3-4494-A467-45319D9E5E8C}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\Unit
 		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetParserRunner", "DotNetParser\DotNetParserRunner.csproj", "{AD95E461-BE02-4272-AE05-D54FC22ADEAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAppRunner", "TestAppRunner\TestAppRunner.csproj", "{AD95E461-BE02-4272-AE05-D54FC22ADEAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

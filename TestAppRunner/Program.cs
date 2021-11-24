@@ -9,15 +9,18 @@ namespace DotNetParserRunner
 {
     class Program
     {
-        static int NumbOfSuccesssTests = 0;
-        static int NumbOfFailedTests = 0;
+        private static int NumbOfSuccesssTests = 0;
+        private static int NumbOfFailedTests = 0;
         static void Main()
         {
-            string exe = @"DotNetParser.exe";
+            bool doil2cpu = false;
+            string il2cpu = @"C:\Users\Misha\AppData\Roaming\Cosmos User Kit\Build\IL2CPU\IL2CPU.dll";
+            string exe = doil2cpu ? il2cpu : "TestApp.dll";//il2cpu;
             var m = new DotNetFile(exe);
 
             var decompiler = new IlDecompiler(m.EntryPoint);
             Console.WriteLine("Decompile of Main function:");
+
             var ilFormater = new ILFormater(decompiler.Decompile());
             var outputString = ilFormater.Format();
 
@@ -34,11 +37,11 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
 
             clr.Start();
-            Console.ReadLine();
+            //Console.ReadLine();
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);
         }
-        private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
 
@@ -46,15 +49,16 @@ namespace DotNetParserRunner
             NumbOfSuccesssTests++;
         }
 
-        private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private static void TestsComplete(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            if (NumbOfFailedTests == 0)
-                PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Green);
-            else
-                PrintWithColor("All tests are complete. Successed tests: " + NumbOfSuccesssTests + ", failed Tests: " + NumbOfFailedTests, ConsoleColor.Red);
+            Console.WriteLine();
+            PrintWithColor("All Tests Completed.", ConsoleColor.DarkYellow);
+            Console.WriteLine();
+            PrintWithColor("Passed tests: "+NumbOfSuccesssTests, ConsoleColor.Green);
+            PrintWithColor("Failed tests: " + NumbOfFailedTests, ConsoleColor.Red);
         }
 
-        private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue)
+        private static void TestFail(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
 
