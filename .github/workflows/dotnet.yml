@@ -19,8 +19,9 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore --ignore-failed-sources
-      continue-on-error: true
     - name: Build
+      if: always()
       run: dotnet build --no-restore
-    - name: Test
+     - name: Test
+      if: always()
       run: dotnet test --no-build --verbosity normal
