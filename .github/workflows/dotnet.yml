@@ -20,8 +20,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore --ignore-failed-sources
     - name: Build
-      if: always()
       run: dotnet build --no-restore
-     - name: Test
       if: always()
+    - name: Test
       run: dotnet test --no-build --verbosity normal
+      if: always()
