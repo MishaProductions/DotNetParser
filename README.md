@@ -14,6 +14,11 @@ Yes, it will., but only a small amount of .NET Features are working.
 - [X] Adding/Subtracting/Multiplying/Dividing
 - [X] string.Length
 - [X] Loading sepreate DLLS
+- [X] Actions
+- [X] Basic generic support
+- [X] Really basic reflection
+- [X] Sub-classes
+- [X] Arrays
 
 # Building
 Set the DotNetParserRunner or TesterKernel project as the startup project in visual studio and click on Run.

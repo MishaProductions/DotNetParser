@@ -191,6 +191,7 @@ namespace LibDotNetParser.CILApi
                             var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
                             uint classs = 0;
                             uint Namespace = 0;
+                            string genericArgType = "";
 
                             //TYPE def
                             if (tabel == MemberRefParentType.TypeDef)
@@ -222,13 +223,61 @@ namespace LibDotNetParser.CILApi
                             //Type Spec
                             else if (tabel == MemberRefParentType.TypeSpec)
                             {
+                                //See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/corelementtype-enumeration for more info
                                 var tt = mainFile.Backend.Tabels.TypeSpecTabel[(int)row - 1];
                                 var b = mainFile.Backend.BlobStream[tt.Signature];
                                 var bi = new BinaryReader(new MemoryStream(mainFile.Backend.BlobStream));
                                 bi.BaseStream.Position = tt.Signature;
 
-                                //TODO
-                                throw new NotImplementedException("TypeSpec not yet implemented");
+                                var a = bi.ReadByte(); //Normally 0x5
+                                var type = bi.ReadByte(); //Normally 0x15 (ELEMENT_TYPE_GENERICINST)
+                                var n = ParseNumber(bi); //
+                                var n2 = ParseNumber(bi);
+                                var bb = bi.ReadByte(); //PTR_END
+                                var aa = bi.ReadByte(); //depends on the generic type.
+                                File.WriteAllBytes("dump_blob", mainFile.Backend.BlobStream);
+                                uint type2;
+                                uint index;
+                                DecodeTypeDefOrRef((uint)n2, out type2, out index);
+
+                                if (type2 == 0)
+                                {
+                                    //Type def
+                                    var Realtabel = mainFile.Backend.Tabels.TypeDefTabel[(int)(index - 1)];
+                                    Namespace = Realtabel.Namespace;
+                                    classs = Realtabel.Name;
+                                }
+                                else if (type2 == 1)
+                                {
+                                    //Type ref
+                                    var Realtabel = mainFile.Backend.Tabels.TypeRefTabel[(int)(index - 1)];
+                                    Namespace = Realtabel.TypeNamespace;
+                                    classs = Realtabel.TypeName;
+                                }
+                                else if (type2 == 2)
+                                {
+                                    //Type spec???? What
+                                    throw new NotImplementedException();
+                                }
+                                else
+                                {
+                                    throw new NotImplementedException("Invaild type");
+                                }
+                                if (aa == 0xE)
+                                {
+                                    //String
+                                    genericArgType = "string";
+                                }
+                                else if (aa == 0x13)
+                                {
+                                    genericArgType = "var";
+                                }
+                                else
+                                {
+                                    //TODO: implement the rest of these
+                                    genericArgType = "Todo";
+                                    //throw new NotImplementedException();
+                                }
                             }
                             //Unknown
                             else
@@ -287,6 +336,7 @@ namespace LibDotNetParser.CILApi
                                 ClassName = typeName,
                                 FunctionName = funcName,
                                 RVA = rva,
+                                GenericArg = genericArgType,
                                 Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
                             };
                             return ret;
@@ -332,6 +382,7 @@ namespace LibDotNetParser.CILApi
                         else
                         {
                             throw new NotImplementedException();
+                            return ret;
                         }
                     }
                 case OpCodeOperandType.InlineSig:
@@ -427,6 +478,34 @@ namespace LibDotNetParser.CILApi
 
             return null;
         }
+        private ulong ParseNumber(BinaryReader r)
+        {
+            var b1 = r.ReadByte();
+            if (b1 == 0xFF)
+            {
+                //NULL
+                throw new Exception();
+            }
+            else if ((b1 & 0x80) == 0)
+            {
+                return b1;
+            }
+            var b2 = r.ReadByte();
+            if ((b1 & 0x40) == 0)
+            {
+                return (ulong)(((b1 & 0x3f) << 8) | b2);
+            }
+            // must be a 4 byte encoding
+
+            if ((b1 & 0x20) != 0)
+            {
+                throw new Exception();
+                // 4 byte encoding has this bit clear -- error if not
+            }
+            var b3 = r.ReadByte();
+            var b4 = r.ReadByte();
+            return (ulong)(((b1 & 0x1f) << 24) | (b2 << 16) | (b3 << 8) | b4);
+        }
         #region Decoding MemberRefParent
         private const uint MemberRefParrent = 0x7;
         private const uint MemberRefParrent_TYPEDEF = 0x0;
@@ -460,6 +539,11 @@ namespace LibDotNetParser.CILApi
                     break;
             }
             row = index >> 3;
+        }
+        private static void DecodeTypeDefOrRef(uint num, out uint type, out uint index)
+        {
+            type = num & 0x3;
+            index = (num >> 2);
         }
 
         public enum MemberRefParentType

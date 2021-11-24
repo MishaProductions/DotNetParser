@@ -187,11 +187,16 @@ namespace libDotNetClr
                 return null;
             #region Internal methods
             //Make sure that RVA is not zero. If its zero, than its extern
-            if (m.IsInternalCall)
+            if (m.IsInternalCall | m.IsImplementedByRuntime)
             {
-                foreach (var item in CustomInternalMethods)
+                string properName = m.Name;
+                if (m.IsImplementedByRuntime)
                 {
-                    if (item.Key == m.Name)
+                    properName = m.Parrent.FullName.Replace(".", "_")+"."+m.Name + "_impl";
+                }
+                foreach (var item in CustomInternalMethods)
+                { 
+                    if (item.Key == properName)
                     {
                         MethodArgStack a = null;
                         item.Value.Invoke(stack.ToArray(), ref a, m);
@@ -222,7 +227,10 @@ namespace libDotNetClr
                                 if (m.AmountOfParms == 1)
                                     return a;
                                 else
-                                    clrError("Failed to find parameters after exectuting an internal method!", "internal CLR error");
+                                {
+                                    //clrError("Failed to find parameters after exectuting an internal method!", "internal CLR error");
+                                    return a;
+                                }
                             }
 
                             if (m.AmountOfParms == 1)
@@ -239,7 +247,7 @@ namespace libDotNetClr
                     }
                 }
 
-                clrError("Cannot find internal method: " + m.Name, "internal CLR error");
+                clrError("Cannot find internal method: " + properName, "internal CLR error");
                 return null;
             }
             else if (m.RVA == 0)
@@ -1193,6 +1201,15 @@ namespace libDotNetClr
                     if (parms[3] != prevItem)
                         stack.Add(parms[3]);
                 }
+                else if (item.OpCodeName == "ldarg.s")
+                {
+                    if(parms.Count == 0)
+                        continue;
+
+                    var prevItem = stack[stack.Count - 1];
+                    if (parms[(byte)item.Operand] != prevItem)
+                        stack.Add(parms[(byte)item.Operand]);
+                }
                 else if (item.OpCodeName == "callvirt")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
@@ -1245,7 +1262,7 @@ namespace libDotNetClr
                     MethodArgStack objectToCallOn = null;
                     if (m2.AmountOfParms > 0)
                     {
-                        objectToCallOn = stack[StartParmIndex - 1];
+                        objectToCallOn = stack[stack.Count - m2.AmountOfParms];
                     }
                     else
                     {
@@ -1413,7 +1430,7 @@ namespace libDotNetClr
                 #endregion
                 else
                 {
-                    clrError("Unsupported opcode: " + item.OpCodeName, "Internal");
+                    clrError("Unsupported opcode: " + item.OpCodeName, "CLR Internal error");
                     return null;
                 }
             }

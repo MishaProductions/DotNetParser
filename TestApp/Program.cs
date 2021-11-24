@@ -1,6 +1,7 @@
 ﻿//Uncomment this if you want to run the tests on the normal CLR
 //#define NoInternalCalls
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace DotNetparserTester
@@ -39,7 +40,7 @@ namespace DotNetparserTester
         public const string ConstString = "Constant String.";
         static void Main(string[] args)
         {
-            ////Equal test
+            //Equal test
             if (ClrTest() == 90)
             {
                 TestSuccess("Equal Test");
@@ -49,7 +50,7 @@ namespace DotNetparserTester
                 TestFail("Equal Test");
             }
             //Inequal test
-            if (Program.ClrTest() != 123)
+            if (ClrTest() != 123)
             {
                 TestSuccess("Inequal Test");
             }
@@ -274,14 +275,13 @@ namespace DotNetparserTester
             {
                 TestFail("String.Length == 4 test fail, testString.Length should be 4, but it is " + testString.Length.ToString());
             }
-            var c = testString[0];
-            if (c == 'T')
+            if (testString[0] == 'T')
             {
                 TestSuccess("Get char in string test.");
             }
             else
             {
-                TestFail("Get char in string test. Wanted 'T' but got " + c);
+                TestFail("Get char in string test. Wanted 'T' but got " + testString[0]);
             }
             string superLongString = "Hello there, this is a super duper long string. This is used to see how good my crappy unicode string tabel implementation is";
             Console.WriteLine(superLongString);
@@ -344,6 +344,55 @@ namespace DotNetparserTester
             {
                 TestFail("Full type name of string is " + FUllName + ", not System.String");
             }
+            var flag1 = 78 >= 76;
+            if (flag1)
+            {
+                TestSuccess("78 >= 76");
+            }
+            else
+            {
+                TestFail("78 >= 76 returned false!");
+            }
+            var flag2 = 78 <= 76;
+            if (flag2)
+            {
+                TestFail("78 <= 76 returned true!");
+            }
+            else
+            {
+                TestSuccess("78 <= 76");
+            }
+
+            //Console.WriteLine("Extensive array / list<string> test / gerneric test");
+            //List<string> list = new List<string>();
+            //list.Add("item 1");
+            //list.Add("item 2");
+            //list.RemoveAt(1);
+            //list.Remove("item 1");
+
+            //if(list.Count != 0)
+            //{
+            //    TestFail("List count is not zero!");
+            //}
+            //else
+            //{
+            //    TestSuccess("List count is zero");
+            //}
+
+            Action<string> action = (string parm) => Console.WriteLine(parm);
+            action.Invoke("hi there :)");
+            Action<string, string> action2 = (string parm, string b) => Console.WriteLine(parm + b);
+            action2.Invoke("hi there ", ":)");
+            Action<string, string, string> action3 = (string parm, string b, string c) => Console.WriteLine(parm + b + c);
+            action3.Invoke("hi there ", ":", ")");
+            Action<string, string, string, string> action4 = (string parm, string b, string c, string d) => Console.WriteLine(parm + b + c + d);
+            action4.Invoke("hi there", " ", ":", ")");
+            Action<string, string, string, string, int> action5 = (string parm, string b, string c, string d, int f) =>
+            {
+                Console.WriteLine(parm + b + c + d);
+                Console.WriteLine(f);
+            };
+            action5.Invoke("hi there", " ", ":", ")", 5);
             TestsComplete();
         }
         /// <summary>

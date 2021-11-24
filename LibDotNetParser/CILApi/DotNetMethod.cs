@@ -58,6 +58,14 @@ namespace LibDotNetParser.CILApi
             }
         }
 
+        public bool IsImplementedByRuntime
+        {
+            get
+            {
+                return (implFlags & MethodImp.miRuntime) != 0;
+            }
+        }
+
         public bool IsExtern
         {
             get

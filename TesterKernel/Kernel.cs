@@ -20,29 +20,55 @@ namespace TesterKernel
             VFSManager.RegisterVFS(fs);
             Console.Clear();
 
-            try
+            string boot = "";
+            bool frame = false;
+            foreach (var item in fs.GetVolumes())
             {
-                if (!Directory.Exists(@"0:\framework"))
-                    Directory.CreateDirectory(@"0:\framework");
+                Console.WriteLine("Found volume: " + item.mFullPath);
+                foreach (var d in Directory.GetDirectories(item.mFullPath))
+                {
+                    Console.WriteLine("dir: " + d);
+                }
+                foreach (var d in Directory.GetFiles(item.mFullPath))
+                {
+                    Console.WriteLine("file: " + d);
+                }
+                if (File.Exists(item.mFullPath + "DOTNETPA.EXE") | File.Exists(item.mFullPath + "DotNetparserTester.exe"))
+                {
+                    Console.WriteLine("Found boot volume: " + item.mFullPath);
+                    boot = item.mFullPath;
+                }
+                if (Directory.Exists(item.mFullPath + "framework"))
+                {
+                    frame = true;
+                }
+                else if (Directory.Exists(item.mFullPath + "FRAMEW"))
+                {
+                    frame = false;
+                }
             }
-            catch (Exception x)
+            if (boot == "")
             {
-                Console.WriteLine("Caught: " + x.Message);
+                Console.WriteLine("Cannot find the media that we booted from.");
+                return;
             }
-
             try
             {
                 byte[] fi = TestApp.file;
-                if (File.Exists(@"0:\DotNetparserTester.exe"))
+                if (File.Exists(boot + @"DOTNETPA.exe"))
                 {
-                    fi = File.ReadAllBytes(@"0:\DotNetparserTester.exe");
+                    fi = File.ReadAllBytes(boot + @"DOTNETPA.exe");
+                }
+                else if (File.Exists(boot + @"DotNetparserTester.exe"))
+                {
+                    fi = File.ReadAllBytes(boot + @"DotNetparserTester.exe");
                 }
                 var fl = new DotNetFile(fi);
 
                 var decompiler = new IlDecompiler(fl.EntryPoint);
                 Console.WriteLine("Decompiltion of Main function:");
                 Console.WriteLine("");
-
+                Console.WriteLine(boot);
                 var ilFormater = new ILFormater(decompiler.Decompile());
                 var outputString = ilFormater.Format();
                 Console.WriteLine(outputString);
@@ -50,7 +76,7 @@ namespace TesterKernel
                 Console.WriteLine("Running program:");
 
 
-                var clr = new DotNetClr(fl, @"0:\framework");
+                var clr = new DotNetClr(fl, frame ? boot + @"framework" : boot + @"FRAMEW");
 
                 //Register our internal methods
                 clr.RegisterCustomInternalMethod("TestsComplete", TestsComplete);
@@ -60,9 +86,9 @@ namespace TesterKernel
                 clr.Start();
                 Console.WriteLine("Program exec complete.");
             }
-            catch(Exception x)
+            catch (Exception x)
             {
-                Console.WriteLine("Caught error: "+x.Message);
+                Console.WriteLine("Caught error: " + x.Message);
             }
         }
 

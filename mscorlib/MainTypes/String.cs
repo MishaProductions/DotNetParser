@@ -35,6 +35,8 @@ namespace System
         public static extern string Concat(string a, string b);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern string Concat(string a, string b, string c);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public static extern string Concat(string a, string b, string c, string d);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool op_Equality(string a, string b);

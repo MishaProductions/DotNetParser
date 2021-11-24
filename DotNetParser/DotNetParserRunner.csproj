@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="md  $(SolutionDir)\DotNetParser\$(OutDir)framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)mscorlib.dll $(SolutionDir)\DotNetParser\$(OutDir)framework" />
+    <Exec Command="md  $(SolutionDir)\DotNetParser\$(OutDir)framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)mscorlib.dll $(SolutionDir)\DotNetParser\$(OutDir)framework&#xD;&#xA;md  $(SolutionDir)\TesterKernel\isoFiles\framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)mscorlib.dll $(SolutionDir)\TesterKernel\isoFiles\framework&#xD;&#xA;copy $(SolutionDir)DotNetParser\$(OutDir)DotNetparserTester.exe $(SolutionDir)\TesterKernel\isoFiles" />
   </Target>
 
 </Project>
