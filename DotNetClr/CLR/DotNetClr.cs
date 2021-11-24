@@ -86,6 +86,8 @@ namespace libDotNetClr
             }
             InitAssembly(file, true);
             PrintColor("Jumping to entry point", ConsoleColor.DarkMagenta);
+            //stack.Clear(); //make sure we have a fresh stack
+            Running = true;
             //Run the entry point
             RunMethod(file.EntryPoint, file, stack);
         }
@@ -109,7 +111,9 @@ namespace libDotNetClr
                     {
                         if (m.Name == ".cctor" && m.IsStatic)
                         {
+                            Console.WriteLine("Creating " + t.FullName);
                             RunMethod(m, file, stack);
+                            //stack.Clear();
                         }
                     }
                 }
@@ -417,7 +421,11 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldc.r8")
                 {
                     //Puts an float32 with value onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Float64, value = (float)item.Operand });
+                    if (item.Operand is float)
+                    {
+                        stack.Add(new MethodArgStack() { type = StackItemType.Float64, value = (float)item.Operand });
+                    }
+
                 }
                 #endregion
                 #region conv* opcodes
@@ -439,8 +447,21 @@ namespace libDotNetClr
                 #region Math
                 else if (item.OpCodeName == "add")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
+                    var a = stack[stack.Count - 2];
+                    var b = stack[stack.Count - 1];
+                    if (a.type != StackItemType.Int32)
+                    {
+                        clrError("invaild datas a", "fatal stack fault");
+                        return null;
+                    }
+                    if (b.type != StackItemType.Int32)
+                    {
+                        clrError("invaild datas b", "fatal stack fault");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var numb2 = (int)b.value;
                     var result = numb1 + numb2;
                     stack.RemoveRange(stack.Count - 2, 2);
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
@@ -658,7 +679,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldsfld")
                 {
-                    //get value from feild
+                    //get value from static field
                     DotNetField f2 = null;
                     foreach (var f in m.Parrent.Fields)
                     {
@@ -669,6 +690,22 @@ namespace libDotNetClr
                         }
                     }
 
+                    if (f2 == null)
+                    {
+                        foreach (var t in m.Parrent.File.Types)
+                        {
+                            foreach (var f in t.Fields)
+                            {
+                                if (f.IndexInTabel == (int)(byte)item.Operand)
+                                {
+                                    f2 = f;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    //TODO: this is risky because it can pick up an unrelated / random field in another DLL
                     if (f2 == null)
                     {
                         foreach (var d in dlls)
@@ -701,10 +738,15 @@ namespace libDotNetClr
                     }
                     if (f3 == null)
                     {
-                        clrError("Attempt to push null onto the stack. Source instruction: ldsfld", "System.NullReferenceException");
-                        return null;
+                        PrintColor("WARN: Cannot find static field value. Static field name: " + f2.ToString(), ConsoleColor.Yellow);
+                        //clrError("Cannot find static field value. Static field name: "+f2.ToString(), "System.NullReferenceException");
+                        //return null;
+                        stack.Add(MethodArgStack.ldnull);
                     }
-                    stack.Add(f3.value);
+                    else
+                    {
+                        stack.Add(f3.value);
+                    }
                 }
                 else if (item.OpCodeName == "stsfld")
                 {
@@ -1133,6 +1175,24 @@ namespace libDotNetClr
                     if (parms[1] != prevItem)
                         stack.Add(parms[1]);
                 }
+                else if (item.OpCodeName == "ldarg.2")
+                {
+                    if (parms.Count == 0)
+                        continue;
+
+                    var prevItem = stack[stack.Count - 1];
+                    if (parms[2] != prevItem)
+                        stack.Add(parms[2]);
+                }
+                else if (item.OpCodeName == "ldarg.3")
+                {
+                    if (parms.Count == 0)
+                        continue;
+
+                    var prevItem = stack[stack.Count - 1];
+                    if (parms[3] != prevItem)
+                        stack.Add(parms[3]);
+                }
                 else if (item.OpCodeName == "callvirt")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
@@ -1155,6 +1215,12 @@ namespace libDotNetClr
                                 }
                             }
                         }
+                    }
+
+                    if (m2 == null)
+                    {
+                        clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
+                        return null;
                     }
 
                     int StartParmIndex = -1;
@@ -1198,12 +1264,6 @@ namespace libDotNetClr
                     {
                         objectToCallOn = stack[stack.Count - 1];
                     }
-
-                    if (m2 == null)
-                    {
-                        clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
-                        return null;
-                    }
                     int oldLen = stack.Count;
                     var ancientStack = stack;
 
@@ -1236,7 +1296,7 @@ namespace libDotNetClr
                 {
                     var arrayLen = stack[stack.Count - 1];
 
-                    stack.Add(new MethodArgStack() { type = StackItemType.Array, ArrayItems = new object[(int)arrayLen.value], ArrayLen = (int)arrayLen.value });
+                    stack.Add(new MethodArgStack() { type = StackItemType.Array, ArrayItems = new MethodArgStack[(int)arrayLen.value], ArrayLen = (int)arrayLen.value });
                 }
                 else if (item.OpCodeName == "ldlen")
                 {
@@ -1248,19 +1308,49 @@ namespace libDotNetClr
 
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = arr.ArrayLen });
                 }
+                //else if (item.OpCodeName == "stelem.ref")
+                //{
+                //    var itemToWrite = stack[stack.Count - 1];
+                //    var index = stack[stack.Count - 2];
+                //    var arr = stack[stack.Count - 3];
+
+                //    arr.ArrayItems[(int)index.value] = itemToWrite.value;
+                //}
+                else if (item.OpCodeName == "dup")
+                {
+                    stack.Add(stack[stack.Count - 1]);
+                }
+                else if (item.OpCodeName == "pop")
+                {
+                    stack.RemoveAt(stack.Count - 1);
+                }
+                else if (item.OpCodeName == "ldelem.ref")
+                {
+                    var index = stack[stack.Count - 1];
+                    var array = stack[stack.Count - 2];
+                    if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error"); return null; }
+                    if (index.type != StackItemType.Int32) { clrError("Expected Int32, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error"); return null; }
+                    var idx = (int)index.value;
+                    stack.Add(array.ArrayItems[idx]);
+                }
                 else if (item.OpCodeName == "stelem.ref")
                 {
-                    var itemToWrite = stack[stack.Count - 1];
+                    var val = stack[stack.Count - 1];
                     var index = stack[stack.Count - 2];
-                    var arr = stack[stack.Count - 3];
-                    throw new NotImplementedException();
+                    var array = stack[stack.Count - 3];
+                    if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
+                    if (index.type != StackItemType.Int32) { clrError("Expected Int32, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
+                    array.ArrayItems[(int)index.value] = val;
                 }
                 #endregion
                 #region Reflection
                 else if (item.OpCodeName == "ldtoken")
                 {
                     var index = (int)item.Operand & 0xFF;
-
+                    if (index >= file.Backend.Tabels.TypeRefTabel.Count)
+                    {
+                        index = file.Backend.Tabels.TypeRefTabel.Count;
+                    }
                     var typeRef = file.Backend.Tabels.TypeRefTabel[index - 1];
                     var name = file.Backend.ClrStringsStream.GetByOffset(typeRef.TypeName);
                     var Typenamespace = file.Backend.ClrStringsStream.GetByOffset(typeRef.TypeNamespace);
@@ -1282,6 +1372,43 @@ namespace libDotNetClr
                         clrError("Unable to resolve type: " + Typenamespace + "." + name, "CLR internal error");
                         return null;
                     }
+                }
+                else if (item.OpCodeName == "ldftn")
+                {
+                    var call = item.Operand as InlineMethodOperandData; //a method
+                    var obj2 = stack[stack.Count - 1]; //the compiler generated object to call the method on
+                    DotNetMethod m2 = null;
+
+                    if (call.RVA == 0) throw new NotImplementedException();
+                    else
+                    {
+                        foreach (var item2 in dlls)
+                        {
+                            foreach (var item3 in item2.Value.Types)
+                            {
+                                foreach (var meth in item3.Methods)
+                                {
+                                    var fullName = call.NameSpace + "." + call.ClassName;
+                                    if (string.IsNullOrEmpty(call.NameSpace))
+                                        fullName = call.ClassName;
+
+                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == fullName)
+                                    {
+                                        m2 = meth;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (m2 == null)
+                        {
+                            clrError($"Cannot resolve virtual called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "");
+                            return null;
+                        }
+                    }
+
+                    stack.Add(new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
                 }
                 #endregion
                 else
@@ -1330,7 +1457,7 @@ namespace libDotNetClr
             if (stackTrace.Length > 0)
             {
                 stackTrace = stackTrace.Substring(0, stackTrace.Length - 1); //Remove last \n
-                PrintColor(stackTrace, ConsoleColor.Red);
+                //PrintColor(stackTrace, ConsoleColor.Red);
             }
         }
 

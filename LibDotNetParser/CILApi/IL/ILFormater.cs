@@ -24,23 +24,23 @@ namespace LibDotNetParser
             {
                 if (item.Operand is string @string)
                 {
-                    output += $"IL_{item.Position}: {item.OpCodeName} \"{@string}\"\n";
+                    output += $"IL_{item.Position.ToString("X")}: {item.OpCodeName} \"{@string}\"\n";
                 }
                 else if (item.Operand is InlineMethodOperandData me)
                 {
-                    output += $"IL_{item.Position}: {item.OpCodeName} {me.NameSpace}.{me.ClassName}.{me.FunctionName}()\n";
+                    output += $"IL_{item.Position.ToString("X")}: {item.OpCodeName} {me.NameSpace}.{me.ClassName}.{me.FunctionName}()\n";
                 }
                 else if (item.Operand is int i)
                 {
-                    output += $"IL_{item.Position}: {item.OpCodeName} {i}\n";
+                    output += $"IL_{item.Position.ToString("X")}: {item.OpCodeName} {i}\n";
                 }
                 else if (item.Operand is byte b)
                 {
-                    output += $"IL_{item.Position}: {item.OpCodeName} {b}\n";
+                    output += $"IL_{item.Position.ToString("X")}: {item.OpCodeName} {b}\n";
                 }
                 else
                 {
-                    output += $"IL_{item.Position}: {item.OpCodeName}\n";
+                    output += $"IL_{item.Position.ToString("X")}: {item.OpCodeName}\n";
                 }
             }
             return output;

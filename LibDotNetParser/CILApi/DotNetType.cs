@@ -97,7 +97,7 @@ namespace LibDotNetParser.CILApi
             if (file.Tabels.TypeDefTabel.Count <= NextTypeIndex)
             {
                 //Happens when this is the last type
-                max = (int)file.Tabels.TypeDefTabel[file.Tabels.TypeDefTabel.Count - 1].FieldList;
+                max = file.Tabels.FieldTabel.Count;
             }
             else
             {

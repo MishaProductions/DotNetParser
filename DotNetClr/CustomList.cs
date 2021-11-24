@@ -38,7 +38,7 @@ namespace libDotNetClr
             Console.WriteLine("Clearing the stack");
             //throw new Exception();
 #endif
-            //backend.Clear();
+            backend.Clear();
         }
         public void Add(T a)
         {

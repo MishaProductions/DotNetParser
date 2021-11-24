@@ -1,6 +1,7 @@
 ﻿using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace LibDotNetParser.CILApi
 {
@@ -142,7 +143,18 @@ namespace LibDotNetParser.CILApi
                         return ret;
                     }
                 case OpCodeOperandType.InlineBrTarget:
-                    throw new NotImplementedException();
+                    {
+                        byte fi = code[Offset + 1];
+                        byte s2 = code[Offset + 2];
+                        byte t = code[Offset + 3];
+                        byte f = code[Offset + 4];
+                        byte[] num2 = new byte[] { fi, s2, t, f };
+                        var numb2 = BitConverter.ToInt32(num2, 0);
+
+                        ret.Size += 4;
+                        ret.Operand = numb2;
+                        return ret;
+                    }
                 case OpCodeOperandType.InlineField:
                     {
                         byte fi = code[Offset + 1];
@@ -158,177 +170,183 @@ namespace LibDotNetParser.CILApi
                     }
                 case OpCodeOperandType.InlineMethod:
                     {
-                        try
+                        byte fi = code[Offset + 1];
+                        byte s2 = code[Offset + 2];
+                        byte t = code[Offset + 3];
+                        byte f = code[Offset + 4]; //Method type. 6=Method,10=MemberRef
+                        byte[] num2 = new byte[] { fi, s2, t, 0 };
+                        var numb2 = BitConverter.ToInt32(num2, 0); //Method Token
+
+
+                        if (f == 10) //MemberRef
                         {
-                            byte fi = code[Offset + 1];
-                            byte s2 = code[Offset + 2];
-                            byte t = code[Offset + 3];
-                            byte f = code[Offset + 4]; //Method type. 6=Method,10=MemberRef
-                            byte[] num2 = new byte[] { fi, s2, t, 0 };
-                            var numb2 = BitConverter.ToInt32(num2, 0); //Method Token
+                            //Get the method that we are calling
+                            var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1];
+
+                            #region Decode
+                            //Decode the class bytes
+                            DecodeMemberRefParent(c.Class, out MemberRefParentType tabel, out uint row);
 
 
-                            if (f == 10) //MemberRef
+                            var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                            uint classs = 0;
+                            uint Namespace = 0;
+
+                            //TYPE def
+                            if (tabel == MemberRefParentType.TypeDef)
                             {
-                                //Get the method that we are calling
-                                var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1];
+                                var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
 
-                                #region Decode
-                                //Decode the class bytes
-                                DecodeMemberRefParent(c.Class, out MemberRefParentType tabel, out uint row);
+                                classs = tt.Name;
+                                Namespace = tt.Namespace;
 
-
-                                var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
-                                uint classs;
-                                uint Namespace;
-
-                                //TYPE def
-                                if (tabel == MemberRefParentType.TypeDef)
-                                {
-                                    var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row - 1];
-
-                                    classs = tt.Name;
-                                    Namespace = tt.Namespace;
-
-                                }
-                                //Type REF
-                                else if (tabel == MemberRefParentType.TypeRef)
-                                {
-                                    var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
-
-                                    classs = tt.TypeName;
-
-
-                                    Namespace = tt.TypeNamespace;
-                                }
-                                //Module Ref
-                                else if (tabel == MemberRefParentType.ModuleRef)
-                                {
-                                    var tt = mainFile.Backend.Tabels.ModuleRefTabel[(int)row - 1];
-
-                                    classs = tt.Name;
-                                    Namespace = tt.Name;
-                                }
-                                //Unknown
-                                else
-                                {
-                                    classs = 0;
-                                    Namespace = 0;
-                                    throw new NotImplementedException();
-                                }
-                                #endregion
-
-                                ret.Size += 4;
-                                var anamespace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
-                                var typeName = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
-
-                                //Now, resolve this method
-                                //TODO: Resolve the method properly by first
-                                //1) resolve the type of the method
-                                //2) search for the method in the type
-                                //3) get method RVA
-
-                                //For now, resolve it by name
-
-                                DotNetMethod m = null;
-                                foreach (var type in ContextTypes)
-                                {
-                                    foreach (var item in type.Types)
-                                    {
-                                        foreach (var meth in item.Methods)
-                                        {
-                                            if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace)
-                                            {
-                                                m = meth;
-                                            }
-                                        }
-                                    }
-
-                                }
-                                uint rva = 0;
-                                if (m != null)
-                                    rva = m.RVA;
-                                else
-                                {
-                                    //Ignore if it is system object constructor
-                                    if (anamespace == "System" && typeName == "Object" && funcName == ".ctor")
-                                    {
-
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
-                                    }
-                                }
-
-
-                                ret.Operand = new InlineMethodOperandData()
-                                {
-                                    NameSpace = anamespace,
-                                    ClassName = typeName,
-                                    FunctionName = funcName,
-                                    RVA = rva,
-                                    Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
-                                };
-                                return ret;
                             }
-                            else if (f == 6)//method
+                            //Type REF
+                            else if (tabel == MemberRefParentType.TypeRef)
                             {
-                                //Get the method that we are calling
-                                var c = mainFile.Backend.Tabels.MethodTabel[numb2 - 1];
+                                var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row - 1];
+
+                                classs = tt.TypeName;
 
 
+                                Namespace = tt.TypeNamespace;
+                            }
+                            //Module Ref
+                            else if (tabel == MemberRefParentType.ModuleRef)
+                            {
+                                var tt = mainFile.Backend.Tabels.ModuleRefTabel[(int)row - 1];
 
+                                classs = tt.Name;
+                                Namespace = tt.Name;
+                            }
+                            //Type Spec
+                            else if (tabel == MemberRefParentType.TypeSpec)
+                            {
+                                var tt = mainFile.Backend.Tabels.TypeSpecTabel[(int)row - 1];
+                                var b = mainFile.Backend.BlobStream[tt.Signature];
+                                var bi = new BinaryReader(new MemoryStream(mainFile.Backend.BlobStream));
+                                bi.BaseStream.Position = tt.Signature;
 
-                                var inst = new ILInstruction()
-                                {
-                                    OpCode = opCode.Value,
-                                    OpCodeName = opCode.Name,
-                                    OperandType = opCode.OpCodeOperandType,
-                                    Position = Offset,
-                                    Size = 4
-                                };
-                                string name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
-                                //Now, resolve this method
-                                DotNetMethod m = null;
-                                foreach (var item in mainFile.Types)
+                                //TODO
+                                throw new NotImplementedException("TypeSpec not yet implemented");
+                            }
+                            //Unknown
+                            else
+                            {
+                                classs = 0;
+                                Namespace = 0;
+                                throw new NotImplementedException();
+                            }
+                            #endregion
+                            var anamespace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
+                            var typeName = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
+
+                            //Now, resolve this method
+                            //TODO: Resolve the method properly by first
+                            //1) resolve the type of the method
+                            //2) search for the method in the type
+                            //3) get method RVA
+
+                            //For now, resolve it by name
+
+                            DotNetMethod m = null;
+                            foreach (var type in ContextTypes)
+                            {
+                                foreach (var item in type.Types)
                                 {
                                     foreach (var meth in item.Methods)
                                     {
-                                        if (meth.RVA == c.RVA && meth.Name == name)
+                                        if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace)
                                         {
                                             m = meth;
                                         }
                                     }
                                 }
 
-                                string className = "CannotFind";
-                                string Namespace = "CannotFind";
-
-                                if (m != null)
+                            }
+                            uint rva = 0;
+                            if (m != null)
+                                rva = m.RVA;
+                            else
+                            {
+                                //Ignore if it is system object constructor
+                                if (anamespace == "System" && typeName == "Object" && funcName == ".ctor")
                                 {
-                                    className = m.Parrent.Name;
-                                    Namespace = m.Parrent.NameSpace;
+
                                 }
-                                ret.Size += 4;
-                                ret.Operand = new InlineMethodOperandData()
+                                else
                                 {
-                                    NameSpace = Namespace,
-                                    ClassName = className,
-                                    FunctionName = name,
-                                    RVA = c.RVA,
-                                    Signature = m.Signature,
-
-                                };
-                                return ret;
+                                    Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                }
                             }
 
+                            ret.Size += 4;
+                            ret.Operand = new InlineMethodOperandData()
+                            {
+                                NameSpace = anamespace,
+                                ClassName = typeName,
+                                FunctionName = funcName,
+                                RVA = rva,
+                                Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
+                            };
+                            return ret;
                         }
-                        catch { }
+                        else if (f == 6)//method
+                        {
+                            //Get the method that we are calling
+                            var c = mainFile.Backend.Tabels.MethodTabel[numb2 - 1];
+                            string name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                            //Now, resolve this method
+                            DotNetMethod m = null;
+                            foreach (var item in mainFile.Types)
+                            {
+                                foreach (var meth in item.Methods)
+                                {
+                                    if (meth.RVA == c.RVA && meth.Name == name)
+                                    {
+                                        m = meth;
+                                    }
+                                }
+                            }
+
+                            string className = "CannotFind";
+                            string Namespace = "CannotFind";
+
+                            if (m != null)
+                            {
+                                className = m.Parrent.Name;
+                                Namespace = m.Parrent.NameSpace;
+                            }
+                            ret.Size += 4;
+                            ret.Operand = new InlineMethodOperandData()
+                            {
+                                NameSpace = Namespace,
+                                ClassName = className,
+                                FunctionName = name,
+                                RVA = c.RVA,
+                                Signature = m.Signature,
+
+                            };
+                            return ret;
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
                     }
-                    break;
                 case OpCodeOperandType.InlineSig:
-                    throw new NotImplementedException();
+                    {
+                        byte fi = code[Offset + 1];
+                        byte s2 = code[Offset + 2];
+                        byte t = code[Offset + 3];
+                        byte f = code[Offset + 4];
+                        byte[] num2 = new byte[] { fi, s2, t, f };
+                        var numb2 = BitConverter.ToInt32(num2, 0);
+
+                        ret.Size += 4;
+                        ret.Operand = numb2;
+                        return ret;
+                    }
                 case OpCodeOperandType.InlineString:
                     {
                         byte first = code[Offset + 1]; //1st index
@@ -391,7 +409,18 @@ namespace LibDotNetParser.CILApi
                         return ret;
                     }
                 case OpCodeOperandType.InlineR:
-                    throw new NotImplementedException();
+                    {
+                        byte fi = code[Offset + 1];
+                        byte s2 = code[Offset + 2];
+                        byte t = code[Offset + 3];
+                        byte f = code[Offset + 4];
+
+                        byte[] num2 = new byte[] { fi, s2, t, f };
+                        var numb2 = BitConverter.ToSingle(num2, 0);
+                        ret.Size += 4;
+                        ret.Operand = numb2;
+                        return ret;
+                    }
                 default:
                     break;
             }

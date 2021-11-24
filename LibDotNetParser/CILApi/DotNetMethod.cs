@@ -115,7 +115,7 @@ namespace LibDotNetParser.CILApi
 
         }
 
-        private static string ElementTypeToString(byte elemType)
+        public static string ElementTypeToString(byte elemType)
         {
             switch (elemType)
             {

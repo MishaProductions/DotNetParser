@@ -305,8 +305,16 @@ namespace DotNetparserTester
                 TestSuccess("Create array, len should be 8 but it is " + stringArray.Length);
             }
             //TODO
-            //stringArray[0] = "a";
-            //stringArray[1] = "b";
+            stringArray[0] = "a";
+            stringArray[1] = "b";
+            if (stringArray[0] == "a")
+            {
+                TestSuccess("Read and write to an array");
+            }
+            else
+            {
+                TestFail("Read and write to an array");
+            }
 
             Console.WriteLine("Reflection tests");
             MyObject obj = new MyObject();
@@ -334,9 +342,8 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("Full type name of string is "+ FUllName+", not System.String");
+                TestFail("Full type name of string is " + FUllName + ", not System.String");
             }
-
             TestsComplete();
         }
         /// <summary>

@@ -4,6 +4,7 @@ namespace LibDotNetParser
 {
     public class MethodArgStack
     {
+        public static readonly MethodArgStack ldnull = new MethodArgStack() { type = StackItemType.ldnull};
         public StackItemType type;
         public object value;
 
@@ -11,7 +12,7 @@ namespace LibDotNetParser
         public DotNetMethod ObjectContructor;
 
         public int ArrayLen;
-        public object[] ArrayItems;
+        public MethodArgStack[] ArrayItems;
 
         public override string ToString()
         {
@@ -39,6 +40,8 @@ namespace LibDotNetParser
                     return ((char)value).ToString();
                 case StackItemType.ObjectRef:
                     return "Object refrence to " + ObjectType.FullName;
+                case StackItemType.MethodPtr:
+                    return "Method Pointer to " + ((DotNetMethod)value).ToString();
                 default:
                     return "Unknown";
             }
@@ -57,6 +60,7 @@ namespace LibDotNetParser
         Object,
         Array,
         Char,
-        ObjectRef
+        ObjectRef,
+        MethodPtr
     }
 }

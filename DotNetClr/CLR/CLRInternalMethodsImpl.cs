@@ -30,6 +30,30 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
             RegisterCustomInternalMethod("GetObjType", GetObjType);
             RegisterCustomInternalMethod("Type_FromRefernce", GetTypeFromRefrence);
+            RegisterCustomInternalMethod("GetAssemblyFromType", GetAssemblyFromType);
+            //RegisterCustomInternalMethod("String_ToUpper", String_ToUpper);
+        }
+
+        private void String_ToUpper(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            returnValue = new MethodArgStack() { type = StackItemType.String, value = "TODOUPERCASE" };
+            return;
+            var str = Stack[stack.Count - 1];
+            if (str.type != StackItemType.String) throw new InvalidOperationException();
+            var oldVal = (string)str.value;
+            returnValue = new MethodArgStack() { type = StackItemType.String, value = oldVal.ToUpper()};
+        }
+
+        private void GetAssemblyFromType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var type = Stack[stack.Count - 1];
+            if (type.type != StackItemType.Object) throw new InvalidOperationException();
+            var dotNetType = type.ObjectType;
+
+            var assembly = CreateType("System.Reflection", "Assembly");
+
+
+            returnValue = assembly;
         }
 
         private void GetTypeFromRefrence(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -222,7 +246,8 @@ namespace libDotNetClr
             }
             else
             {
-                throw new NotImplementedException();
+                returnValue = new MethodArgStack() { type = StackItemType.Int32, value = 0 };
+                return;
             }
             if (b is string)
             {
@@ -234,7 +259,8 @@ namespace libDotNetClr
             }
             else
             {
-                throw new NotImplementedException();
+                returnValue = new MethodArgStack() { type = StackItemType.Int32, value = 0 };
+                return;
             }
 
             if (first == second)

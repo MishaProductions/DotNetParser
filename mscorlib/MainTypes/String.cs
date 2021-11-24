@@ -25,7 +25,10 @@ namespace System
 
             return false;
         }
-
+        //public string ToUpper()
+        //{
+        //    return String_ToUpper();
+        //}
         //Internal calls
 
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -39,5 +42,7 @@ namespace System
         public extern static int strLen();
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static char String_get_Chars_1(int i);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string String_ToUpper();
     }
 }
