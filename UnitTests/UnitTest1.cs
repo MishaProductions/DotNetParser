@@ -14,10 +14,14 @@ namespace UnitTests
         public void MainTest()
         {
             DoTest();
-            if (NumbOfFailedTests >= 1)
+            if (NumbOfFailedTests > 0)
             {
                 Console.WriteLine("Tests have failed, exiting now");
                 Assert.IsTrue(false);
+            }
+            else
+            {
+                Assert.IsTrue(true);
             }
         }
 
@@ -26,7 +30,7 @@ namespace UnitTests
         static int NumbOfFailedTests = 0;
         static void DoTest()
         {
-            string exe = @"DotNetparserTester.exe";
+            string exe = @"TestApp.dll";
             var m = new DotNetFile(exe);
 
             var decompiler = new IlDecompiler(m.EntryPoint);

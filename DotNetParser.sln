@@ -6,8 +6,15 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibDotNetParser", "LibDotNetParser\LibDotNetParser.csproj", "{8F344CC5-DB3B-437D-A492-B41F5BD0160B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TesterKernel", "TesterKernel\TesterKernel.csproj", "{0B54933E-1BDB-4BF3-BBFC-AAFB7806DCA1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B6E06C06-B2C1-46EB-B182-0F449E892F88} = {B6E06C06-B2C1-46EB-B182-0F449E892F88}
+		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{B6E06C06-B2C1-46EB-B182-0F449E892F88}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libDotNetClr", "DotNetClr\libDotNetClr.csproj", "{67155BFC-F7B3-4494-A467-45319D9E5E8C}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -27,10 +34,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{BEDA62A8-E3DF-403C-BA1F-D86BF8A35653}"
 	ProjectSection(ProjectDependencies) = postProject
+		{B6E06C06-B2C1-46EB-B182-0F449E892F88} = {B6E06C06-B2C1-46EB-B182-0F449E892F88}
 		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
+		{AD95E461-BE02-4272-AE05-D54FC22ADEAE} = {AD95E461-BE02-4272-AE05-D54FC22ADEAE}
+		{8F344CC5-DB3B-437D-A492-B41F5BD0160B} = {8F344CC5-DB3B-437D-A492-B41F5BD0160B}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAppRunner", "TestAppRunner\TestAppRunner.csproj", "{AD95E461-BE02-4272-AE05-D54FC22ADEAE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BA2DB41A-2D1C-469D-911D-CBD1E83D2590} = {BA2DB41A-2D1C-469D-911D-CBD1E83D2590}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
