@@ -46,6 +46,14 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("System_Action`3.Invoke_impl", Action3InvokeImpl);
             RegisterCustomInternalMethod("System_Action`4.Invoke_impl", Action4InvokeImpl);
             RegisterCustomInternalMethod("System_Action`5.Invoke_impl", Action5InvokeImpl);
+            RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
+        }
+
+        private void Boolean_GetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var val = Stack[Stack.Length - 1];
+            returnValue = val;
+            stack.RemoveAt(stack.Count - 1);
         }
 
         private void Action5InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -190,7 +198,7 @@ namespace libDotNetClr
             var str = Stack[Stack.Length - 1];
             if (str.type != StackItemType.String) throw new InvalidOperationException();
             var oldVal = (string)str.value;
-            returnValue = new MethodArgStack() { type = StackItemType.String, value = oldVal.ToUpper()};
+            returnValue = new MethodArgStack() { type = StackItemType.String, value = oldVal.ToUpper() };
         }
 
         private void GetAssemblyFromType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -211,7 +219,7 @@ namespace libDotNetClr
             if (re.type != StackItemType.ObjectRef) throw new InvalidOperationException();
 
             var type = CreateType("System", "Type");
-            var typeToRead= CreateType(re.ObjectType);
+            var typeToRead = CreateType(re.ObjectType);
             WriteStringToType(type, "internal__fullname", typeToRead.ObjectType.FullName);
             returnValue = type;
         }
@@ -369,7 +377,7 @@ namespace libDotNetClr
             string returnVal = "";
             for (int i = Stack.Length - method.AmountOfParms; i < Stack.Length; i++)
             {
-               if (Stack[i].type != StackItemType.String)
+                if (Stack[i].type != StackItemType.String)
                 {
                     clrError("fatal error see InternalMethod_String_Concat method", "******BIG FATAL ERROR********");
                     return;

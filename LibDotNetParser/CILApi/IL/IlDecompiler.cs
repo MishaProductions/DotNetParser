@@ -379,6 +379,24 @@ namespace LibDotNetParser.CILApi
                             };
                             return ret;
                         }
+                        else if (f == 0x2B)
+                        {
+                            //Method spec
+                            var idx = mainFile.Backend.Tabels.MethodSpecTable[fi - 1];
+                            uint fa;
+                            uint row;
+                            DecodeMethodDefOrRef(idx.Method, out fa, out row);
+                            if (fa == 0)
+                            {
+                                //MemberDef
+                            }
+                            else if (fa == 1)
+                            {
+                                //MemberRef
+                            }
+                            throw new NotImplementedException();
+                            return ret;
+                        }
                         else
                         {
                             throw new NotImplementedException();
@@ -545,7 +563,18 @@ namespace LibDotNetParser.CILApi
             type = num & 0x3;
             index = (num >> 2);
         }
+        internal const int RowIdBitCount = 24;
+        internal const uint RIDMask = (1 << RowIdBitCount) - 1;
+        internal const uint TagMask = 0x00000001;
+        private const uint MethodDef = 0x06 << RowIdBitCount;
+        private const uint MemberRef = 0x0A << RowIdBitCount;
+        internal const uint TagToTokenTypeByteVector = MethodDef >> 24 | MemberRef >> 16;
+        private static void DecodeMethodDefOrRef(uint methodDefOrRef, out uint type, out uint row)
+        {
+            type = (methodDefOrRef & (1 << 0));
 
+            row = (methodDefOrRef >> 1);
+        }
         public enum MemberRefParentType
         {
             TypeDef,

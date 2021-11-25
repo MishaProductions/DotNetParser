@@ -393,8 +393,24 @@ namespace DotNetparserTester
                 Console.WriteLine(f);
             };
             action5.Invoke("hi there", " ", ":", ")", 5);
+            if (true.ToString() == "True")
+            {
+                TestSuccess("true.ToString() is true");
+            }
+            else
+            {
+                TestFail("true.toString != true");
+            }
+
+            var a = Array.Empty<object>();
             TestsComplete();
         }
+
+        private static void aLogError(string v)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Returns 90.
         /// </summary>

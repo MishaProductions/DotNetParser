@@ -111,7 +111,7 @@ namespace libDotNetClr
                     {
                         if (m.Name == ".cctor" && m.IsStatic)
                         {
-                            Console.WriteLine("Creating " + t.FullName);
+                            Console.WriteLine("Creating " + t.FullName+"."+m.Name);
                             RunMethod(m, file, stack);
                             //stack.Clear();
                         }
@@ -1426,6 +1426,17 @@ namespace libDotNetClr
                     }
 
                     stack.Add(new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
+                }
+                else if (item.OpCodeName == "leave.s")
+                {
+                    // find the ILInstruction that is in this position
+                    int i2 = item.Position + (int)item.Operand + 1;
+                    ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                    if (inst == null)
+                        throw new Exception("Attempt to branch to null");
+                    stack.RemoveAt(stack.Count - 1);
+                    i = inst.RelPosition - 1;
                 }
                 #endregion
                 else

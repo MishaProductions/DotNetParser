@@ -37,6 +37,12 @@ namespace LibDotNetParser.DotNet.Tabels
         public List<FieldRVA> FieldRVATabel { get; }
         public List<Assembly> AssemblyTabel { get; }
         public List<AssemblyRef> AssemblyRefTabel { get; }
+        public List<File> FileTable { get; }
+        public List<ExportedType> ExportedTypeTable { get; }
+        public List<ManifestResource> ManifestResourceTable { get; }
+        public List<NestedClass> NestedClassTable { get; }
+        public List<GenericParam> GenericParamTable { get; }
+        public List<MethodSpec> MethodSpecTable { get; }
         public Tabels(PEFile p)
         {
             //Init
@@ -70,6 +76,12 @@ namespace LibDotNetParser.DotNet.Tabels
             FieldRVATabel = new List<FieldRVA>();
             AssemblyTabel = new List<Assembly>();
             AssemblyRefTabel = new List<AssemblyRef>();
+            FileTable = new List<File>();
+            ExportedTypeTable = new List<ExportedType>();
+            ManifestResourceTable = new List<ManifestResource>();
+            NestedClassTable = new List<NestedClass>();
+            GenericParamTable = new List<GenericParam>();
+            MethodSpecTable = new List<MethodSpec>();
 
             int a = 0;
             //Read module Tabel (if any)
@@ -354,7 +366,6 @@ namespace LibDotNetParser.DotNet.Tabels
                 {
                     var m = new Assembly();
                     m.Read(r);
-                    var x = p.ClrStringsStream.GetByOffset(m.Name);
                     AssemblyTabel.Add(m);
                 }
                 a++;
@@ -384,8 +395,91 @@ namespace LibDotNetParser.DotNet.Tabels
                 {
                     var m = new AssemblyRef();
                     m.Read(r);
-                    var x = p.ClrStringsStream.GetByOffset(m.Name);
                     AssemblyRefTabel.Add(m);
+                }
+                a++;
+            }
+            //Read AssemblyRefProcessor Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.AssemblyRefProcessor) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    r.BaseStream.Position += 8; //Test please
+                }
+                a++;
+            }
+            //Read AssemblyRefOS Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.AssemblyRefOS) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    r.BaseStream.Position += 16; //Test please
+                }
+                a++;
+            }
+            //Read File Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.File) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new File();
+                    m.Read(r);
+                    FileTable.Add(m);
+                }
+                a++;
+            }
+            //Read ExportedType Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.ExportedType) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new ExportedType();
+                    m.Read(r);
+                    ExportedTypeTable.Add(m);
+                }
+                a++;
+            }
+            //Read ManifestResource Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.ManifestResource) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new ManifestResource();
+                    m.Read(r);
+                    ManifestResourceTable.Add(m);
+                }
+                a++;
+            }
+            //Read NestedClass Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.NestedClass) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new NestedClass();
+                    m.Read(r);
+                    NestedClassTable.Add(m);
+                }
+                a++;
+            }
+            //Read GenericParam Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.GenericParam) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new GenericParam();
+                    m.Read(r);
+                    GenericParamTable.Add(m);
+                }
+                a++;
+            }
+            //Read MethodSpec Tabel
+            if ((p.ClrMetaDataStreamHeader.TablesFlags & MetadataTableFlags.MethodSpec) != 0)
+            {
+                for (int i = 0; i < p.ClrMetaDataStreamHeader.TableSizes[a]; i++)
+                {
+                    var m = new MethodSpec();
+                    m.Read(r);
+                    MethodSpecTable.Add(m);
                 }
                 a++;
             }
