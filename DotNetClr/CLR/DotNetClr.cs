@@ -1,5 +1,4 @@
-﻿//#define CLR_DEBUG
-using LibDotNetParser;
+﻿using LibDotNetParser;
 using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
@@ -96,7 +95,7 @@ namespace libDotNetClr
                 MethodArgStack[] itms = new MethodArgStack[args.Length];
                 for (int i = 0; i < args.Length; i++)
                 {
-                    itms[i] = new MethodArgStack() { type = StackItemType.String, value = args[i] };
+                    itms[i] = MethodArgStack.String(args[i]);
                 }
                 Startparams.Add(new MethodArgStack() { ArrayLen = 1, type = StackItemType.Array, ArrayItems = itms });
             }
@@ -369,73 +368,73 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldc.i4")
                 {
                     //Puts an int32 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)item.Operand });
+                    stack.Add(MethodArgStack.Int32((int)item.Operand));
                 }
                 else if (item.OpCodeName == "ldc.i4.0")
                 {
                     //Puts an 0 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                    stack.Add(MethodArgStack.Int32(0));
                 }
                 else if (item.OpCodeName == "ldc.i4.1")
                 {
                     //Puts an int32 with value 1 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                    stack.Add(MethodArgStack.Int32(1));
                 }
                 else if (item.OpCodeName == "ldc.i4.2")
                 {
                     //Puts an int32 with value 2 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)2 });
+                    stack.Add(MethodArgStack.Int32(2));
                 }
                 else if (item.OpCodeName == "ldc.i4.3")
                 {
                     //Puts an int32 with value 3 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)3 });
+                    stack.Add(MethodArgStack.Int32(3));
                 }
                 else if (item.OpCodeName == "ldc.i4.4")
                 {
                     //Puts an int32 with value 4 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)4 });
+                    stack.Add(MethodArgStack.Int32(4));
                 }
                 else if (item.OpCodeName == "ldc.i4.5")
                 {
                     //Puts an int32 with value 5 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)5 });
+                    stack.Add(MethodArgStack.Int32(5));
                 }
                 else if (item.OpCodeName == "ldc.i4.6")
                 {
                     //Puts an int32 with value 6 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)6 });
+                    stack.Add(MethodArgStack.Int32(6));
                 }
                 else if (item.OpCodeName == "ldc.i4.7")
                 {
                     //Puts an int32 with value 7 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)7 });
+                    stack.Add(MethodArgStack.Int32(7));
                 }
                 else if (item.OpCodeName == "ldc.i4.8")
                 {
-                    //Puts an int32 with value 3 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)8 });
+                    //Puts an int32 with value 8 onto the arg stack
+                    stack.Add(MethodArgStack.Int32(8));
                 }
                 else if (item.OpCodeName == "ldc.i4.m1")
                 {
                     //Puts an int32 with value -1 onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)-1 });
+                    stack.Add(MethodArgStack.Int32(-1));
                 }
                 else if (item.OpCodeName == "ldc.i4.s")
                 {
                     //Push an int32 onto the stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)(sbyte)(byte)item.Operand });
+                    stack.Add(MethodArgStack.Int32((int)(sbyte)(byte)item.Operand));
                 }
                 //Push int64
                 else if (item.OpCodeName == "ldc.i8")
                 {
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int64, value = (long)item.Operand });
+                    stack.Add(MethodArgStack.Int64((long)item.Operand));
                 }
                 //push float64
                 else if (item.OpCodeName == "ldc.r4")
                 {
                     //Puts an float32 with value onto the arg stack
-                    stack.Add(new MethodArgStack() { type = StackItemType.Float32, value = (float)item.Operand });
+                    stack.Add(MethodArgStack.Float32((float)item.Operand));
                 }
                 //Push float64
                 else if (item.OpCodeName == "ldc.r8")
@@ -443,9 +442,12 @@ namespace libDotNetClr
                     //Puts an float32 with value onto the arg stack
                     if (item.Operand is float)
                     {
-                        stack.Add(new MethodArgStack() { type = StackItemType.Float64, value = (float)item.Operand });
+                        stack.Add(MethodArgStack.Float64((float)item.Operand));
                     }
-
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 #endregion
                 #region conv* opcodes
@@ -484,7 +486,7 @@ namespace libDotNetClr
                     var numb2 = (int)b.value;
                     var result = numb1 + numb2;
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                    stack.Add(MethodArgStack.Int32(result));
                 }
                 else if (item.OpCodeName == "sub")
                 {
@@ -492,7 +494,7 @@ namespace libDotNetClr
                     var numb2 = (int)stack[stack.Count - 1].value;
                     var result = numb1 - numb2;
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                    stack.Add(MethodArgStack.Int32(result));
                 }
                 else if (item.OpCodeName == "div")
                 {
@@ -502,7 +504,7 @@ namespace libDotNetClr
                     //TODO: Check if dividing by zero
                     var result = numb1 / numb2;
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                    stack.Add(MethodArgStack.Int32(result));
                 }
                 else if (item.OpCodeName == "mul")
                 {
@@ -510,7 +512,7 @@ namespace libDotNetClr
                     var numb2 = (int)stack[stack.Count - 1].value;
                     var result = numb1 * numb2;
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = result });
+                    stack.Add(MethodArgStack.Int32(result));
                 }
                 else if (item.OpCodeName == "ceq")
                 {
@@ -554,12 +556,12 @@ namespace libDotNetClr
                     if (Numb1 == Numb2)
                     {
                         //push 1
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                        stack.Add(MethodArgStack.Int32(1));
                     }
                     else
                     {
                         //push 0
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                        stack.Add(MethodArgStack.Int32(0));
                     }
                 }
                 else if (item.OpCodeName == "cgt")
@@ -570,12 +572,12 @@ namespace libDotNetClr
                     if (numb1 > numb2)
                     {
                         //push 1
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                        stack.Add(MethodArgStack.Int32(1));
                     }
                     else
                     {
                         //push 0
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                        stack.Add(MethodArgStack.Int32(0));
                     }
                 }
                 else if (item.OpCodeName == "clt")
@@ -586,12 +588,12 @@ namespace libDotNetClr
                     if (numb1 < numb2)
                     {
                         //push 1
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)1 });
+                        stack.Add(MethodArgStack.Int32(1));
                     }
                     else
                     {
                         //push 0
-                        stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = (int)0 });
+                        stack.Add(MethodArgStack.Int32(0));
                     }
                 }
                 #endregion
@@ -636,9 +638,6 @@ namespace libDotNetClr
                         if (inst == null)
                             throw new Exception("Attempt to branch to null");
                         i = inst.RelPosition - 1;
-#if CLR_DEBUG
-                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is false.");
-#endif
                     }
                 }
                 else if (item.OpCodeName == "brtrue.s")
@@ -655,9 +654,6 @@ namespace libDotNetClr
                             throw new Exception("Attempt to branch to null");
                         stack.RemoveAt(stack.Count - 1);
                         i = inst.RelPosition - 1;
-#if CLR_DEBUG
-                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName+" because item on stack is true.");
-#endif
                     }
                     else
                     {
@@ -668,10 +664,7 @@ namespace libDotNetClr
                 #region Misc
                 else if (item.OpCodeName == "ldstr")
                 {
-                    stack.Add(new MethodArgStack() { type = StackItemType.String, value = (string)item.Operand });
-#if CLR_DEBUG
-                    Console.WriteLine("[CLRDEBUG] Pushing: " + (string)item.Operand);
-#endif
+                    stack.Add(MethodArgStack.String((string)item.Operand));
                 }
                 else if (item.OpCodeName == "nop")
                 {
@@ -921,7 +914,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldnull")
                 {
-                    stack.Add(new MethodArgStack() { type = StackItemType.ldnull, value = null });
+                    stack.Add(MethodArgStack.Null());
                 }
                 else if (item.OpCodeName == "throw")
                 {
@@ -941,10 +934,6 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ret")
                 {
                     //Return from function
-#if CLR_DEBUG
-                    Console.WriteLine("[CLR] Returning from function");
-#endif
-                    //Successful return
                     MethodArgStack a = null;
                     if (stack.Count != 0 && m.HasReturnValue)
                     {
@@ -1341,7 +1330,7 @@ namespace libDotNetClr
                     {
                         throw new InvalidOperationException("Array is null");
                     }
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = array.ArrayLen });
+                    stack.Add(MethodArgStack.Int32(array.ArrayLen));
                 }
                 else if (item.OpCodeName == "dup")
                 {
@@ -1365,9 +1354,8 @@ namespace libDotNetClr
                         return null;
                     }
                     var idx = (int)index.value;
-                    stack.Add(array.ArrayItems[idx]);
-
                     stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.Add(array.ArrayItems[idx]);
                 }
                 else if (item.OpCodeName == "stelem.ref")
                 {
@@ -1400,7 +1388,7 @@ namespace libDotNetClr
                         {
                             if (t.Name == name && t.NameSpace == Typenamespace)
                             {
-                                stack.Add(new MethodArgStack() { type = StackItemType.ObjectRef, ObjectType = t });
+                                stack.Add(MethodArgStack.ObjectRef(t));
                                 found = true;
                                 break;
                             }

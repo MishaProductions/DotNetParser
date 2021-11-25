@@ -1,5 +1,4 @@
-﻿//#define CLR_DEBUG
-using LibDotNetParser;
+﻿using LibDotNetParser;
 using System.Collections.Generic;
 
 namespace libDotNetClr

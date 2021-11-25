@@ -1,5 +1,4 @@
-﻿//#define CLR_DEBUG
-using LibDotNetParser.CILApi;
+﻿using LibDotNetParser.CILApi;
 
 namespace libDotNetClr
 {
