@@ -165,7 +165,83 @@ namespace LibDotNetParser.CILApi
                         var numb2 = BitConverter.ToInt32(num2, 0);
 
                         ret.Size += 4;
-                        ret.Operand = fi;
+
+                        if (f == 4)
+                        {
+                            //Inside of field table
+                            var c = mainFile.Backend.Tabels.FieldTabel[fi - 1];
+                            var ret2 = new FieldInfo() { Name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name), IsInFieldTabel = true, IndexInTabel = fi };
+
+
+                            ret.Operand = ret2;
+                        }
+                        else if (f == 10)
+                        {
+                            //Inside of MemberRef table
+                            var c = mainFile.Backend.Tabels.MemberRefTabelRow[fi - 1];
+
+                            var ret2 = new FieldInfo() { Name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name), IsInFieldTabel = true, IndexInTabel = fi };
+
+                            DecodeMemberRefParent(c.Class, out MemberRefParentType type, out uint row2);
+                            if (type == MemberRefParentType.TypeSpec)
+                            {   //Method spec
+                                var tt = mainFile.Backend.Tabels.TypeSpecTabel[(int)(row2 - 1)];
+
+                                //See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/corelementtype-enumeration for more info
+                                var b = mainFile.Backend.BlobStream[tt.Signature];
+                                var bi = new BinaryReader(new MemoryStream(mainFile.Backend.BlobStream));
+                                bi.BaseStream.Position = tt.Signature;
+
+                                var a = bi.ReadByte(); //Normally 0x5
+                                var type3 = bi.ReadByte(); //Normally 0x15 (ELEMENT_TYPE_GENERICINST)
+                                var n = ParseNumber(bi); //
+                                var n2 = ParseNumber(bi);
+                                var bb = bi.ReadByte(); //PTR_END
+                                var aa = bi.ReadByte(); //depends on the generic type.
+                                uint type2;
+                                uint index;
+                                DecodeTypeDefOrRef((uint)n2, out type2, out index);
+                                uint Namespace = 0;
+                                uint classs = 0;
+
+                                if (type2 == 0)
+                                {
+                                    //Type def
+                                    var Realtabel = mainFile.Backend.Tabels.TypeDefTabel[(int)(index - 1)];
+                                    Namespace = Realtabel.Namespace;
+                                    classs = Realtabel.Name;
+                                }
+                                else if (type2 == 1)
+                                {
+                                    //Type ref
+                                    var Realtabel = mainFile.Backend.Tabels.TypeRefTabel[(int)(index - 1)];
+                                    Namespace = Realtabel.TypeNamespace;
+                                    classs = Realtabel.TypeName;
+                                }
+                                else if (type2 == 2)
+                                {
+                                    //Type spec???? What
+                                    throw new NotImplementedException();
+                                }
+                                else
+                                {
+                                    throw new NotImplementedException("Invaild type");
+                                }
+
+                                ret2.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
+                                ret2.Class = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
+                                ret.Operand = ret2;
+                            }
+                            else
+                            {
+                                throw new NotImplementedException();
+                            }
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                       
                         return ret;
                     }
                 case OpCodeOperandType.InlineMethod:
@@ -235,7 +311,6 @@ namespace LibDotNetParser.CILApi
                                 var n2 = ParseNumber(bi);
                                 var bb = bi.ReadByte(); //PTR_END
                                 var aa = bi.ReadByte(); //depends on the generic type.
-                                File.WriteAllBytes("dump_blob", mainFile.Backend.BlobStream);
                                 uint type2;
                                 uint index;
                                 DecodeTypeDefOrRef((uint)n2, out type2, out index);
@@ -386,21 +461,215 @@ namespace LibDotNetParser.CILApi
                             uint fa;
                             uint row;
                             DecodeMethodDefOrRef(idx.Method, out fa, out row);
+
                             if (fa == 0)
                             {
-                                //MemberDef
+                                //Method
+                                var c = mainFile.Backend.Tabels.MethodTabel[(int)(row - 1)];
+                                string name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                                //Now, resolve this method
+                                DotNetMethod m = null;
+                                foreach (var item in mainFile.Types)
+                                {
+                                    foreach (var meth in item.Methods)
+                                    {
+                                        if (meth.RVA == c.RVA && meth.Name == name)
+                                        {
+                                            m = meth;
+                                        }
+                                    }
+                                }
+
+                                string className = "CannotFind";
+                                string Namespace = "CannotFind";
+
+                                if (m != null)
+                                {
+                                    className = m.Parrent.Name;
+                                    Namespace = m.Parrent.NameSpace;
+                                }
+                                ret.Size += 4;
+                                ret.Operand = new InlineMethodOperandData()
+                                {
+                                    NameSpace = Namespace,
+                                    ClassName = className,
+                                    FunctionName = name,
+                                    RVA = c.RVA,
+                                    Signature = m.Signature,
+
+                                };
+                                return ret;
                             }
                             else if (fa == 1)
                             {
                                 //MemberRef
+                                var c = mainFile.Backend.Tabels.MemberRefTabelRow[(int)(row - 1)];
+
+                                #region Decode
+                                //Decode the class bytes
+                                DecodeMemberRefParent(c.Class, out MemberRefParentType tabel, out uint row2);
+
+
+                                var funcName = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name);
+                                uint classs = 0;
+                                uint Namespace = 0;
+                                string genericArgType = "";
+
+                                //TYPE def
+                                if (tabel == MemberRefParentType.TypeDef)
+                                {
+                                    var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)row2 - 1];
+
+                                    classs = tt.Name;
+                                    Namespace = tt.Namespace;
+
+                                }
+                                //Type REF
+                                else if (tabel == MemberRefParentType.TypeRef)
+                                {
+                                    var tt = mainFile.Backend.Tabels.TypeRefTabel[(int)row2 - 1];
+
+                                    classs = tt.TypeName;
+
+
+                                    Namespace = tt.TypeNamespace;
+                                }
+                                //Module Ref
+                                else if (tabel == MemberRefParentType.ModuleRef)
+                                {
+                                    var tt = mainFile.Backend.Tabels.ModuleRefTabel[(int)row2 - 1];
+
+                                    classs = tt.Name;
+                                    Namespace = tt.Name;
+                                }
+                                //Type Spec
+                                else if (tabel == MemberRefParentType.TypeSpec)
+                                {
+                                    //See https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/corelementtype-enumeration for more info
+                                    var tt = mainFile.Backend.Tabels.TypeSpecTabel[(int)row2 - 1];
+                                    var b = mainFile.Backend.BlobStream[tt.Signature];
+                                    var bi = new BinaryReader(new MemoryStream(mainFile.Backend.BlobStream));
+                                    bi.BaseStream.Position = tt.Signature;
+
+                                    var a = bi.ReadByte(); //Normally 0x5
+                                    var type = bi.ReadByte(); //Normally 0x15 (ELEMENT_TYPE_GENERICINST)
+                                    var n = ParseNumber(bi); //
+                                    var n2 = ParseNumber(bi);
+                                    var bb = bi.ReadByte(); //PTR_END
+                                    var aa = bi.ReadByte(); //depends on the generic type.
+                                    uint type2;
+                                    uint index;
+                                    DecodeTypeDefOrRef((uint)n2, out type2, out index);
+
+                                    if (type2 == 0)
+                                    {
+                                        //Type def
+                                        var Realtabel = mainFile.Backend.Tabels.TypeDefTabel[(int)(index - 1)];
+                                        Namespace = Realtabel.Namespace;
+                                        classs = Realtabel.Name;
+                                    }
+                                    else if (type2 == 1)
+                                    {
+                                        //Type ref
+                                        var Realtabel = mainFile.Backend.Tabels.TypeRefTabel[(int)(index - 1)];
+                                        Namespace = Realtabel.TypeNamespace;
+                                        classs = Realtabel.TypeName;
+                                    }
+                                    else if (type2 == 2)
+                                    {
+                                        //Type spec???? What
+                                        throw new NotImplementedException();
+                                    }
+                                    else
+                                    {
+                                        throw new NotImplementedException("Invaild type");
+                                    }
+                                    if (aa == 0xE)
+                                    {
+                                        //String
+                                        genericArgType = "string";
+                                    }
+                                    else if (aa == 0x13)
+                                    {
+                                        genericArgType = "var";
+                                    }
+                                    else
+                                    {
+                                        //TODO: implement the rest of these
+                                        genericArgType = "Todo";
+                                        //throw new NotImplementedException();
+                                    }
+                                }
+                                //Unknown
+                                else
+                                {
+                                    classs = 0;
+                                    Namespace = 0;
+                                    throw new NotImplementedException();
+                                }
+                                #endregion
+                                var anamespace = mainFile.Backend.ClrStringsStream.GetByOffset(Namespace);
+                                var typeName = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
+
+                                //Now, resolve this method
+                                //TODO: Resolve the method properly by first
+                                //1) resolve the type of the method
+                                //2) search for the method in the type
+                                //3) get method RVA
+
+                                //For now, resolve it by name
+
+                                DotNetMethod m = null;
+                                foreach (var type in ContextTypes)
+                                {
+                                    foreach (var item in type.Types)
+                                    {
+                                        foreach (var meth in item.Methods)
+                                        {
+                                            if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace)
+                                            {
+                                                m = meth;
+                                            }
+                                        }
+                                    }
+
+                                }
+                                uint rva = 0;
+                                if (m != null)
+                                    rva = m.RVA;
+                                else
+                                {
+                                    //Ignore if it is system object constructor
+                                    if (anamespace == "System" && typeName == "Object" && funcName == ".ctor")
+                                    {
+
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                    }
+                                }
+
+                                ret.Size += 4;
+                                ret.Operand = new InlineMethodOperandData()
+                                {
+                                    NameSpace = anamespace,
+                                    ClassName = typeName,
+                                    FunctionName = funcName,
+                                    RVA = rva,
+                                    GenericArg = genericArgType,
+                                    Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
+                                };
+                                return ret;
                             }
-                            throw new NotImplementedException();
-                            return ret;
+                            else
+                            {
+                                throw new NotImplementedException();
+                            }
                         }
                         else
                         {
                             throw new NotImplementedException();
-                            return ret;
                         }
                     }
                 case OpCodeOperandType.InlineSig:

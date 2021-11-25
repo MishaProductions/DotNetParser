@@ -111,7 +111,7 @@ namespace libDotNetClr
                     {
                         if (m.Name == ".cctor" && m.IsStatic)
                         {
-                            Console.WriteLine("Creating " + t.FullName+"."+m.Name);
+                            Console.WriteLine("Creating " + t.FullName + "." + m.Name);
                             RunMethod(m, file, stack);
                             //stack.Clear();
                         }
@@ -192,10 +192,10 @@ namespace libDotNetClr
                 string properName = m.Name;
                 if (m.IsImplementedByRuntime)
                 {
-                    properName = m.Parrent.FullName.Replace(".", "_")+"."+m.Name + "_impl";
+                    properName = m.Parrent.FullName.Replace(".", "_") + "." + m.Name + "_impl";
                 }
                 foreach (var item in CustomInternalMethods)
-                { 
+                {
                     if (item.Key == properName)
                     {
                         MethodArgStack a = null;
@@ -689,40 +689,31 @@ namespace libDotNetClr
                 {
                     //get value from static field
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.Fields)
+                    FieldInfo info = item.Operand as FieldInfo;
+                    foreach (var f in m.Parrent.File.Types)
                     {
-                        if (f.IndexInTabel == (int)(byte)item.Operand)
+                        foreach (var tttt in f.Fields)
                         {
-                            f2 = f;
-                            break;
-                        }
-                    }
-
-                    if (f2 == null)
-                    {
-                        foreach (var t in m.Parrent.File.Types)
-                        {
-                            foreach (var f in t.Fields)
+                            if (tttt.IndexInTabel == info.IndexInTabel && tttt.Name == info.Name)
                             {
-                                if (f.IndexInTabel == (int)(byte)item.Operand)
-                                {
-                                    f2 = f;
-                                    break;
-                                }
+                                f2 = tttt;
+                                break;
                             }
                         }
                     }
-
-                    //TODO: this is risky because it can pick up an unrelated / random field in another DLL
+                    if (string.IsNullOrEmpty(info.Class) && f2 == null)
+                    {
+                        throw new Exception("Could not find the field");
+                    }
                     if (f2 == null)
                     {
-                        foreach (var d in dlls)
+                        foreach (var dll in dlls)
                         {
-                            foreach (var t in d.Value.Types)
+                            foreach (var type in dll.Value.Types)
                             {
-                                foreach (var f in t.Fields)
+                                foreach (var f in type.Fields)
                                 {
-                                    if (f.IndexInTabel == (int)(byte)item.Operand)
+                                    if (f.Name == info.Name && type.Name == info.Class && type.NameSpace == info.Namespace)
                                     {
                                         f2 = f;
                                         break;
@@ -730,6 +721,10 @@ namespace libDotNetClr
                                 }
                             }
                         }
+                    }
+                    if (f2 == null)
+                    {
+                        throw new InvalidOperationException("Cannot find the field to write to.");
                     }
 
                     if (f2 == null)
@@ -758,15 +753,23 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "stsfld")
                 {
+                    FieldInfo info = item.Operand as FieldInfo;
                     //write value to field.
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.Fields)
+                    foreach (var f in m.Parrent.File.Types)
                     {
-                        if (f.IndexInTabel == (int)(byte)item.Operand)
+                        foreach (var tttt in f.Fields)
                         {
-                            f2 = f;
-                            break;
+                            if (tttt.IndexInTabel == info.IndexInTabel && tttt.Name == info.Name)
+                            {
+                                f2 = tttt;
+                                break;
+                            }
                         }
+                    }
+                    if (string.IsNullOrEmpty(info.Class) && f2 == null)
+                    {
+                        throw new Exception("Could not find the field");
                     }
                     if (f2 == null)
                     {
@@ -776,7 +779,7 @@ namespace libDotNetClr
                             {
                                 foreach (var f in type.Fields)
                                 {
-                                    if (f.IndexInTabel == (int)(byte)item.Operand)
+                                    if (f.Name == info.Name && type.Name == info.Class && type.NameSpace == info.Namespace)
                                     {
                                         f2 = f;
                                         break;
@@ -784,6 +787,10 @@ namespace libDotNetClr
                                 }
                             }
                         }
+                    }
+                    if (f2 == null)
+                    {
+                        throw new InvalidOperationException("Cannot find the field to write to.");
                     }
                     StaticField f3 = null;
                     foreach (var f in StaticFieldHolder.staticFields)
@@ -1047,26 +1054,36 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "stfld")
                 {
                     //write value to field.
+                    FieldInfo info = item.Operand as FieldInfo;
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.Fields)
+                    foreach (var f in m.Parrent.File.Types)
                     {
-                        if (f.IndexInTabel == (byte)item.Operand)
+                        foreach (var tttt in f.Fields)
                         {
-                            f2 = f;
-                            break;
+                            if (tttt.IndexInTabel == info.IndexInTabel && tttt.Name == info.Name)
+                            {
+                                f2 = tttt;
+                                break;
+                            }
                         }
+                    }
+                    if (string.IsNullOrEmpty(info.Class) && f2 == null)
+                    {
+                        throw new Exception("Could not find the field");
                     }
                     if (f2 == null)
                     {
-                        //Resolve recursively
-                        foreach (var type in file.Types)
+                        foreach (var dll in dlls)
                         {
-                            foreach (var field in type.Fields)
+                            foreach (var type in dll.Value.Types)
                             {
-                                if (field.IndexInTabel == (byte)item.Operand)
+                                foreach (var f in type.Fields)
                                 {
-                                    f2 = field;
-                                    break;
+                                    if (f.Name == info.Name && type.Name == info.Class && type.NameSpace == info.Namespace)
+                                    {
+                                        f2 = f;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -1111,29 +1128,44 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldfld")
                 {
                     //read value from field.
+                    FieldInfo info = item.Operand as FieldInfo;
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.Fields)
+                    foreach (var f in m.Parrent.File.Types)
                     {
-                        if (f.IndexInTabel == (byte)item.Operand)
+                        foreach (var tttt in f.Fields)
                         {
-                            f2 = f;
-                            break;
+                            if (tttt.IndexInTabel == info.IndexInTabel && tttt.Name == info.Name)
+                            {
+                                f2 = tttt;
+                                break;
+                            }
+                        }
+                    }
+                    if (string.IsNullOrEmpty(info.Class) && f2 == null)
+                    {
+                        throw new Exception("Could not find the field");
+                    }
+                    if (f2 == null)
+                    {
+                        foreach (var dll in dlls)
+                        {
+                            foreach (var type in dll.Value.Types)
+                            {
+                                foreach (var f in type.Fields)
+                                {
+                                    if (f.Name == info.Name && type.Name == info.Class && type.NameSpace == info.Namespace)
+                                    {
+                                        f2 = f;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                     if (f2 == null)
                     {
-                        //Resolve recursively
-                        foreach (var type in file.Types)
-                        {
-                            foreach (var field in type.Fields)
-                            {
-                                if (field.IndexInTabel == (byte)item.Operand)
-                                {
-                                    f2 = field;
-                                    break;
-                                }
-                            }
-                        }
+                        clrError("Failed to resolve field for writing.", "");
+                        return null;
                     }
                     MethodArgStack obj = stack[stack.Count - 1];
                     //TODO: do we need to do this? Probably not
@@ -1203,7 +1235,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldarg.s")
                 {
-                    if(parms.Count == 0)
+                    if (parms.Count == 0)
                         continue;
 
                     var prevItem = stack[stack.Count - 1];
@@ -1317,13 +1349,22 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "ldlen")
                 {
-                    var arr = stack[stack.Count - 1];
-                    if (arr.type != StackItemType.Array)
+                    MethodArgStack array = null;
+                    for (int i5 = stack.Count - 1; i5 >= 0; i5--)
                     {
-                        throw new Exception(" Expected array, but got something else.");
+                        var arr = stack[i5];
+                        if (arr.type == StackItemType.Array)
+                        {
+                            array = arr;
+                            break;
+                        }
                     }
 
-                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = arr.ArrayLen });
+                    if (array == null)
+                    {
+                        throw new InvalidOperationException("Array is null");
+                    }
+                    stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = array.ArrayLen });
                 }
                 //else if (item.OpCodeName == "stelem.ref")
                 //{

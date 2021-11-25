@@ -401,8 +401,14 @@ namespace DotNetparserTester
             {
                 TestFail("true.toString != true");
             }
-
-            var a = Array.Empty<object>();
+            if (Array.Empty<string>().Length == 0)
+            {
+                TestSuccess("Array.Empty() returns empty array");
+            }
+            else
+            {
+                TestFail("Array.Empty() returned non empty array");
+            }
             TestsComplete();
         }
 

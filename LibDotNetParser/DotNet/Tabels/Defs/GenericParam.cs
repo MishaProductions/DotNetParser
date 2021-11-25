@@ -20,7 +20,7 @@ namespace LibDotNetParser.DotNet.Tabels.Defs
         {
             Number = reader.ReadUInt16();
             Flags = reader.ReadUInt16();
-            Owner = reader.ReadUInt32();
+            Owner = reader.ReadUInt16();
             Name = reader.ReadStringStreamIndex();
         }
     }
