@@ -36,7 +36,7 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestSuccess", TestSuccess);
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
 
-            clr.Start();
+            clr.Start(new string[] { "testArg"});
             //Console.ReadLine();
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);

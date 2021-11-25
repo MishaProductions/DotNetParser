@@ -67,7 +67,7 @@ namespace libDotNetClr
         /// <summary>
         /// Starts the .NET Executable
         /// </summary>
-        public void Start()
+        public void Start(string[] args = null)
         {
             try
             {
@@ -88,8 +88,20 @@ namespace libDotNetClr
             PrintColor("Jumping to entry point", ConsoleColor.DarkMagenta);
             //stack.Clear(); //make sure we have a fresh stack
             Running = true;
+
             //Run the entry point
-            RunMethod(file.EntryPoint, file, stack);
+            var Startparams = new CustomList<MethodArgStack>();
+            if (args != null)
+            {
+                MethodArgStack[] itms = new MethodArgStack[args.Length];
+                for (int i = 0; i < args.Length; i++)
+                {
+                    itms[i] = new MethodArgStack() { type = StackItemType.String, value = args[i] };
+                }
+                Startparams.Add(new MethodArgStack() { ArrayLen = 1, type = StackItemType.Array, ArrayItems = itms });
+            }
+            stack.Clear();
+            RunMethod(file.EntryPoint, file, Startparams);
         }
         private void InitAssembly(DotNetFile file, bool InitCorLib)
         {
@@ -519,7 +531,8 @@ namespace libDotNetClr
                     }
                     else
                     {
-                        throw new Exception();
+                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                        return null;
                     }
 
                     if (numb2 is int)
@@ -532,7 +545,8 @@ namespace libDotNetClr
                     }
                     else
                     {
-                        throw new Exception();
+                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                        return null;
                     }
 
                     stack.RemoveRange(stack.Count - 2, 2);
@@ -590,10 +604,6 @@ namespace libDotNetClr
 
                     if (inst == null)
                         throw new Exception("Attempt to branch to null");
-
-#if CLR_DEBUG
-                    Console.WriteLine("branching to: IL_" + inst.Position + ": " + inst.OpCodeName);
-#endif
                     i = inst.RelPosition - 1;
                 }
                 else if (item.OpCodeName == "brfalse.s")
@@ -617,8 +627,6 @@ namespace libDotNetClr
                         }
                         catch { }
                     }
-
-
                     if (exec)
                     {
                         // find the ILInstruction that is in this position
@@ -722,13 +730,9 @@ namespace libDotNetClr
                             }
                         }
                     }
-                    if (f2 == null)
-                    {
-                        throw new InvalidOperationException("Cannot find the field to write to.");
-                    }
 
                     if (f2 == null)
-                        throw new Exception("Cannot find the field.");
+                        throw new Exception("Cannot find the static field to read from.");
 
                     StaticField f3 = null;
                     foreach (var f in StaticFieldHolder.staticFields)
@@ -742,8 +746,6 @@ namespace libDotNetClr
                     if (f3 == null)
                     {
                         PrintColor("WARN: Cannot find static field value. Static field name: " + f2.ToString(), ConsoleColor.Yellow);
-                        //clrError("Cannot find static field value. Static field name: "+f2.ToString(), "System.NullReferenceException");
-                        //return null;
                         stack.Add(MethodArgStack.ldnull);
                     }
                     else
@@ -912,64 +914,6 @@ namespace libDotNetClr
                     var oldStack = stack;
                     returnValue = RunMethod(m2, m.Parrent.File, newParms, addToCallStack);
                     stack = oldStack;
-                    //if (m2.AmountOfParms == 0)
-                    //{
-                    //    //no need to do anything
-                    //}
-                    //else
-                    //{
-                    //    //Re extract the parms after running the function
-                    //    for (int i3 = 0; i3 < stack.Count; i3++)
-                    //    {
-                    //        var stackitm = stack[i3];
-                    //        if (stackitm.type == m2.StartParm && EndParmIndex == -1)
-                    //        {
-                    //            StartParmIndex = i3;
-                    //        }
-                    //        if (stackitm.type == m2.EndParm && StartParmIndex != -1)
-                    //        {
-                    //            EndParmIndex = i3;
-                    //        }
-                    //    }
-                    //    if (StartParmIndex == -1)
-                    //    {
-                    //        if (returnValue != null)
-                    //        {
-                    //            stack.Add(returnValue);
-                    //        }
-                    //        continue;
-                    //    }
-
-                    //    if (m2.AmountOfParms == 1 && stack.Count - 1 >= m2.AmountOfParms)
-                    //    {
-                    //        try
-                    //        {
-                    //            stack.RemoveAt(StartParmIndex);
-                    //        }
-                    //        catch (Exception) { }
-                    //    }
-                    //    else
-                    //    {
-                    //        var numb = EndParmIndex - StartParmIndex;
-                    //        if (numb == -1)
-                    //        {
-                    //            if (returnValue != null)
-                    //            {
-                    //                stack.Add(returnValue);
-                    //            }
-                    //            continue;
-                    //        }
-                    //        if (stack.Count < numb)
-                    //        {
-                    //            if (returnValue != null)
-                    //            {
-                    //                stack.Add(returnValue);
-                    //            }
-                    //            continue;
-                    //        }
-                    //        stack.RemoveRange(StartParmIndex, numb);
-                    //    }
-                    //}
                     if (returnValue != null)
                     {
                         stack.Add(returnValue);
@@ -1201,46 +1145,79 @@ namespace libDotNetClr
                 {
                     if (parms.Count == 0)
                         continue;
-
-                    var prevItem = stack[stack.Count - 1];
-                    if (parms[0] != prevItem)
+                    if (stack.Count > 0)
+                    {
+                        var prevItem = stack[stack.Count - 1];
+                        if (parms[0] != prevItem)
+                            stack.Add(parms[0]);
+                    }
+                    else
+                    {
                         stack.Add(parms[0]);
+                    }
                 }
                 else if (item.OpCodeName == "ldarg.1")
                 {
                     if (parms.Count == 0)
                         continue;
 
-                    var prevItem = stack[stack.Count - 1];
-                    if (parms[1] != prevItem)
+                    if (stack.Count > 0)
+                    {
+                        var prevItem = stack[stack.Count - 1];
+                        if (parms[1] != prevItem)
+                            stack.Add(parms[1]);
+                    }
+                    else
+                    {
                         stack.Add(parms[1]);
+                    }
                 }
                 else if (item.OpCodeName == "ldarg.2")
                 {
                     if (parms.Count == 0)
                         continue;
 
-                    var prevItem = stack[stack.Count - 1];
-                    if (parms[2] != prevItem)
+                    if (stack.Count > 0)
+                    {
+                        var prevItem = stack[stack.Count - 1];
+                        if (parms[2] != prevItem)
+                            stack.Add(parms[2]);
+                    }
+                    else
+                    {
                         stack.Add(parms[2]);
+                    }
                 }
                 else if (item.OpCodeName == "ldarg.3")
                 {
                     if (parms.Count == 0)
                         continue;
 
-                    var prevItem = stack[stack.Count - 1];
-                    if (parms[3] != prevItem)
+                    if (stack.Count > 0)
+                    {
+                        var prevItem = stack[stack.Count - 1];
+                        if (parms[3] != prevItem)
+                            stack.Add(parms[3]);
+                    }
+                    else
+                    {
                         stack.Add(parms[3]);
+                    }
                 }
                 else if (item.OpCodeName == "ldarg.s")
                 {
                     if (parms.Count == 0)
                         continue;
-
-                    var prevItem = stack[stack.Count - 1];
-                    if (parms[(byte)item.Operand] != prevItem)
+                    if (stack.Count > 0)
+                    {
+                        var prevItem = stack[stack.Count - 1];
+                        if (parms[(byte)item.Operand] != prevItem)
+                            stack.Add(parms[(byte)item.Operand]);
+                    }
+                    else
+                    {
                         stack.Add(parms[(byte)item.Operand]);
+                    }
                 }
                 else if (item.OpCodeName == "callvirt")
                 {
@@ -1366,14 +1343,6 @@ namespace libDotNetClr
                     }
                     stack.Add(new MethodArgStack() { type = StackItemType.Int32, value = array.ArrayLen });
                 }
-                //else if (item.OpCodeName == "stelem.ref")
-                //{
-                //    var itemToWrite = stack[stack.Count - 1];
-                //    var index = stack[stack.Count - 2];
-                //    var arr = stack[stack.Count - 3];
-
-                //    arr.ArrayItems[(int)index.value] = itemToWrite.value;
-                //}
                 else if (item.OpCodeName == "dup")
                 {
                     stack.Add(stack[stack.Count - 1]);
@@ -1386,10 +1355,19 @@ namespace libDotNetClr
                 {
                     var index = stack[stack.Count - 1];
                     var array = stack[stack.Count - 2];
-                    if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error"); return null; }
-                    if (index.type != StackItemType.Int32) { clrError("Expected Int32, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error"); return null; }
+                    if (array.type != StackItemType.Array)
+                    {
+                        clrError("Expected array, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error"); return null;
+                    }
+                    if (index.type != StackItemType.Int32)
+                    {
+                        clrError("Expected Int32, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error");
+                        return null;
+                    }
                     var idx = (int)index.value;
                     stack.Add(array.ArrayItems[idx]);
+
+                    stack.RemoveAt(stack.Count - 1); //Remove index
                 }
                 else if (item.OpCodeName == "stelem.ref")
                 {
@@ -1399,6 +1377,9 @@ namespace libDotNetClr
                     if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
                     if (index.type != StackItemType.Int32) { clrError("Expected Int32, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
                     array.ArrayItems[(int)index.value] = val;
+
+                    stack.RemoveAt(stack.Count - 1); //Remove value
+                    stack.RemoveAt(stack.Count - 1); //Remove index
                 }
                 #endregion
                 #region Reflection

@@ -1,5 +1,6 @@
 ﻿using LibDotNetParser.DotNet.Tabels.Defs;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace LibDotNetParser.CILApi
@@ -271,8 +272,12 @@ namespace LibDotNetParser.CILApi
                     {
                         info.FirstParm = StackItemType.Int64;
                     }
+                    else if (ElementTypeToString(parm) == "[]")
+                    {
+                        info.FirstParm = StackItemType.Array;
+                    }
                 }
-                else if (i == parmaters)
+                else if (i == parmaters-1)
                 {
                     if (ElementTypeToString(parm) == "string")
                     {
@@ -286,6 +291,15 @@ namespace LibDotNetParser.CILApi
                     {
                         info.LastParm = StackItemType.Int64;
                     }
+                    else if (ElementTypeToString(parm) == "[]")
+                    {
+                        info.LastParm = StackItemType.Array;
+                    }
+                    else if (ElementTypeToString(parm) == "ELEMENT_TYPE_GENERICINST")
+                    {
+                        info.LastParm = StackItemType.Object;
+                    }
+                    if (FunctionName == "RunCompilerEngine") Debugger.Break();
                 }
                 info.AmountOfParms++;
             }

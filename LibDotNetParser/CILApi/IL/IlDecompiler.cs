@@ -765,7 +765,7 @@ namespace LibDotNetParser.CILApi
 
             return null;
         }
-        private ulong ParseNumber(BinaryReader r)
+        public static ulong ParseNumber(BinaryReader r)
         {
             var b1 = r.ReadByte();
             if (b1 == 0xFF)
