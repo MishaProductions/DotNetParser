@@ -79,6 +79,7 @@ namespace LibDotNetParser
 
     public enum StackItemType
     {
+        None,
         String,
         Int32,
         Int64,

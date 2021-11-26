@@ -1,4 +1,5 @@
 ﻿using LibDotNetParser.DotNet.Tabels.Defs;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -34,8 +35,6 @@ namespace LibDotNetParser.CILApi
             }
         }
         public int AmountOfParms { get; private set; }
-        public StackItemType StartParm { get; private set; }
-        public StackItemType EndParm { get; private set; }
         public DotNetFile File
         {
             get
@@ -50,7 +49,6 @@ namespace LibDotNetParser.CILApi
                 return (flags & MethodAttr.mdStatic) != 0;
             }
         }
-
         public bool IsInternalCall
         {
             get
@@ -77,6 +75,8 @@ namespace LibDotNetParser.CILApi
         public DotNetType Parrent { get; }
         public bool HasReturnValue { get; }
 
+        public MethodSignatureInfoV2 SignatureInfo { get; }
+
         /// <summary>
         /// Internal use only
         /// </summary>
@@ -93,35 +93,11 @@ namespace LibDotNetParser.CILApi
             this.file2 = parrent.File;
 
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);
-            var sig2 = ParseMethodSignature(item.Signature, File, this.Name);
-            this.Signature = sig2.Signature;
-            this.AmountOfParms = sig2.AmountOfParms;
-            this.StartParm = sig2.FirstParm;
-            this.EndParm = sig2.LastParm;
-            string sig = "";
 
-            var blobStreamReader = new BinaryReader(new MemoryStream(file.BlobStream));
-            blobStreamReader.BaseStream.Seek(item.Signature, SeekOrigin.Begin);
-            var length = blobStreamReader.ReadByte();
-            var type = blobStreamReader.ReadByte();
-            var parmaters = blobStreamReader.ReadByte();
-            var returnType = blobStreamReader.ReadByte();
-            HasReturnValue = returnType != 1;
-            if (type == 0)
-            {
-                //Static method
-                sig += "static ";
-            }
-
-            for (int i = 0; i < parmaters; i++)
-            {
-                var parm = blobStreamReader.ReadByte();
-                if (parm == 0x0E)
-                {
-                    Parms.Add(new MethodArgStack() { type = StackItemType.String });
-                }
-            }
-
+            //method signatures
+            SignatureInfo = ParseMethodSignature(item.Signature, File, this.Name);
+            this.Signature = SignatureInfo.Signature;
+            this.AmountOfParms = SignatureInfo.AmountOfParms;
         }
 
         public static string ElementTypeToString(byte elemType)
@@ -235,88 +211,354 @@ namespace LibDotNetParser.CILApi
             return code.ToArray();
         }
 
-        internal static MethodSignatureInfo ParseMethodSignature(uint signature, DotNetFile file, string FunctionName)
+        internal static MethodSignatureInfoV2 ParseMethodSignature(uint signature, DotNetFile file, string FunctionName)
         {
+            MethodSignatureInfoV2 ret = new MethodSignatureInfoV2();
             string sig = "";
             var blobStreamReader = new BinaryReader(new MemoryStream(file.Backend.BlobStream));
             blobStreamReader.BaseStream.Seek(signature, SeekOrigin.Begin);
             var length = blobStreamReader.ReadByte();
             var type = blobStreamReader.ReadByte();
             var parmaters = blobStreamReader.ReadByte();
-            var returnType = blobStreamReader.ReadByte();
+            var returnVal = ReadParam(blobStreamReader, file); //read return value
 
             if (type == 0)
             {
                 //Static method
                 sig += "static ";
+                ret.IsStatic = true;
             }
-            MethodSignatureInfo info = new MethodSignatureInfo();
-            sig += ElementTypeToString(returnType);
+            sig += returnVal.TypeInString;
             sig += " " + FunctionName;
             sig += "(";
             for (int i = 0; i < parmaters; i++)
             {
-                var parm = blobStreamReader.ReadByte();
-                sig += ElementTypeToString(parm) + ",";
-                if (i == 0)
-                {
-                    if (ElementTypeToString(parm) == "string")
-                    {
-                        info.FirstParm = StackItemType.String;
-                    }
-                    else if (ElementTypeToString(parm) == "int")
-                    {
-                        info.FirstParm = StackItemType.Int32;
-                    }
-                    else if (ElementTypeToString(parm) == "long")
-                    {
-                        info.FirstParm = StackItemType.Int64;
-                    }
-                    else if (ElementTypeToString(parm) == "[]")
-                    {
-                        info.FirstParm = StackItemType.Array;
-                    }
-                }
-                else if (i == parmaters-1)
-                {
-                    if (ElementTypeToString(parm) == "string")
-                    {
-                        info.LastParm = StackItemType.String;
-                    }
-                    else if (ElementTypeToString(parm) == "int")
-                    {
-                        info.LastParm = StackItemType.Int32;
-                    }
-                    else if (ElementTypeToString(parm) == "long")
-                    {
-                        info.LastParm = StackItemType.Int64;
-                    }
-                    else if (ElementTypeToString(parm) == "[]")
-                    {
-                        info.LastParm = StackItemType.Array;
-                    }
-                    else if (ElementTypeToString(parm) == "ELEMENT_TYPE_GENERICINST")
-                    {
-                        info.LastParm = StackItemType.Object;
-                    }
-                    if (FunctionName == "RunCompilerEngine") Debugger.Break();
-                }
-                info.AmountOfParms++;
+                var parm = ReadParam(blobStreamReader, file);
+                ret.Params.Add(parm);
+                sig += parm.TypeInString + ", ";
+                ret.AmountOfParms++;
             }
 
-            if (parmaters == 1)
-            {
-                info.LastParm = info.FirstParm;
-            }
-            sig = sig.TrimEnd(','); //Remove the last ,
+            sig = sig.Substring(0, sig.Length - 2); //Remove the last ,
             sig += ");";
-            info.Signature = sig;
-            return info;
+            ret.Signature = sig;
+            return ret;
         }
         public override string ToString()
         {
             return $"{Name} in {Parrent.FullName}";
         }
+        private static MethodSignatureParam ReadParam(BinaryReader r, DotNetFile file)
+        {
+            string sig;
+            var parm = r.ReadByte();
+            MethodSignatureParam ret = new MethodSignatureParam();
+            switch (parm)
+            {
+                case 0x00:
+                    {
+                        //end of list
+                        sig = "End of list";
+                        break;
+                    }
+                case 0x01:
+                    {
+                        sig = "void";
+                        ret.type = StackItemType.None;
+                        break;
+                    }
+                case 0x02:
+                    {
+                        sig = "bool";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x03:
+                    {
+                        sig = "char";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x04:
+                    {
+                        sig = "sbyte";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x05:
+                    {
+                        sig = "byte";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x06:
+                    {
+                        sig = "short";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x07:
+                    {
+                        sig = "ushort";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x08:
+                    {
+                        sig = "int";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x09:
+                    {
+                        sig = "uint";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x0A:
+                    {
+                        sig = "long";
+                        ret.type = StackItemType.Int64;
+                        break;
+                    }
+                case 0x0B:
+                    {
+                        sig = "ulong";
+                        ret.type = StackItemType.Int64;
+                        break;
+                    }
+                case 0x0C:
+                    {
+                        sig = "float";
+                        ret.type = StackItemType.Float32;
+                        break;
+                    }
+                case 0x0D:
+                    {
+                        sig = "double";
+                        ret.type = StackItemType.Float64;
+                        break;
+                    }
+                case 0x0E:
+                    {
+                        sig = "string";
+                        ret.type = StackItemType.String;
+                        break;
+                    }
+                case 0xF:
+                    //Pointer* (followed by type
+                    throw new System.NotImplementedException();
+                case 0x10:
+                    //byref* //followed by type
+                    throw new System.NotImplementedException();
+                case 0x11:
+                    //valve type (followed by typedef or typeref token)
+                    {
+                        var t = r.ReadByte(); //type of the type
+                        IlDecompiler.DecodeTypeDefOrRef(t, out uint rowType, out uint index);
+                        string name;
+                        string Namespace;
+                        ret.type = StackItemType.Object;
+                        ret.IsClass = true;
+                        if (rowType == 0)
+                        {
+                            //typedef
+                            var tt = file.Backend.Tabels.TypeDefTabel[(int)(index - 1)];
+                            name = file.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                            Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+
+                            //resolve it
+                            foreach (var item in file.Types)
+                            {
+                                if (item.NameSpace == Namespace && item.Name == name)
+                                {
+                                    ret.ClassType = item;
+                                }
+                            }
+                        }
+                        else if (rowType == 1)
+                        {
+                            //typeref
+                            var tt = file.Backend.Tabels.TypeRefTabel[(int)(index - 1)];
+                            name = file.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
+                            Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                        if (!string.IsNullOrEmpty(Namespace))
+                            sig = $"{Namespace}.{name}";
+                        else
+                            sig = $"{name}";
+                        break;
+                    }
+                case 0x12:
+                    //class followed by typedef or typeref token
+                    {
+                        var t = r.ReadByte(); //type of the type
+                        IlDecompiler.DecodeTypeDefOrRef(t, out uint rowType, out uint index);
+                        string name;
+                        string Namespace;
+                        ret.type = StackItemType.Object;
+                        ret.IsClass = true;
+                        if (rowType == 0)
+                        {
+                            //typedef
+                            var tt = file.Backend.Tabels.TypeDefTabel[(int)(index - 1)];
+                            name = file.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                            Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+
+                            //resolve it
+                            foreach (var item in file.Types)
+                            {
+                                if (item.NameSpace == Namespace && item.Name == name)
+                                {
+                                    ret.ClassType = item;
+                                }
+                            }
+                        }
+                        else if (rowType == 1)
+                        {
+                            //typeref
+                            var tt = file.Backend.Tabels.TypeRefTabel[(int)(index - 1)];
+                            name = file.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
+                            Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                        if (!string.IsNullOrEmpty(Namespace))
+                            sig = $"{Namespace}.{name}";
+                        else
+                            sig = $"{name}";
+                        break;
+                    }
+                case 0x13:
+                    //GENERIC_PARM
+                    {
+                        var b = r.ReadByte();
+                        ;
+                        sig = "todo";
+                        break;
+                    }
+                case 0x14:
+                    {
+                        sig = "[][]";
+                        ret.type = StackItemType.Array;
+                        break;
+                    }
+                case 0x15:
+                    {
+                        //ELEMENT_TYPE_GENERICINST
+                        var t = r.ReadByte(); //type of the generic type
+                        var c = r.ReadByte(); //generic type (TypeDefOrRefEncoded)
+                        var d = r.ReadByte(); //Count of generic args
+                        IlDecompiler.DecodeTypeDefOrRef(c, out uint rowType, out uint index);
+                        ret.IsGeneric = true;
+                        ret.type = StackItemType.Object;
+                        if (rowType == 0)
+                        {
+                            //typedef
+                            var tt = file.Backend.Tabels.TypeDefTabel[(int)(index - 1)];
+                            var name = file.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                            var Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+
+                            if (!string.IsNullOrEmpty(Namespace))
+                                sig = $"{Namespace}.{name}<";
+                            else
+                                sig = $"{name}<";
+
+                            ret.GenericClassNamespace = Namespace;
+                            ret.GenericClassName = name;
+                        }
+                        else if (rowType == 1)
+                        {
+                            //typeref
+                            var tt = file.Backend.Tabels.TypeRefTabel[(int)(index - 1)];
+                            var name = file.Backend.ClrStringsStream.GetByOffset(tt.TypeName);
+                            var Namespace = file.Backend.ClrStringsStream.GetByOffset(tt.TypeNamespace);
+
+                            if (!string.IsNullOrEmpty(Namespace))
+                                sig = $"{Namespace}.{name}<";
+                            else
+                                sig = $"{name}<";
+
+                            ret.GenericClassNamespace = Namespace;
+                            ret.GenericClassName = name;
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
+                        break;
+                    }
+                case 0x16:
+                    {
+                        //TypeRef
+                        throw new System.NotImplementedException();
+                    }
+                case 0x18:
+                    {
+                        //IntPtr
+                        sig = "IntPtr";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x19:
+                    {
+                        //UIntPtr
+                        sig = "UIntPtr";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
+                case 0x1B:
+                    {
+                        sig = "func ptr";
+                        ret.type = StackItemType.MethodPtr;
+                        break;
+                    }
+                case 0x1C:
+                    {
+                        sig = "object";
+                        ret.type = StackItemType.Object;
+                        break;
+                    }
+                case 0x1D:
+                    {
+                        sig = "[]";
+                        ret.type = StackItemType.Array;
+                        break;
+                    }
+                case 0x1E:
+                    //MVar
+                    throw new System.NotImplementedException();
+                default:
+                    throw new System.NotImplementedException("Unknown byte: 0x" + parm.ToString("X"));
+            }
+
+            ret.TypeInString = sig;
+            return ret;
+        }
+        public class MethodSignatureInfoV2
+        {
+            public MethodSignatureParam ReturnVal { get; set; }
+            public List<MethodSignatureParam> Params = new List<MethodSignatureParam>();
+            public bool IsStatic { get; set; } = false;
+            public string Signature { get; set; } = "";
+            public int AmountOfParms { get; set; } = 0;
+        }
+        public class MethodSignatureParam
+        {
+            public StackItemType type;
+            public string TypeInString;
+
+            public bool IsGeneric { get; set; } = false;
+            public string GenericClassNamespace { get; set; }
+            public string GenericClassName { get; set; }
+            public bool IsClass { get; set; } = false;
+            public DotNetType ClassType { get; set; }
+        }
     }
-    class MethodSignatureInfo { public int AmountOfParms; public string Signature; public StackItemType FirstParm; public StackItemType LastParm; }
 }

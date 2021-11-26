@@ -827,7 +827,7 @@ namespace LibDotNetParser.CILApi
             }
             row = index >> 3;
         }
-        private static void DecodeTypeDefOrRef(uint num, out uint type, out uint index)
+        public static void DecodeTypeDefOrRef(uint num, out uint type, out uint index)
         {
             type = num & 0x3;
             index = (num >> 2);

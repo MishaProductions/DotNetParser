@@ -221,17 +221,42 @@ namespace libDotNetClr
                         {
                             int StartParmIndex = -1;
                             int EndParmIndex = -1;
-                            for (int i3 = 0; i3 < stack.Count; i3++)
+                            int paramsRead = 0;
+                            bool foundEndIndex = false;
+                            if (m.AmountOfParms > 0)
                             {
-                                var stackitm = stack[i3];
-                                if (stackitm.type == m.StartParm && EndParmIndex == -1)
+                                var endParam = m.SignatureInfo.Params[m.SignatureInfo.Params.Count - 1];
+                                for (int i4 = stack.Count - 1; i4 >= 0; i4--)
                                 {
-                                    StartParmIndex = i3;
+                                    var stackitm = stack[i4];
+                                    if (stackitm.type == endParam.type | stackitm.type == StackItemType.ldnull && StartParmIndex == -1 && !foundEndIndex)
+                                    {
+                                        if (endParam.IsClass)
+                                        {
+                                            if (endParam.ClassType != stackitm.ObjectType)
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                        EndParmIndex = i4;
+                                        foundEndIndex = true;
+                                        if (m.AmountOfParms == 1)
+                                        {
+                                            StartParmIndex = i4;
+                                            break;
+                                        }
+                                    }
+                                    if (EndParmIndex != -1 && paramsRead + 1 >= m.AmountOfParms)
+                                    {
+                                        StartParmIndex = i4;
+                                        break;
+                                    }
+                                    if (EndParmIndex != -1 && StartParmIndex == -1)
+                                    {
+                                        paramsRead++;
+                                    }
                                 }
-                                if (stackitm.type == m.EndParm && StartParmIndex != -1)
-                                {
-                                    EndParmIndex = i3;
-                                }
+                                ;
                             }
                             if (StartParmIndex == -1)
                             {
@@ -458,7 +483,7 @@ namespace libDotNetClr
                     var numb = stack[stack.Count - 1];
                     if (numb.type == StackItemType.Int32)
                     {
-                        //stack.Add(numb);
+                        //We don't need to do anything because it's already int32
                     }
                     else
                     {
@@ -866,30 +891,59 @@ namespace libDotNetClr
                             return null;
                         }
                     }
-                    //Extract the parms
+                    //Extract the params
                     int StartParmIndex = -1;
                     int EndParmIndex = -1;
-                    for (int i4 = stack.Count - 1; i4 >= 0; i4--)
+                    int paramsRead = 0;
+                    bool foundEndIndex = false;
+                    if (m2.AmountOfParms > 0)
                     {
-                        var stackitm = stack[i4];
-                        if (stackitm.type == m2.EndParm | stackitm.type == StackItemType.ldnull && StartParmIndex == -1)
+                        var endParam = m2.SignatureInfo.Params[m2.SignatureInfo.Params.Count - 1];
+                        for (int i4 = stack.Count - 1; i4 >= 0; i4--)
                         {
-                            EndParmIndex = i4;
-                            if (m2.AmountOfParms == 1)
+                            var stackitm = stack[i4];
+                            if (stackitm.type == endParam.type | stackitm.type == StackItemType.ldnull && StartParmIndex == -1 && !foundEndIndex)
+                            {
+                                if (endParam.IsClass)
+                                {
+                                    if (endParam.ClassType != stackitm.ObjectType)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                EndParmIndex = i4;
+                                foundEndIndex = true;
+                                if (m2.AmountOfParms == 1)
+                                {
+                                    StartParmIndex = i4;
+                                    break;
+                                }
+                            }
+                            if (EndParmIndex != -1 && paramsRead + 1 >= m2.AmountOfParms)
                             {
                                 StartParmIndex = i4;
                                 break;
                             }
+                            if (EndParmIndex != -1 && StartParmIndex == -1)
+                            {
+                                paramsRead++;
+                            }
                         }
-                        if (stackitm.type == m2.StartParm | stackitm.type == StackItemType.ldnull && EndParmIndex != -1)
-                        {
-                            StartParmIndex = i4;
-                        }
+                        ;
+                    }
+                    if (m2.AmountOfParms == 0)
+                    {
+                        StartParmIndex = -1;
+                        EndParmIndex = -1;
+                    }
+                    if ((EndParmIndex - StartParmIndex + 1) != m2.AmountOfParms && StartParmIndex != -1 && m2.AmountOfParms != 1)
+                    {
+                        throw new InvalidOperationException("Fatal error: an attempt was made to read " + (EndParmIndex - StartParmIndex + 1) + " parameters before calling the method, but it only needs " + m2.AmountOfParms);
                     }
                     CustomList<MethodArgStack> newParms = new CustomList<MethodArgStack>();
                     if (StartParmIndex != -1)
                     {
-                        for (int i5 = StartParmIndex; i5 < EndParmIndex; i5++)
+                        for (int i5 = StartParmIndex; i5 < EndParmIndex + 1; i5++)
                         {
                             var itm5 = stack[i5];
                             newParms.Add(itm5);
@@ -1100,17 +1154,15 @@ namespace libDotNetClr
                         clrError("Failed to resolve field for writing.", "");
                         return null;
                     }
-                    MethodArgStack obj = stack[stack.Count - 1];
+                    MethodArgStack obj = null;
                     //TODO: do we need to do this? Probably not
-                    foreach (var t in stack)
+                    for (int i6 = stack.Count - 1; i6 >= 0; i6--)
                     {
-                        if (t.type == StackItemType.Object)
+                        var itm = stack[i6];
+                        if (itm.type == StackItemType.Object)
                         {
-                            if (t.ObjectType == f2.ParrentType)
-                            {
-                                obj = t;
-                                break;
-                            }
+                            obj = itm;
+                            break;
                         }
                     }
 
@@ -1238,24 +1290,53 @@ namespace libDotNetClr
                         return null;
                     }
 
+                    //Extract the params
                     int StartParmIndex = -1;
                     int EndParmIndex = -1;
-                    for (int i4 = stack.Count - 1; i4 >= 0; i4--)
+                    int paramsRead = 0;
+                    bool foundEndIndex = false;
+                    if (m2.AmountOfParms > 0)
                     {
-                        var stackitm = stack[i4];
-                        if (stackitm.type == m2.EndParm | stackitm.type == StackItemType.ldnull && StartParmIndex == -1)
+                        var endParam = m2.SignatureInfo.Params[m2.SignatureInfo.Params.Count - 1];
+                        for (int i4 = stack.Count - 1; i4 >= 0; i4--)
                         {
-                            EndParmIndex = i4;
-                            if (m2.AmountOfParms == 1)
+                            var stackitm = stack[i4];
+                            if (stackitm.type == endParam.type | stackitm.type == StackItemType.ldnull && StartParmIndex == -1 && !foundEndIndex)
+                            {
+                                if (endParam.IsClass)
+                                {
+                                    if (endParam.ClassType != stackitm.ObjectType)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                EndParmIndex = i4;
+                                foundEndIndex = true;
+                                if (m2.AmountOfParms == 1)
+                                {
+                                    StartParmIndex = i4;
+                                    break;
+                                }
+                            }
+                            if (EndParmIndex != -1 && paramsRead + 1 >= m2.AmountOfParms)
                             {
                                 StartParmIndex = i4;
                                 break;
                             }
+                            if (EndParmIndex != -1 && StartParmIndex == -1)
+                            {
+                                paramsRead++;
+                            }
                         }
-                        if (stackitm.type == m2.StartParm | stackitm.type == StackItemType.ldnull && EndParmIndex != -1)
-                        {
-                            StartParmIndex = i4;
-                        }
+                    }
+                    if (m2.AmountOfParms == 0)
+                    {
+                        StartParmIndex = -1;
+                        EndParmIndex = -1;
+                    }
+                    if ((EndParmIndex - StartParmIndex + 1) != m2.AmountOfParms && StartParmIndex != -1 && m2.AmountOfParms != 1)
+                    {
+                        throw new InvalidOperationException("Fatal error: an attempt was made to read " + (EndParmIndex - StartParmIndex + 1) + " parameters before calling the method, but it only needs " + m2.AmountOfParms);
                     }
                     MethodArgStack objectToCallOn = null;
                     if (m2.AmountOfParms > 0)
@@ -1270,8 +1351,11 @@ namespace libDotNetClr
                             var itm = stack[x];
                             if (itm.type == StackItemType.Object)
                             {
-                                objectToCallOn = itm;
-                                break;
+                                if (itm.ObjectType == m2.Parrent)
+                                {
+                                    objectToCallOn = itm;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1283,19 +1367,23 @@ namespace libDotNetClr
                     var ancientStack = stack;
 
                     //Create a list of parameters
-                    var newParams = new CustomList<MethodArgStack>();
-                    if (objectToCallOn != null)
-                        newParams.Add(objectToCallOn);
-                    if (StartParmIndex != -1 && EndParmIndex != 1)
+                    CustomList<MethodArgStack> newParams = new CustomList<MethodArgStack>();
+                    newParams.Add(objectToCallOn);
+                    if (StartParmIndex != -1)
                     {
-                        for (int x = StartParmIndex; x < EndParmIndex - 1; x++)
+                        for (int i5 = StartParmIndex; i5 < EndParmIndex + 1; i5++)
                         {
-                            newParams.Add(stack[x]);
+                            var itm5 = stack[i5];
+                            newParams.Add(itm5);
+                        }
+                        if (StartParmIndex == 1 && EndParmIndex == 1)
+                        {
+                            newParams.Add(stack[StartParmIndex]);
                         }
                     }
-                    if (StartParmIndex == EndParmIndex && StartParmIndex != -1)
+                    if (StartParmIndex == 0 && EndParmIndex == 0 && m2.AmountOfParms == 1)
                     {
-                        newParams.Add(stack[StartParmIndex]);
+                        newParams.Add(stack[0]);
                     }
 
                     var returnValue = RunMethod(m2, m2.File, newParams, addToCallStack);

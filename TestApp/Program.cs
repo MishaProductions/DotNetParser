@@ -285,7 +285,6 @@ namespace DotNetparserTester
             }
             string superLongString = "Hello there, this is a super duper long string. This is used to see how good my crappy unicode string tabel implementation is";
             Console.WriteLine(superLongString);
-
             if ('A'.ToString() == "A")
             {
                 TestSuccess("Char.ToString() test");
@@ -342,7 +341,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestFail("Full type name of string is " + FUllName + ", not System.String");
+                TestFail("Full type name of string is System.String, not " + FUllName);
             }
             var flag1 = 78 >= 76;
             if (flag1)
@@ -409,7 +408,14 @@ namespace DotNetparserTester
             {
                 TestFail("Array.Empty() returned non empty array");
             }
+            ActionAsMethodArgTest(new string[] { "hi","bye"}, action, action);
             TestsComplete();
+        }
+
+        private static void ActionAsMethodArgTest(string[] vs, Action<string> action1, Action<string> action2)
+        {
+            action1(vs[0]);
+            action2(vs[1]);
         }
 
         private static void aLogError(string v)

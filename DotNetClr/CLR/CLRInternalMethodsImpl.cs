@@ -2,6 +2,7 @@
 using LibDotNetParser.CILApi;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace libDotNetClr
@@ -136,8 +137,23 @@ namespace libDotNetClr
         }
         private void Action1InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = stack[stack.Count - 2];
-            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
+            MethodArgStack obj = null;
+            for (int i = stack.Count - 1; i >= 0; i--)
+            {
+                var itm = stack[i];
+                if (itm.type == StackItemType.Object)
+                {
+                    if (itm.ObjectType.FullName.Contains("Action"))
+                    {
+                        obj = itm;
+                        break;
+                    }
+                }
+            }
+            if (obj == null)
+            {
+                throw new InvalidOperationException("Failed to find the action to call.");
+            }
 
             var d = (ObjectValueHolder)obj.value;
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
@@ -425,7 +441,7 @@ namespace libDotNetClr
         #region Misc
         private void DebuggerBreak(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            Console.WriteLine("DebuggerBreak() not supported");
+            Debugger.Break();
         }
         #endregion
     }
