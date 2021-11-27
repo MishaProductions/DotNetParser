@@ -9,15 +9,18 @@ namespace DotNetparserTester
     class MyObject
     {
         public string WelcomeMessage;
+        public Action<string> s;
         public MyObject()
         {
             WelcomeMessage = "lol";
             Console.WriteLine("constructor end....");
+            s = (string s) => { Console.WriteLine(s); };
         }
         public void Hello(string SecondMessage)
         {
             Console.WriteLine(WelcomeMessage);
             Console.WriteLine(SecondMessage);
+            s("hi from action");
         }
 
         public class SubClass
@@ -38,6 +41,8 @@ namespace DotNetparserTester
     {
         public static string TestField = "Default Value.";
         public const string ConstString = "Constant String.";
+        public static Action<string> console;
+
         static void Main(string[] args)
         {
             //Equal test
@@ -409,15 +414,41 @@ namespace DotNetparserTester
                 TestFail("Array.Empty() returned non empty array");
             }
             ActionAsMethodArgTest(new string[] { "hi","bye"}, action, action);
+            ActionAsMethodArgTest2(new string[] { "a", "b" });
+            //TODO
+            //int h = 0;
+            //TestByRef("this is correct", ref h);
+            //if (h == 0)
+            //{
+            //    TestFail("ByRef value did not change!");
+            //}
+            //else if (h == 1)
+            //{
+            //    TestSuccess("ByRef value is correct");
+            //}
+            //else
+            //{
+            //    TestFail("ByRef value is not a 1 or a 0.");
+            //}
             TestsComplete();
         }
-
+        private static void TestByRef(string t, ref int a)
+        {
+            Console.WriteLine("Testing ByRef. t = "+t);
+            a = 1;
+        }
         private static void ActionAsMethodArgTest(string[] vs, Action<string> action1, Action<string> action2)
         {
-            action1(vs[0]);
-            action2(vs[1]);
-        }
+            console = action1;
 
+            console(vs[0]);
+            console(vs[1]);
+        }
+        private static void ActionAsMethodArgTest2(string[] vs)
+        {
+            console(vs[0]);
+            console(vs[1]);
+        }
         private static void aLogError(string v)
         {
             throw new NotImplementedException();
@@ -428,7 +459,10 @@ namespace DotNetparserTester
         /// </summary>
         /// <returns>90</returns>
         public static int ClrTest() { return 90; }
+        public static void Test(Type t, string[] a, int b)
+        {
 
+        }
 #if NoInternalCalls
         private static void TestSuccess(string name)
         {

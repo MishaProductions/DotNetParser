@@ -100,6 +100,7 @@ namespace libDotNetClr
                 Startparams.Add(new MethodArgStack() { ArrayLen = 1, type = StackItemType.Array, ArrayItems = itms });
             }
             stack.Clear();
+            Localstack = new MethodArgStack[256];
             RunMethod(file.EntryPoint, file, Startparams);
         }
         private void InitAssembly(DotNetFile file, bool InitCorLib)
@@ -246,17 +247,16 @@ namespace libDotNetClr
                                             break;
                                         }
                                     }
-                                    if (EndParmIndex != -1 && paramsRead + 1 >= m.AmountOfParms)
-                                    {
-                                        StartParmIndex = i4;
-                                        break;
-                                    }
                                     if (EndParmIndex != -1 && StartParmIndex == -1)
                                     {
                                         paramsRead++;
                                     }
+                                    if (EndParmIndex != -1 && paramsRead >= m.AmountOfParms)
+                                    {
+                                        StartParmIndex = i4;
+                                        break;
+                                    }
                                 }
-                                ;
                             }
                             if (StartParmIndex == -1)
                             {
@@ -275,9 +275,14 @@ namespace libDotNetClr
                             }
                             else
                             {
-                                stack.RemoveRange(StartParmIndex, EndParmIndex - StartParmIndex);
+                                stack.RemoveRange(StartParmIndex, EndParmIndex - StartParmIndex + 1);
                             }
-                            ;
+                        }
+
+
+                        if (m.Name.Contains("ToString"))
+                        {
+                            stack.RemoveAt(stack.Count - 1);
                         }
                         return a;
                     }
@@ -669,7 +674,22 @@ namespace libDotNetClr
                 {
                     if (stack[stack.Count - 1].value == null)
                         continue;
-                    if ((int)stack[stack.Count - 1].value == 1)
+                    bool exec = false;
+                    if (stack[stack.Count - 1].type != StackItemType.Int32)
+                    {
+                        if (stack[stack.Count - 1].type != StackItemType.ldnull)
+                        {
+                            exec = true;
+                        }
+                    }
+                    else
+                    {
+                        if ((int)stack[stack.Count - 1].value == 1)
+                        {
+                            exec = true;
+                        }
+                    }
+                    if (exec)
                     {
                         // find the ILInstruction that is in this position
                         int i2 = item.Position + (int)item.Operand + 1;
@@ -941,6 +961,28 @@ namespace libDotNetClr
                         throw new InvalidOperationException("Fatal error: an attempt was made to read " + (EndParmIndex - StartParmIndex + 1) + " parameters before calling the method, but it only needs " + m2.AmountOfParms);
                     }
                     CustomList<MethodArgStack> newParms = new CustomList<MethodArgStack>();
+                    //Find the object that we are calling it on (if any)
+                    if (m2.AmountOfParms > 0)
+                    {
+                        newParms.Add(stack[stack.Count - m2.AmountOfParms - 1]);
+                    }
+                    else
+                    {
+                        //find the object
+                        for (int x = stack.Count - 1; x >= 0; x--)
+                        {
+                            var itm = stack[x];
+                            if (itm.type == StackItemType.Object)
+                            {
+                                if (itm.ObjectType == m2.Parrent)
+                                {
+                                    newParms.Add(itm);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     if (StartParmIndex != -1)
                     {
                         for (int i5 = StartParmIndex; i5 < EndParmIndex + 1; i5++)
@@ -1014,8 +1056,19 @@ namespace libDotNetClr
                             {
                                 if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature)
                                 {
-                                    m2 = meth;
-                                    break;
+                                    if (call.ParamListIndex != 0)
+                                    {
+                                        if (meth.ParamListIndex == call.ParamListIndex)
+                                        {
+                                            m2 = meth;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        m2 = meth;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -1026,7 +1079,7 @@ namespace libDotNetClr
                         clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
-
+                    Console.WriteLine("Creating instance of " + m2.Parrent.FullName);
                     MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = new ObjectValueHolder() };
                     stack.Add(a);
                     //Call the contructor
@@ -1159,7 +1212,7 @@ namespace libDotNetClr
                     for (int i6 = stack.Count - 1; i6 >= 0; i6--)
                     {
                         var itm = stack[i6];
-                        if (itm.type == StackItemType.Object)
+                        if (itm.type == StackItemType.Object && itm.ObjectType == f2.ParrentType)
                         {
                             obj = itm;
                             break;
@@ -1341,7 +1394,7 @@ namespace libDotNetClr
                     MethodArgStack objectToCallOn = null;
                     if (m2.AmountOfParms > 0)
                     {
-                        objectToCallOn = stack[stack.Count - m2.AmountOfParms];
+                        objectToCallOn = stack[stack.Count - m2.AmountOfParms - 1];
                     }
                     else
                     {
@@ -1535,6 +1588,32 @@ namespace libDotNetClr
                         throw new Exception("Attempt to branch to null");
                     stack.RemoveAt(stack.Count - 1);
                     i = inst.RelPosition - 1;
+                }
+                else if (item.OpCodeName == "stind.i4")
+                {
+                    var val = stack[stack.Count - 1];
+                    var ptr = stack[stack.Count - 2];
+                    if (ptr.type != StackItemType.Int32) throw new InvalidOperationException("Invaild pointer!");
+
+                    //Because we ignore the stack after calling the method, and remove everything from it, we need to find the value
+                    bool found = false;
+                    for (int i7 = stack.Count - 3; i7 >= 0; i7--)
+                    {
+                        var itm = stack[i7];
+                        if (itm.type == val.type && itm.value == ptr.value)
+                        {
+                            stack[i7] = val;
+                            found = true;
+                            break;
+                        }
+                    }
+                    stack[stack.Count - 2] = val; //just in case
+                    stack.RemoveAt(stack.Count - 1); //remove value
+
+                    if (!found)
+                    {
+                        clrError("Failed to find target value of pointer", "internal error clr");
+                    }
                 }
                 #endregion
                 else

@@ -76,6 +76,7 @@ namespace LibDotNetParser.CILApi
         public bool HasReturnValue { get; }
 
         public MethodSignatureInfoV2 SignatureInfo { get; }
+        public uint ParamListIndex { get; internal set; }
 
         /// <summary>
         /// Internal use only
@@ -91,7 +92,7 @@ namespace LibDotNetParser.CILApi
             this.flags = (MethodAttr)item.Flags;
             this.implFlags = (MethodImp)item.ImplFlags;
             this.file2 = parrent.File;
-
+            ParamListIndex = item.ParamList;
             this.Name = file.ClrStringsStream.GetByOffset(item.Name);
 
             //method signatures
@@ -100,72 +101,6 @@ namespace LibDotNetParser.CILApi
             this.AmountOfParms = SignatureInfo.AmountOfParms;
         }
 
-        public static string ElementTypeToString(byte elemType)
-        {
-            switch (elemType)
-            {
-                case 0x00:
-                    return "END";
-                case 0x01:
-                    return "void";
-                case 0x02:
-                    return "bool";
-                case 0x03:
-                    return "char";
-                case 0x04:
-                    return "sbyte";
-                case 0x05:
-                    return "byte";
-                case 0x06:
-                    return "short";
-                case 0x07:
-                    return "ushort";
-                case 0x08:
-                    return "int";
-                case 0x09:
-                    return "uint";
-                case 0x0A:
-                    return "long";
-                case 0x0B:
-                    return "ulong";
-                case 0x0C:
-                    return "float";
-                case 0x0D:
-                    return "double";
-                case 0x0E:
-                    return "string";
-                case 0xF:
-                    return "pointer*"; //followed by type
-                case 0x10:
-                    return "byref*"; //followed by type
-                case 0x11:
-                    return "valveType"; //followed by TypeDef or TypeRef token
-                case 0x12:
-                    return "CLASS"; //followed by typedef or typeref token
-                case 0x13:
-                    return "GENERIC_PARM";
-                case 0x14:
-                    return "Array";
-                case 0x15:
-                    return "ELEMENT_TYPE_GENERICINST";
-                case 0x16:
-                    return "TypeRef";
-                case 0x18:
-                    return "IntPtr";
-                case 0x19:
-                    return "UIntPtr";
-                case 0x1B:
-                    return "function pointer";
-                case 0x1C:
-                    return "object";
-                case 0x1D:
-                    return "[]";
-                case 0x1E:
-                    return "mvar";
-                default:
-                    return "<Unknown>";
-            }
-        }
         /// <summary>
         /// Gets the raw IL instructions for this method.
         /// </summary>
@@ -217,9 +152,9 @@ namespace LibDotNetParser.CILApi
             string sig = "";
             var blobStreamReader = new BinaryReader(new MemoryStream(file.Backend.BlobStream));
             blobStreamReader.BaseStream.Seek(signature, SeekOrigin.Begin);
-            var length = blobStreamReader.ReadByte();
-            var type = blobStreamReader.ReadByte();
-            var parmaters = blobStreamReader.ReadByte();
+            var length = IlDecompiler.ParseNumber(blobStreamReader);
+            var type = IlDecompiler.ParseNumber(blobStreamReader);
+            var parmaters = IlDecompiler.ParseNumber(blobStreamReader);
             var returnVal = ReadParam(blobStreamReader, file); //read return value
 
             if (type == 0)
@@ -231,7 +166,7 @@ namespace LibDotNetParser.CILApi
             sig += returnVal.TypeInString;
             sig += " " + FunctionName;
             sig += "(";
-            for (int i = 0; i < parmaters; i++)
+            for (ulong i = 0; i < parmaters; i++)
             {
                 var parm = ReadParam(blobStreamReader, file);
                 ret.Params.Add(parm);
@@ -346,15 +281,23 @@ namespace LibDotNetParser.CILApi
                         break;
                     }
                 case 0xF:
-                    //Pointer* (followed by type
-                    throw new System.NotImplementedException();
+                    //Pointer* (followed by type)
+                    {
+                        sig = ReadParam(r, file).TypeInString+"*";
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
                 case 0x10:
                     //byref* //followed by type
-                    throw new System.NotImplementedException();
+                    {
+                        sig = "ref "+ReadParam(r, file).TypeInString;
+                        ret.type = StackItemType.Int32;
+                        break;
+                    }
                 case 0x11:
                     //valve type (followed by typedef or typeref token)
                     {
-                        var t = r.ReadByte(); //type of the type
+                        var t = IlDecompiler.ParseNumber(r); //type of the type
                         IlDecompiler.DecodeTypeDefOrRef(t, out uint rowType, out uint index);
                         string name;
                         string Namespace;
@@ -396,7 +339,7 @@ namespace LibDotNetParser.CILApi
                 case 0x12:
                     //class followed by typedef or typeref token
                     {
-                        var t = r.ReadByte(); //type of the type
+                        var t = IlDecompiler.ParseNumber(r); //type of the type
                         IlDecompiler.DecodeTypeDefOrRef(t, out uint rowType, out uint index);
                         string name;
                         string Namespace;
@@ -438,8 +381,7 @@ namespace LibDotNetParser.CILApi
                 case 0x13:
                     //GENERIC_PARM
                     {
-                        var b = r.ReadByte();
-                        ;
+                        var b = IlDecompiler.ParseNumber(r);
                         sig = "todo";
                         break;
                     }
@@ -452,12 +394,19 @@ namespace LibDotNetParser.CILApi
                 case 0x15:
                     {
                         //ELEMENT_TYPE_GENERICINST
-                        var t = r.ReadByte(); //type of the generic type
-                        var c = r.ReadByte(); //generic type (TypeDefOrRefEncoded)
-                        var d = r.ReadByte(); //Count of generic args
-                        IlDecompiler.DecodeTypeDefOrRef(c, out uint rowType, out uint index);
+                        var t = IlDecompiler.ParseNumber(r); //type of the generic type
+                        var c = IlDecompiler.ParseNumber(r); //generic type (TypeDefOrRefEncoded)
+                        var d = IlDecompiler.ParseNumber(r); //Count of generic args
+                        IlDecompiler.DecodeTypeDefOrRef((uint)c, out uint rowType, out uint index);
                         ret.IsGeneric = true;
                         ret.type = StackItemType.Object;
+                        List<MethodSignatureParam> @params = new List<MethodSignatureParam>();
+                        for (ulong i = 0; i < d; i++)
+                        {
+                            @params.Add(ReadParam(r, file));
+                        }
+
+
                         if (rowType == 0)
                         {
                             //typedef
@@ -492,6 +441,13 @@ namespace LibDotNetParser.CILApi
                         {
                             throw new NotImplementedException();
                         }
+
+                        foreach (var item in @params)
+                        {
+                            sig += item.TypeInString + ", ";
+                        }
+                        sig = sig.Substring(0, sig.Length - 2);
+                        sig += ">";
                         break;
                     }
                 case 0x16:
@@ -527,13 +483,18 @@ namespace LibDotNetParser.CILApi
                     }
                 case 0x1D:
                     {
-                        sig = "[]";
+                        ret.ArrayType = ReadParam(r, file);
+                        sig = ret.ArrayType.TypeInString+"[]";
                         ret.type = StackItemType.Array;
+                        ret.IsArray = true;
                         break;
                     }
                 case 0x1E:
                     //MVar
-                    throw new System.NotImplementedException();
+                    var num = IlDecompiler.ParseNumber(r);
+                    sig = "MVAR";
+
+                    break;
                 default:
                     throw new System.NotImplementedException("Unknown byte: 0x" + parm.ToString("X"));
             }
@@ -559,6 +520,8 @@ namespace LibDotNetParser.CILApi
             public string GenericClassName { get; set; }
             public bool IsClass { get; set; } = false;
             public DotNetType ClassType { get; set; }
+            public bool IsArray { get; set; } = false;
+            public MethodSignatureParam ArrayType { get; set; }
         }
     }
 }

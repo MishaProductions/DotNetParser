@@ -1,6 +1,7 @@
 ﻿using LibDotNetParser.CILApi.IL;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace LibDotNetParser.CILApi
@@ -161,16 +162,16 @@ namespace LibDotNetParser.CILApi
                         byte s2 = code[Offset + 2];
                         byte t = code[Offset + 3];
                         byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToInt32(num2, 0);
+                        byte[] num2 = new byte[] { fi, s2 };
+                        var numb2 = BitConverter.ToUInt16(num2, 0);
 
                         ret.Size += 4;
 
                         if (f == 4)
                         {
                             //Inside of field table
-                            var c = mainFile.Backend.Tabels.FieldTabel[fi - 1];
-                            var ret2 = new FieldInfo() { Name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name), IsInFieldTabel = true, IndexInTabel = fi };
+                            var c = mainFile.Backend.Tabels.FieldTabel[numb2 - 1];
+                            var ret2 = new FieldInfo() { Name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name), IsInFieldTabel = true, IndexInTabel = numb2 };
 
 
                             ret.Operand = ret2;
@@ -178,9 +179,9 @@ namespace LibDotNetParser.CILApi
                         else if (f == 10)
                         {
                             //Inside of MemberRef table
-                            var c = mainFile.Backend.Tabels.MemberRefTabelRow[fi - 1];
+                            var c = mainFile.Backend.Tabels.MemberRefTabelRow[numb2 - 1];
 
-                            var ret2 = new FieldInfo() { Name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name), IsInFieldTabel = true, IndexInTabel = fi };
+                            var ret2 = new FieldInfo() { Name = mainFile.Backend.ClrStringsStream.GetByOffset(c.Name), IsInFieldTabel = true, IndexInTabel = numb2 };
 
                             DecodeMemberRefParent(c.Class, out MemberRefParentType type, out uint row2);
                             if (type == MemberRefParentType.TypeSpec)
@@ -241,7 +242,7 @@ namespace LibDotNetParser.CILApi
                         {
                             throw new NotImplementedException();
                         }
-                       
+
                         return ret;
                     }
                 case OpCodeOperandType.InlineMethod:
@@ -252,7 +253,6 @@ namespace LibDotNetParser.CILApi
                         byte f = code[Offset + 4]; //Method type. 6=Method,10=MemberRef
                         byte[] num2 = new byte[] { fi, s2, t, 0 };
                         var numb2 = BitConverter.ToInt32(num2, 0); //Method Token
-
 
                         if (f == 10) //MemberRef
                         {
@@ -427,7 +427,7 @@ namespace LibDotNetParser.CILApi
                             {
                                 foreach (var meth in item.Methods)
                                 {
-                                    if (meth.RVA == c.RVA && meth.Name == name)
+                                    if (meth.RVA == c.RVA && meth.Name == name && meth.ParamListIndex == c.ParamList)
                                     {
                                         m = meth;
                                     }
@@ -450,14 +450,14 @@ namespace LibDotNetParser.CILApi
                                 FunctionName = name,
                                 RVA = c.RVA,
                                 Signature = m.Signature,
-
+                                ParamListIndex = c.ParamList
                             };
                             return ret;
                         }
                         else if (f == 0x2B)
                         {
                             //Method spec
-                            var idx = mainFile.Backend.Tabels.MethodSpecTable[fi - 1];
+                            var idx = mainFile.Backend.Tabels.MethodSpecTable[numb2 - 1];
                             uint fa;
                             uint row;
                             DecodeMethodDefOrRef(idx.Method, out fa, out row);
@@ -765,7 +765,7 @@ namespace LibDotNetParser.CILApi
 
             return null;
         }
-        public static ulong ParseNumber(BinaryReader r)
+        public static uint ParseNumber(BinaryReader r)
         {
             var b1 = r.ReadByte();
             if (b1 == 0xFF)
@@ -780,7 +780,7 @@ namespace LibDotNetParser.CILApi
             var b2 = r.ReadByte();
             if ((b1 & 0x40) == 0)
             {
-                return (ulong)(((b1 & 0x3f) << 8) | b2);
+                return (uint)(((b1 & 0x3f) << 8) | b2);
             }
             // must be a 4 byte encoding
 
@@ -791,7 +791,7 @@ namespace LibDotNetParser.CILApi
             }
             var b3 = r.ReadByte();
             var b4 = r.ReadByte();
-            return (ulong)(((b1 & 0x1f) << 24) | (b2 << 16) | (b3 << 8) | b4);
+            return (uint)(((b1 & 0x1f) << 24) | (b2 << 16) | (b3 << 8) | b4);
         }
         #region Decoding MemberRefParent
         private const uint MemberRefParrent = 0x7;
