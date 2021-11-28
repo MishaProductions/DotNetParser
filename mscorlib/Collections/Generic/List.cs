@@ -7,7 +7,7 @@ namespace System.Collections.Generic
 {
     public class List<T>
     {
-        private int count;
+        private int count = 0;
         public int get_Count()
         {
             return count;

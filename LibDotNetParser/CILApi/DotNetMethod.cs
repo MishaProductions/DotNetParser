@@ -24,7 +24,7 @@ namespace LibDotNetParser.CILApi
             private set;
         }
 
-        public List<MethodArgStack> Parms = new List<MethodArgStack>();
+        public List<MethodSignatureParam> Parms = new List<MethodSignatureParam>();
         public string Name { get; private set; }
         public uint RVA { get { return BackendTabel.RVA; } }
         public uint Offset
@@ -99,6 +99,7 @@ namespace LibDotNetParser.CILApi
             SignatureInfo = ParseMethodSignature(item.Signature, File, this.Name);
             this.Signature = SignatureInfo.Signature;
             this.AmountOfParms = SignatureInfo.AmountOfParms;
+            Parms = SignatureInfo.Params;
         }
 
         /// <summary>

@@ -413,8 +413,10 @@ namespace DotNetparserTester
             {
                 TestFail("Array.Empty() returned non empty array");
             }
+            Console.WriteLine("Action as argument tests");
             ActionAsMethodArgTest(new string[] { "hi","bye"}, action, action);
             ActionAsMethodArgTest2(new string[] { "a", "b" });
+            Console.WriteLine("List tests");
             List<string> s = new List<string>();
             s.Add("hi!");
             //TODO
@@ -451,9 +453,9 @@ namespace DotNetparserTester
             console(vs[0]);
             console(vs[1]);
         }
-        private static void aLogError(string v)
+        private static void test5(string[] v, object f, int a)
         {
-            throw new NotImplementedException();
+            Console.WriteLine(v[a]);
         }
 
         /// <summary>

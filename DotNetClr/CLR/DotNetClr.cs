@@ -857,7 +857,7 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "call")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
-                    InternalCallMethod(call, m, addToCallStack, false);
+                    InternalCallMethod(call, m, addToCallStack, false, false);
                 }
                 else if (item.OpCodeName == "ldnull")
                 {
@@ -905,7 +905,7 @@ namespace libDotNetClr
                         {
                             foreach (var meth in item3.Methods)
                             {
-                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature)
+                                if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && item3.Name == call.ClassName)
                                 {
                                     if (call.ParamListIndex != 0)
                                     {
@@ -930,17 +930,17 @@ namespace libDotNetClr
                         clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
+
                     Console.WriteLine("Creating instance of " + m2.Parrent.FullName);
                     MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = new ObjectValueHolder() };
-                    stack.Add(a);
                     //Call the contructor
-                    InternalCallMethod(call, m, true, true);
-
-                    if (stack.Count == 0)
+                    if (!InternalCallMethod(call, m, true, true, true, a))
                     {
-                        //Make sure its still here
-                        stack.Add(a);
+                        Console.WriteLine("Error occured, returning null.");
+                        return null; //error occured
                     }
+
+                    stack.Add(a);
                 }
                 else if (item.OpCodeName == "stfld")
                 {
@@ -1167,7 +1167,7 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "callvirt")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
-                    InternalCallMethod(call, m, addToCallStack, true);
+                    InternalCallMethod(call, m, addToCallStack, true, false);
                 }
                 #endregion
                 #region Arrays
@@ -1302,7 +1302,9 @@ namespace libDotNetClr
                         }
                     }
 
-                    stack.Add(new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
+                    var ptr = CreateType("System", "IntPtr");
+                    (ptr.value as ObjectValueHolder).Fields.Add("ptr", new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
+                    stack.Add(ptr);
                 }
                 else if (item.OpCodeName == "leave.s")
                 {
@@ -1410,7 +1412,7 @@ namespace libDotNetClr
             throw new Exception("Cannot find the method!");
         }
 
-        public void InternalCallMethod(InlineMethodOperandData call, DotNetMethod m, bool addToCallStack, bool IsVirt)
+        public bool InternalCallMethod(InlineMethodOperandData call, DotNetMethod m, bool addToCallStack, bool IsVirt, bool isConstructor, MethodArgStack constructorObj = null)
         {
             MethodArgStack returnValue;
 
@@ -1440,14 +1442,14 @@ namespace libDotNetClr
                 if (m2 == null)
                 {
                     Console.WriteLine($"Cannot resolve called method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}");
-                    return;
+                    return false;
                 }
             }
             else
             {
                 if (call.NameSpace == "System" && call.ClassName == "Object" && call.FunctionName == ".ctor")
                 {
-                    return; //Ignore
+                    return true; //Ignore
                 }
                 //Attempt to resolve it
                 foreach (var item2 in dlls)
@@ -1467,7 +1469,7 @@ namespace libDotNetClr
                 if (m2 == null)
                 {
                     clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}. Method signature is {call.Signature}", "System.MethodNotFound");
-                    return;
+                    return false;
                 }
             }
             //Extract the params
@@ -1475,41 +1477,8 @@ namespace libDotNetClr
             int EndParmIndex = -1;
             int paramsRead = 0;
             bool foundEndIndex = false;
-            if (m2.AmountOfParms > 0)
-            {
-                var endParam = m2.SignatureInfo.Params[m2.SignatureInfo.Params.Count - 1];
-                for (int i4 = stack.Count - 1; i4 >= 0; i4--)
-                {
-                    var stackitm = stack[i4];
-                    if (stackitm.type == endParam.type | stackitm.type == StackItemType.ldnull | endParam.type == StackItemType.Any && StartParmIndex == -1 && !foundEndIndex)
-                    {
-                        if (endParam.IsClass)
-                        {
-                            if (endParam.ClassType != stackitm.ObjectType)
-                            {
-                                continue;
-                            }
-                        }
-                        EndParmIndex = i4;
-                        foundEndIndex = true;
-                        if (m2.AmountOfParms == 1)
-                        {
-                            StartParmIndex = i4;
-                            break;
-                        }
-                    }
-                    if (EndParmIndex != -1 && paramsRead + 1 >= m2.AmountOfParms)
-                    {
-                        StartParmIndex = i4;
-                        break;
-                    }
-                    if (EndParmIndex != -1 && StartParmIndex == -1)
-                    {
-                        paramsRead++;
-                    }
-                }
-                ;
-            }
+            EndParmIndex = stack.Count - 1;
+            StartParmIndex = stack.Count - m2.AmountOfParms;
             if (m2.AmountOfParms == 0)
             {
                 StartParmIndex = -1;
@@ -1522,34 +1491,39 @@ namespace libDotNetClr
             CustomList<MethodArgStack> newParms = new CustomList<MethodArgStack>();
             //Find the object that we are calling it on (if any)
             MethodArgStack objectToCallOn = null;
-            if (m2.AmountOfParms > 0)
+            if (!isConstructor)
             {
-                if (stack.Count - m2.AmountOfParms - 1 != -1)
-                    objectToCallOn = stack[stack.Count - m2.AmountOfParms - 1];
-                else
-                    objectToCallOn = stack[0];
-
-                if (objectToCallOn.type != StackItemType.Object && !IsSpecialType(objectToCallOn, m2))
+                if (m2.AmountOfParms > 0)
                 {
-                    objectToCallOn = stack[0];
-                }
-            }
-            else
-            {
-                //find the object
-                for (int x = stack.Count - 1; x >= 0; x--)
-                {
-                    var itm = stack[x];
-                    if (itm.type == StackItemType.Object)
+                    var idx = stack.Count - m2.AmountOfParms - 1;
+                    if (idx >= 0)
                     {
-                        if (itm.ObjectType == m2.Parrent)
+                        objectToCallOn = stack[idx];
+                        //TODO: remove this hack
+                        if (objectToCallOn.type != StackItemType.Object && idx != 0 && !IsSpecialType(objectToCallOn, m2))
                         {
-                            objectToCallOn = itm;
-                            break;
+                            objectToCallOn = stack[idx - 1];
+                        }
+                    }
+                }
+                else
+                {
+                    //find the object
+                    for (int x = stack.Count - 1; x >= 0; x--)
+                    {
+                        var itm = stack[x];
+                        if (itm.type == StackItemType.Object)
+                        {
+                            if (itm.ObjectType == m2.Parrent)
+                            {
+                                objectToCallOn = itm;
+                                break;
+                            }
                         }
                     }
                 }
             }
+
 
             if (objectToCallOn == null && IsVirt)
             {
@@ -1558,7 +1532,7 @@ namespace libDotNetClr
             }
             if (objectToCallOn != null)
             {
-                if (objectToCallOn.type == StackItemType.Object || IsSpecialType(objectToCallOn, m2))
+                if (objectToCallOn.type == StackItemType.Object | IsSpecialType(objectToCallOn, m2))
                 {
                     if (StartParmIndex == -1)
                     {
@@ -1566,7 +1540,7 @@ namespace libDotNetClr
                     }
                     else
                     {
-                        if (objectToCallOn.ObjectType == m2.Parrent || objectToCallOn.ObjectType == null)
+                        if (objectToCallOn.ObjectType == m2.Parrent | objectToCallOn.ObjectType == null)
                         {
                             newParms.Add(objectToCallOn);
                         }
@@ -1577,8 +1551,15 @@ namespace libDotNetClr
                         }
                     }
                 }
-                else
-                    objectToCallOn = null;
+            }
+            if (isConstructor)
+            {
+                newParms.Add(constructorObj);
+            }
+            if (m2.AmountOfParms == 0)
+            {
+                StartParmIndex = -1;
+                EndParmIndex = -1;
             }
             if (StartParmIndex != -1)
             {
@@ -1604,6 +1585,7 @@ namespace libDotNetClr
             {
                 stack.Add(returnValue);
             }
+            return true;
         }
 
         private bool IsSpecialType(MethodArgStack obj, DotNetMethod m)

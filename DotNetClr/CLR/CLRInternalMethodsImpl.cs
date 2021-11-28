@@ -59,111 +59,86 @@ namespace libDotNetClr
         #region Actions
         private void Action5InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = stack[stack.Count - 6];
-            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
-
+            MethodArgStack obj = Stack[0];
             var d = (ObjectValueHolder)obj.value;
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
             var toCall = d.Fields["__internal_method"];
-            if (toCall.type != StackItemType.MethodPtr) throw new InvalidOperationException();
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)toCall.value;
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(stack[stack.Count - 5]);
-            parms.Add(stack[stack.Count - 4]);
-            parms.Add(stack[stack.Count - 3]);
-            parms.Add(stack[stack.Count - 2]);
-            parms.Add(stack[stack.Count - 1]);
+            parms.Add(Stack[1]);
+            parms.Add(Stack[2]);
+            parms.Add(Stack[3]);
+            parms.Add(Stack[4]);
+            parms.Add(Stack[5]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 5, 5);
         }
         private void Action4InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = stack[stack.Count - 5];
-            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
-
+            MethodArgStack obj = Stack[0];
             var d = (ObjectValueHolder)obj.value;
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
             var toCall = d.Fields["__internal_method"];
-            if (toCall.type != StackItemType.MethodPtr) throw new InvalidOperationException();
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)toCall.value;
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(stack[stack.Count - 4]);
-            parms.Add(stack[stack.Count - 3]);
-            parms.Add(stack[stack.Count - 2]);
-            parms.Add(stack[stack.Count - 1]);
+            parms.Add(Stack[1]);
+            parms.Add(Stack[2]);
+            parms.Add(Stack[3]);
+            parms.Add(Stack[4]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 4, 4);
         }
         private void Action3InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = stack[stack.Count - 4];
-            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
-
+            MethodArgStack obj = Stack[0];
             var d = (ObjectValueHolder)obj.value;
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
             var toCall = d.Fields["__internal_method"];
-            if (toCall.type != StackItemType.MethodPtr) throw new InvalidOperationException();
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)toCall.value;
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(stack[stack.Count - 3]);
-            parms.Add(stack[stack.Count - 2]);
-            parms.Add(stack[stack.Count - 1]);
+            parms.Add(Stack[1]);
+            parms.Add(Stack[2]);
+            parms.Add(Stack[3]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 3, 3);
         }
         private void Action2InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = stack[stack.Count - 3];
-            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
-
+            MethodArgStack obj = Stack[0];
             var d = (ObjectValueHolder)obj.value;
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
             var toCall = d.Fields["__internal_method"];
-            if (toCall.type != StackItemType.MethodPtr) throw new InvalidOperationException();
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)toCall.value;
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(stack[stack.Count - 2]);
-            parms.Add(stack[stack.Count - 1]);
+            parms.Add(Stack[1]);
+            parms.Add(Stack[2]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 2, 2);
         }
         private void Action1InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            MethodArgStack obj = null;
-            for (int i = stack.Count - 1; i >= 0; i--)
-            {
-                var itm = stack[i];
-                if (itm.type == StackItemType.Object)
-                {
-                    if (itm.ObjectType.FullName.Contains("Action"))
-                    {
-                        obj = itm;
-                        break;
-                    }
-                }
-            }
-            if (obj == null)
-            {
-                throw new InvalidOperationException("Failed to find the action to call.");
-            }
-
+            MethodArgStack obj = Stack[0];
             var d = (ObjectValueHolder)obj.value;
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
             var toCall = d.Fields["__internal_method"];
-            if (toCall.type != StackItemType.MethodPtr) throw new InvalidOperationException();
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)toCall.value;
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(stack[stack.Count - 1]);
+            parms.Add(Stack[1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveAt(stack.Count - 1);
         }
@@ -183,10 +158,11 @@ namespace libDotNetClr
         private void ActionCtorImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             // do nothing
-            var theAction = stack[stack.Count - 1];
-            var methodPtr = stack[stack.Count - 2];
+            var theAction = Stack[0];
+            var obj = Stack[1];
+            var methodPtr = Stack[2];
             if (theAction.type != StackItemType.Object) throw new InvalidOperationException();
-            if (methodPtr.type != StackItemType.MethodPtr) throw new InvalidOperationException();
+            if (methodPtr.type != StackItemType.Object) throw new InvalidOperationException();
 
             //store the method in a secret field
             var d = (ObjectValueHolder)theAction.value;
