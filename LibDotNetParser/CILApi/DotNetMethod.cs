@@ -382,7 +382,8 @@ namespace LibDotNetParser.CILApi
                     //GENERIC_PARM
                     {
                         var b = IlDecompiler.ParseNumber(r);
-                        sig = "todo";
+                        sig = "T";
+                        ret.type = StackItemType.Any;
                         break;
                     }
                 case 0x14:

@@ -52,7 +52,7 @@ namespace libDotNetClr
 
         private void Boolean_GetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var val = Stack[Stack.Length - 1];
+            var val = stack[stack.Count - 1];
             returnValue = val;
             stack.RemoveAt(stack.Count - 1);
         }
@@ -70,11 +70,11 @@ namespace libDotNetClr
             var toCallMethod = (DotNetMethod)toCall.value;
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(Stack[stack.Count - 5]);
-            parms.Add(Stack[stack.Count - 4]);
-            parms.Add(Stack[stack.Count - 3]);
-            parms.Add(Stack[stack.Count - 2]);
-            parms.Add(Stack[stack.Count - 1]);
+            parms.Add(stack[stack.Count - 5]);
+            parms.Add(stack[stack.Count - 4]);
+            parms.Add(stack[stack.Count - 3]);
+            parms.Add(stack[stack.Count - 2]);
+            parms.Add(stack[stack.Count - 1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 5, 5);
         }
@@ -91,10 +91,10 @@ namespace libDotNetClr
             var toCallMethod = (DotNetMethod)toCall.value;
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(Stack[stack.Count - 4]);
-            parms.Add(Stack[stack.Count - 3]);
-            parms.Add(Stack[stack.Count - 2]);
-            parms.Add(Stack[stack.Count - 1]);
+            parms.Add(stack[stack.Count - 4]);
+            parms.Add(stack[stack.Count - 3]);
+            parms.Add(stack[stack.Count - 2]);
+            parms.Add(stack[stack.Count - 1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 4, 4);
         }
@@ -111,9 +111,9 @@ namespace libDotNetClr
             var toCallMethod = (DotNetMethod)toCall.value;
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(Stack[stack.Count - 3]);
-            parms.Add(Stack[stack.Count - 2]);
-            parms.Add(Stack[stack.Count - 1]);
+            parms.Add(stack[stack.Count - 3]);
+            parms.Add(stack[stack.Count - 2]);
+            parms.Add(stack[stack.Count - 1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 3, 3);
         }
@@ -130,8 +130,8 @@ namespace libDotNetClr
             var toCallMethod = (DotNetMethod)toCall.value;
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(Stack[stack.Count - 2]);
-            parms.Add(Stack[stack.Count - 1]);
+            parms.Add(stack[stack.Count - 2]);
+            parms.Add(stack[stack.Count - 1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveRange(stack.Count - 2, 2);
         }
@@ -163,7 +163,7 @@ namespace libDotNetClr
             var toCallMethod = (DotNetMethod)toCall.value;
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
-            parms.Add(Stack[stack.Count - 1]);
+            parms.Add(stack[stack.Count - 1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
             stack.RemoveAt(stack.Count - 1);
         }
@@ -183,8 +183,8 @@ namespace libDotNetClr
         private void ActionCtorImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             // do nothing
-            var theAction = Stack[Stack.Length - 1];
-            var methodPtr = Stack[Stack.Length - 2];
+            var theAction = stack[stack.Count - 1];
+            var methodPtr = stack[stack.Count - 2];
             if (theAction.type != StackItemType.Object) throw new InvalidOperationException();
             if (methodPtr.type != StackItemType.MethodPtr) throw new InvalidOperationException();
 
@@ -215,19 +215,19 @@ namespace libDotNetClr
         private void GetTypeFromRefrence(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var re = Stack[Stack.Length - 1];
-            if (re.type != StackItemType.ObjectRef) throw new InvalidOperationException();
+            if (re.type != StackItemType.Object) throw new InvalidOperationException();
 
             var type = CreateType("System", "Type");
-            var typeToRead = CreateType(re.ObjectType);
+            var typeToRead = CreateType(ReadStringFromType(re, "_namespace"), ReadStringFromType(re, "_name"));
             WriteStringToType(type, "internal__fullname", typeToRead.ObjectType.FullName);
             returnValue = type;
         }
         private void GetObjType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = Stack[Stack.Length - 1];
+            var obj = stack[stack.Count - 1];
 
             //TODO: Remove this hack
-            if (obj.type != StackItemType.Object) obj = Stack[0];
+            if (obj.type != StackItemType.Object) obj = stack[0];
             if (obj.type != StackItemType.Object) throw new InvalidOperationException();
             //Create the type object
 
@@ -259,21 +259,21 @@ namespace libDotNetClr
         #region Implementation for various ToString methods
         private void Internal__System_Char_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var c = Stack[Stack.Length - 1].value;
+            var c = stack[stack.Count - 1].value;
             returnValue = new MethodArgStack() { value = (int)c, type = StackItemType.Int32 };
         }
 
         private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var str = (string)Stack[Stack.Length - 2].value;
-            var index = (int)Stack[Stack.Length - 1].value;
+            var str = (string)stack[stack.Count - 2].value;
+            var index = (int)stack[stack.Count - 1].value;
 
             returnValue = new MethodArgStack() { type = StackItemType.String, value = str[index] };
         }
 
         private void Internal__System_String_Get_Length(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var stringToRead = Stack[Stack.Length - 1];
+            var stringToRead = stack[stack.Count - 1];
             var str = (string)stringToRead.value;
             returnValue = new MethodArgStack() { type = StackItemType.Int32, value = str.Length };
         }
@@ -281,42 +281,42 @@ namespace libDotNetClr
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((uint)(int)Stack[Stack.Length - 1].value).ToString();
+            str.value = ((uint)(int)stack[stack.Count - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_Int32_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
+            str.value = ((int)stack[stack.Count - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_Int16_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
+            str.value = ((int)stack[stack.Count - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_UInt16_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((ushort)(int)Stack[Stack.Length - 1].value).ToString();
+            str.value = ((ushort)(int)stack[stack.Count - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_SByte_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((sbyte)(int)Stack[Stack.Length - 1].value).ToString();
+            str.value = ((sbyte)(int)stack[stack.Count - 1].value).ToString();
             returnValue = str;
         }
         private void InternalMethod_Byte_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
+            str.value = ((int)stack[stack.Count - 1].value).ToString();
             returnValue = str;
         }
         #endregion

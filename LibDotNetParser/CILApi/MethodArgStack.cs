@@ -89,6 +89,7 @@ namespace LibDotNetParser
         Object,
         Array,
         ObjectRef,
-        MethodPtr
+        MethodPtr,
+        Any
     }
 }

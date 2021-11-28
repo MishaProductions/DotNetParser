@@ -415,6 +415,8 @@ namespace DotNetparserTester
             }
             ActionAsMethodArgTest(new string[] { "hi","bye"}, action, action);
             ActionAsMethodArgTest2(new string[] { "a", "b" });
+            List<string> s = new List<string>();
+            s.Add("hi!");
             //TODO
             //int h = 0;
             //TestByRef("this is correct", ref h);

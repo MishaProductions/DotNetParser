@@ -36,5 +36,10 @@ namespace libDotNetClr
             var d = (ObjectValueHolder)objectInstance.value;
             d.Fields.Add(property, new MethodArgStack() { type = StackItemType.String, value = value });
         }
+        private string ReadStringFromType(MethodArgStack objectInstance, string property)
+        {
+            var d = (ObjectValueHolder)objectInstance.value;
+            return (string)d.Fields[property].value;
+        }
     }
 }
