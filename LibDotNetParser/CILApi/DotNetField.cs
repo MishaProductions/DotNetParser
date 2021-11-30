@@ -1,6 +1,8 @@
 ﻿using LibDotNetParser.DotNet;
 using LibDotNetParser.DotNet.Tabels.Defs;
 using LibDotNetParser.PE;
+using System.IO;
+using static LibDotNetParser.CILApi.DotNetMethod;
 
 namespace LibDotNetParser.CILApi
 {
@@ -20,6 +22,7 @@ namespace LibDotNetParser.CILApi
         /// </summary>
         public MethodArgStack Value;
 
+        public MethodSignatureParam ValueType { get; private set; }
         public DotNetField(PEFile file, Field backend, DotNetType parrent, int indexintable)
         {
             this.file = file;
@@ -28,6 +31,16 @@ namespace LibDotNetParser.CILApi
             this.IndexInTabel = indexintable;
             flags = (FieldAttribs)BackendTabel.Flags;
             Name = file.ClrStringsStream.GetByOffset(backend.Name);
+
+
+            //Read the field info in blob stream
+            var b = new BinaryReader(new MemoryStream(file.BlobStream));
+            b.BaseStream.Position = backend.Signature;
+
+            var size = b.ReadByte();
+            var prolog = b.ReadByte();
+
+            ValueType = ReadParam(b, parrent.File);
         }
         public override string ToString()
         {

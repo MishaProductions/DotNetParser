@@ -550,8 +550,8 @@ namespace libDotNetClr
                         throw new Exception("There has to be 2 or more items on the stack for ceq instruction to work!");
                     var numb1 = stack[stack.Count - 2].value;
                     var numb2 = stack[stack.Count - 1].value;
-                    int Numb1 = 0;
-                    int Numb2 = 0;
+                    int Numb1;
+                    int Numb2;
 
                     if (numb1 is int)
                     {
@@ -857,7 +857,10 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "call")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
-                    InternalCallMethod(call, m, addToCallStack, false, false);
+                    if (!InternalCallMethod(call, m, addToCallStack, false, false))
+                    {
+                        return null;
+                    }
                 }
                 else if (item.OpCodeName == "ldnull")
                 {
@@ -931,8 +934,43 @@ namespace libDotNetClr
                         return null;
                     }
 
-                    Console.WriteLine("Creating instance of " + m2.Parrent.FullName);
                     MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = new ObjectValueHolder() };
+
+                    //init fields
+                    foreach (var f in m2.Parrent.Fields)
+                    {
+                        var h = a.value as ObjectValueHolder;
+                        switch (f.ValueType.type)
+                        {
+                            case StackItemType.String:
+                                h.Fields.Add(f.Name, MethodArgStack.Null());
+                                break;
+                            case StackItemType.Int32:
+                                h.Fields.Add(f.Name, MethodArgStack.Int32(0));
+                                break;
+                            case StackItemType.Int64:
+                                h.Fields.Add(f.Name, MethodArgStack.Int64(0));
+                                break;
+                            case StackItemType.Float32:
+                                h.Fields.Add(f.Name, MethodArgStack.Float32(0));
+                                break;
+                            case StackItemType.Float64:
+                                h.Fields.Add(f.Name, MethodArgStack.Float64(0));
+                                break;
+                            case StackItemType.Object:
+                                h.Fields.Add(f.Name, MethodArgStack.Null());
+                                break;
+                            case StackItemType.Array:
+                                h.Fields.Add(f.Name, MethodArgStack.Null());
+                                break;
+                            default:
+                                throw new NotImplementedException();
+                                break;
+                        }
+                    }
+
+
+
                     //Call the contructor
                     if (!InternalCallMethod(call, m, true, true, true, a))
                     {
@@ -1090,111 +1128,59 @@ namespace libDotNetClr
                 {
                     if (parms.Count == 0)
                         continue;
-                    if (stack.Count > 0)
-                    {
-                        var prevItem = stack[stack.Count - 1];
-                        if (parms[0] != prevItem)
-                            stack.Add(parms[0]);
-                    }
-                    else
-                    {
-                        stack.Add(parms[0]);
-                    }
+                    stack.Add(parms[0]);
                 }
                 else if (item.OpCodeName == "ldarg.1")
                 {
                     if (parms.Count == 0)
                         continue;
 
-                    if (stack.Count > 0)
-                    {
-                        var prevItem = stack[stack.Count - 1];
-                        if (parms[1] != prevItem)
-                            stack.Add(parms[1]);
-                    }
-                    else
-                    {
-                        stack.Add(parms[1]);
-                    }
+                    stack.Add(parms[1]);
                 }
                 else if (item.OpCodeName == "ldarg.2")
                 {
                     if (parms.Count == 0)
                         continue;
 
-                    if (stack.Count > 0)
-                    {
-                        var prevItem = stack[stack.Count - 1];
-                        if (parms[2] != prevItem)
-                            stack.Add(parms[2]);
-                    }
-                    else
-                    {
-                        stack.Add(parms[2]);
-                    }
+                    stack.Add(parms[2]);
                 }
                 else if (item.OpCodeName == "ldarg.3")
                 {
                     if (parms.Count == 0)
                         continue;
 
-                    if (stack.Count > 0)
-                    {
-                        var prevItem = stack[stack.Count - 1];
-                        if (parms[3] != prevItem)
-                            stack.Add(parms[3]);
-                    }
-                    else
-                    {
-                        stack.Add(parms[3]);
-                    }
+                    stack.Add(parms[3]);
                 }
                 else if (item.OpCodeName == "ldarg.s")
                 {
                     if (parms.Count == 0)
                         continue;
-                    if (stack.Count > 0)
-                    {
-                        var prevItem = stack[stack.Count - 1];
-                        if (parms[(byte)item.Operand] != prevItem)
-                            stack.Add(parms[(byte)item.Operand]);
-                    }
-                    else
-                    {
-                        stack.Add(parms[(byte)item.Operand]);
-                    }
+
+                    stack.Add(parms[(byte)item.Operand]);
                 }
                 else if (item.OpCodeName == "callvirt")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
-                    InternalCallMethod(call, m, addToCallStack, true, false);
+                    if (!InternalCallMethod(call, m, addToCallStack, true, false))
+                    {
+                        return null;
+                    }
                 }
                 #endregion
                 #region Arrays
                 else if (item.OpCodeName == "newarr")
                 {
                     var arrayLen = stack[stack.Count - 1];
+                    var array = Arrays.AllocArray((int)arrayLen.value);
 
-                    stack.Add(new MethodArgStack() { type = StackItemType.Array, ArrayItems = new MethodArgStack[(int)arrayLen.value], ArrayLen = (int)arrayLen.value });
+                    stack.RemoveAt(stack.Count - 1);
+                    stack.Add(new MethodArgStack() { type = StackItemType.Array, value = array.Index});
                 }
                 else if (item.OpCodeName == "ldlen")
                 {
-                    MethodArgStack array = null;
-                    for (int i5 = stack.Count - 1; i5 >= 0; i5--)
-                    {
-                        var arr = stack[i5];
-                        if (arr.type == StackItemType.Array)
-                        {
-                            array = arr;
-                            break;
-                        }
-                    }
-
-                    if (array == null)
-                    {
-                        throw new InvalidOperationException("Array is null");
-                    }
-                    stack.Add(MethodArgStack.Int32(array.ArrayLen));
+                    MethodArgStack array = stack[stack.Count - 1];
+                    stack.RemoveAt(stack.Count - 1);
+                    stack.Add(MethodArgStack.Int32(Arrays.ArrayRefs[Arrays.GetIndexFromRef(array)].Length));
                 }
                 else if (item.OpCodeName == "dup")
                 {
@@ -1219,19 +1205,33 @@ namespace libDotNetClr
                     }
                     var idx = (int)index.value;
                     stack.RemoveAt(stack.Count - 1); //Remove index
-                    stack.Add(array.ArrayItems[idx]);
+                    stack.RemoveAt(stack.Count - 1); //Remove array
+
+                    stack.Add(Arrays.ArrayRefs[Arrays.GetIndexFromRef(array)].Items[idx]);
                 }
                 else if (item.OpCodeName == "stelem.ref")
                 {
                     var val = stack[stack.Count - 1];
                     var index = stack[stack.Count - 2];
                     var array = stack[stack.Count - 3];
-                    if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
+                    //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
                     if (index.type != StackItemType.Int32) { clrError("Expected Int32, but got something else. Fault instruction name: stelem.ref", "Internal CLR error"); return null; }
-                    array.ArrayItems[(int)index.value] = val;
+
+                    Arrays.ArrayRefs[Arrays.GetIndexFromRef(array)].Items[(int)index.value] = val;
 
                     stack.RemoveAt(stack.Count - 1); //Remove value
                     stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array ref
+                }
+                else if (item.OpCodeName == "stelem")
+                {
+                    var val = stack[stack.Count - 1];
+                    var index = stack[stack.Count - 2];
+                    var array = stack[stack.Count - 3];
+                    //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
+                    array.ArrayItems[(int)index.value] = val;
+
+                    stack.RemoveAt(stack.Count - 1); //Remove value
                 }
                 #endregion
                 #region Reflection
@@ -1303,7 +1303,8 @@ namespace libDotNetClr
                     }
 
                     var ptr = CreateType("System", "IntPtr");
-                    (ptr.value as ObjectValueHolder).Fields.Add("ptr", new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
+                    (ptr.value as ObjectValueHolder).Fields.Add("PtrToMethod", new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
+                    stack.RemoveAt(stack.Count - 1); //remove the object
                     stack.Add(ptr);
                 }
                 else if (item.OpCodeName == "leave.s")
@@ -1415,7 +1416,6 @@ namespace libDotNetClr
         public bool InternalCallMethod(InlineMethodOperandData call, DotNetMethod m, bool addToCallStack, bool IsVirt, bool isConstructor, MethodArgStack constructorObj = null)
         {
             MethodArgStack returnValue;
-
             DotNetMethod m2 = null;
             if (call.RVA != 0)
             {
@@ -1473,12 +1473,8 @@ namespace libDotNetClr
                 }
             }
             //Extract the params
-            int StartParmIndex = -1;
-            int EndParmIndex = -1;
-            int paramsRead = 0;
-            bool foundEndIndex = false;
-            EndParmIndex = stack.Count - 1;
-            StartParmIndex = stack.Count - m2.AmountOfParms;
+            int StartParmIndex = stack.Count - m2.AmountOfParms;
+            int EndParmIndex = stack.Count - 1;
             if (m2.AmountOfParms == 0)
             {
                 StartParmIndex = -1;
@@ -1523,12 +1519,21 @@ namespace libDotNetClr
                     }
                 }
             }
-
-
-            if (objectToCallOn == null && IsVirt)
+            if (objectToCallOn == null && IsVirt && !isConstructor)
             {
-                //clrError("cannot find the object to call on", "internal clr error");
-                //return;
+                //Try to find it
+                for (int i = stack.Count - 1; i >= 0; i--)
+                {
+                    var itm = stack[i];
+                    if (itm.type == StackItemType.Object)
+                    {
+                        if (itm.ObjectType == m2.Parrent)
+                        {
+                            objectToCallOn = itm;
+                            break;
+                        }
+                    }
+                }
             }
             if (objectToCallOn != null)
             {
@@ -1577,10 +1582,17 @@ namespace libDotNetClr
             {
                 newParms.Add(stack[0]);
             }
+
             //Call it
-            var oldStack = stack;
+            var oldStack = stack.backend.GetRange(0, stack.Count);
             returnValue = RunMethod(m2, m.Parrent.File, newParms, addToCallStack);
-            stack = oldStack;
+            stack.backend = oldStack;
+
+            //Remove the parameters once we are finished
+            if (StartParmIndex != -1 && EndParmIndex != -1)
+            {
+                stack.RemoveRange(StartParmIndex, EndParmIndex - StartParmIndex+1);
+            }
             if (returnValue != null)
             {
                 stack.Add(returnValue);
@@ -1594,8 +1606,37 @@ namespace libDotNetClr
             {
                 return true;
             }
+            if (m.Parrent.FullName == "System.IntPtr" && obj.type == StackItemType.IntPtr)
+            {
+                return true;
+            }
             return false;
         }
         #endregion
+    }
+
+    internal static class Arrays
+    {
+        public static ArrayRef[] ArrayRefs = new ArrayRef[100];
+        private static int CurrentIndex = 0;
+        public static int GetIndexFromRef(MethodArgStack r)
+        {
+            return (int)r.value;
+        }
+        public static ArrayRef AllocArray(int arrayLen)
+        {
+            ArrayRefs[CurrentIndex] = new ArrayRef();
+            ArrayRefs[CurrentIndex].Length = arrayLen;
+            ArrayRefs[CurrentIndex].Items = new MethodArgStack[arrayLen];
+            ArrayRefs[CurrentIndex].Index = CurrentIndex;
+            CurrentIndex++;
+            return ArrayRefs[CurrentIndex-1];
+        }
+    }
+    internal class ArrayRef
+    {
+        public MethodArgStack[] Items;
+        public int Length;
+        public int Index { get; internal set; }
     }
 }

@@ -13,7 +13,7 @@ namespace libDotNetClr
     /// <typeparam name="T"></typeparam>
     internal class CustomList<T>
     {
-        private List<T> backend = new List<T>();
+        public List<T> backend = new List<T>();
         public int Count { get { return backend.Count; } }
 
         public T this[int index]
@@ -47,7 +47,6 @@ namespace libDotNetClr
 
         public void RemoveAt(int m)
         {
-            var a = backend[m];
             backend.RemoveAt(m);
         }
         public void RemoveRange(int index, int count)

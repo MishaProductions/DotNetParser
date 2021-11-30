@@ -73,7 +73,7 @@ namespace LibDotNetParser.CILApi
             }
         }
         public DotNetType Parrent { get; }
-        public bool HasReturnValue { get; }
+        public bool HasReturnValue { get; private set; }
 
         public MethodSignatureInfoV2 SignatureInfo { get; }
         public uint ParamListIndex { get; internal set; }
@@ -100,6 +100,9 @@ namespace LibDotNetParser.CILApi
             this.Signature = SignatureInfo.Signature;
             this.AmountOfParms = SignatureInfo.AmountOfParms;
             Parms = SignatureInfo.Params;
+
+            if (SignatureInfo.ReturnVal.type != StackItemType.None)
+                HasReturnValue = true;
         }
 
         /// <summary>
@@ -157,6 +160,7 @@ namespace LibDotNetParser.CILApi
             var type = IlDecompiler.ParseNumber(blobStreamReader);
             var parmaters = IlDecompiler.ParseNumber(blobStreamReader);
             var returnVal = ReadParam(blobStreamReader, file); //read return value
+            ret.ReturnVal = returnVal;
 
             if (type == 0)
             {
@@ -174,8 +178,8 @@ namespace LibDotNetParser.CILApi
                 sig += parm.TypeInString + ", ";
                 ret.AmountOfParms++;
             }
-
-            sig = sig.Substring(0, sig.Length - 2); //Remove the last ,
+            if (parmaters > 0)
+                sig = sig.Substring(0, sig.Length - 2); //Remove the last ,
             sig += ");";
             ret.Signature = sig;
             return ret;
@@ -184,7 +188,7 @@ namespace LibDotNetParser.CILApi
         {
             return $"{Name} in {Parrent.FullName}";
         }
-        private static MethodSignatureParam ReadParam(BinaryReader r, DotNetFile file)
+        internal static MethodSignatureParam ReadParam(BinaryReader r, DotNetFile file)
         {
             string sig;
             var parm = r.ReadByte();
@@ -195,6 +199,7 @@ namespace LibDotNetParser.CILApi
                     {
                         //end of list
                         sig = "End of list";
+                        ret.type = StackItemType.Array; //array maybe?
                         break;
                     }
                 case 0x01:
@@ -284,14 +289,14 @@ namespace LibDotNetParser.CILApi
                 case 0xF:
                     //Pointer* (followed by type)
                     {
-                        sig = ReadParam(r, file).TypeInString+"*";
+                        sig = ReadParam(r, file).TypeInString + "*";
                         ret.type = StackItemType.Int32;
                         break;
                     }
                 case 0x10:
                     //byref* //followed by type
                     {
-                        sig = "ref "+ReadParam(r, file).TypeInString;
+                        sig = "ref " + ReadParam(r, file).TypeInString;
                         ret.type = StackItemType.Int32;
                         break;
                     }
@@ -486,7 +491,7 @@ namespace LibDotNetParser.CILApi
                 case 0x1D:
                     {
                         ret.ArrayType = ReadParam(r, file);
-                        sig = ret.ArrayType.TypeInString+"[]";
+                        sig = ret.ArrayType.TypeInString + "[]";
                         ret.type = StackItemType.Array;
                         ret.IsArray = true;
                         break;

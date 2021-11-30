@@ -65,7 +65,7 @@ namespace libDotNetClr
             var toCall = d.Fields["__internal_method"];
             if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["PtrToMethod"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
             parms.Add(Stack[1]);
@@ -84,7 +84,7 @@ namespace libDotNetClr
             var toCall = d.Fields["__internal_method"];
             if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["PtrToMethod"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
             parms.Add(Stack[1]);
@@ -102,7 +102,7 @@ namespace libDotNetClr
             var toCall = d.Fields["__internal_method"];
             if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["PtrToMethod"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
             parms.Add(Stack[1]);
@@ -119,7 +119,7 @@ namespace libDotNetClr
             var toCall = d.Fields["__internal_method"];
             if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["PtrToMethod"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
             parms.Add(Stack[1]);
@@ -135,7 +135,7 @@ namespace libDotNetClr
             var toCall = d.Fields["__internal_method"];
             if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
 
-            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["ptr"].value);
+            var toCallMethod = (DotNetMethod)(((ObjectValueHolder)toCall.value).Fields["PtrToMethod"].value);
             var parms = new CustomList<MethodArgStack>();
             parms.Add(obj); //Is this needed?
             parms.Add(Stack[1]);
@@ -241,8 +241,8 @@ namespace libDotNetClr
 
         private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var str = (string)stack[stack.Count - 2].value;
-            var index = (int)stack[stack.Count - 1].value;
+            var str = (string)Stack[0].value;
+            var index = (int)Stack[1].value;
 
             returnValue = new MethodArgStack() { type = StackItemType.String, value = str[index] };
         }

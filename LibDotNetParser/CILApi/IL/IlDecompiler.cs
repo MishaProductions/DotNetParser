@@ -372,7 +372,7 @@ namespace LibDotNetParser.CILApi
                             //3) get method RVA
 
                             //For now, resolve it by name
-
+                            var sig = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature;
                             DotNetMethod m = null;
                             foreach (var type in ContextTypes)
                             {
@@ -380,7 +380,7 @@ namespace LibDotNetParser.CILApi
                                 {
                                     foreach (var meth in item.Methods)
                                     {
-                                        if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace)
+                                        if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace  && meth.Signature == sig)
                                         {
                                             m = meth;
                                         }
@@ -400,7 +400,7 @@ namespace LibDotNetParser.CILApi
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                   // Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
                                 }
                             }
 
@@ -412,7 +412,7 @@ namespace LibDotNetParser.CILApi
                                 FunctionName = funcName,
                                 RVA = rva,
                                 GenericArg = genericArgType,
-                                Signature = DotNetMethod.ParseMethodSignature(c.Signature, mainFile, funcName).Signature
+                                Signature = sig
                             };
                             return ret;
                         }

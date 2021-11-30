@@ -306,7 +306,7 @@ namespace DotNetparserTester
             }
             else
             {
-                TestSuccess("Create array, len should be 8 but it is " + stringArray.Length);
+                TestFail("Create array, len should be 8 but it is " + stringArray.Length);
             }
             //TODO
             stringArray[0] = "a";
@@ -416,9 +416,9 @@ namespace DotNetparserTester
             Console.WriteLine("Action as argument tests");
             ActionAsMethodArgTest(new string[] { "hi","bye"}, action, action);
             ActionAsMethodArgTest2(new string[] { "a", "b" });
-            Console.WriteLine("List tests");
-            List<string> s = new List<string>();
-            s.Add("hi!");
+            //Console.WriteLine("List tests");
+            //List<string> s = new List<string>();
+            // s.Add("hi!");
             //TODO
             //int h = 0;
             //TestByRef("this is correct", ref h);
@@ -434,6 +434,7 @@ namespace DotNetparserTester
             //{
             //    TestFail("ByRef value is not a 1 or a 0.");
             //}
+            Console.WriteLine(action.GetType().FullName);
             TestsComplete();
         }
         private static void TestByRef(string t, ref int a)
@@ -442,6 +443,10 @@ namespace DotNetparserTester
             a = 1;
         }
         private static void ActionAsMethodArgTest(string[] vs, Action<string> action1, Action<string> action2)
+        {
+            ActionAsMethodArgTestB(vs, action2, action1);
+        }
+        private static void ActionAsMethodArgTestB(string[] vs, Action<string> action1, Action<string> action2)
         {
             console = action1;
 
