@@ -11,9 +11,6 @@ namespace LibDotNetParser
         public DotNetType ObjectType;
         public DotNetMethod ObjectContructor;
 
-        public int ArrayLen;
-        public MethodArgStack[] ArrayItems;
-
         public override string ToString()
         {
             switch (type)

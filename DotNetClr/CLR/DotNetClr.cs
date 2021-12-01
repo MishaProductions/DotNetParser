@@ -97,7 +97,9 @@ namespace libDotNetClr
                 {
                     itms[i] = MethodArgStack.String(args[i]);
                 }
-                Startparams.Add(new MethodArgStack() { ArrayLen = 1, type = StackItemType.Array, ArrayItems = itms });
+
+                var array = Arrays.AllocArray(itms.Length);
+                Startparams.Add(new MethodArgStack() { type = StackItemType.Array, value = array.Index });
             }
             stack.Clear();
             CallStack.Clear();
@@ -1273,7 +1275,7 @@ namespace libDotNetClr
                     var index = stack[stack.Count - 2];
                     var array = stack[stack.Count - 3];
                     //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
-                    array.ArrayItems[(int)index.value] = val;
+                    Arrays.ArrayRefs[Arrays.GetIndexFromRef(array)].Items[(int)index.value] = val;
 
                     stack.RemoveAt(stack.Count - 1); //Remove value
                 }
