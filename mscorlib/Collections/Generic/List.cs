@@ -25,11 +25,6 @@ namespace System.Collections.Generic
         }
         public List(int capacity)
         {
-            if (capacity < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(capacity));
-            }
-
             if (capacity == 0)
                 _items = _emptyArray;
             else

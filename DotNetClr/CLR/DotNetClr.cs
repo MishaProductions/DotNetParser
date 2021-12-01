@@ -627,6 +627,38 @@ namespace libDotNetClr
                         stack.Add(MethodArgStack.Int32(0));
                     }
                 }
+                else if (item.OpCodeName == "blt")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    stack.RemoveRange(stack.Count - 2, 2);
+                    if (numb1 < numb2)
+                    {
+                        //push 1
+                        stack.Add(MethodArgStack.Int32(1));
+                    }
+                    else
+                    {
+                        //push 0
+                        stack.Add(MethodArgStack.Int32(0));
+                    }
+                }
+                else if (item.OpCodeName == "bge.s")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    stack.RemoveRange(stack.Count - 2, 2);
+                    if (numb1 >= numb2)
+                    {
+                        //push 1
+                        stack.Add(MethodArgStack.Int32(1));
+                    }
+                    else
+                    {
+                        //push 0
+                        stack.Add(MethodArgStack.Int32(0));
+                    }
+                }
                 #endregion
                 #region Branch instructions
                 else if (item.OpCodeName == "br.s")
@@ -981,7 +1013,8 @@ namespace libDotNetClr
                     }
 
 
-
+                    if (call.ClassName == "ConsoleCompilerEngineSettings")
+                        Debugger.Break();
                     //Call the contructor
                     if (!InternalCallMethod(call, m, true, true, true, a))
                     {
