@@ -414,7 +414,7 @@ namespace DotNetparserTester
                 TestFail("Array.Empty() returned non empty array");
             }
             Console.WriteLine("Action as argument tests");
-            ActionAsMethodArgTest(new string[] { "hi","bye"}, action, action);
+            ActionAsMethodArgTest(new string[] { "hi", "bye" }, action, action);
             ActionAsMethodArgTest2(new string[] { "a", "b" });
             //Console.WriteLine("List tests");
             //List<string> s = new List<string>();
@@ -434,12 +434,18 @@ namespace DotNetparserTester
             //{
             //    TestFail("ByRef value is not a 1 or a 0.");
             //}
-            Console.WriteLine(action.GetType().FullName);
+
+            Console.WriteLine("Interface tests");
+            IHelloWorldFunction f = new HelloWorldFunction();
+            f.SayHello();
+            Console.WriteLine(f.HelloMessage);
             TestsComplete();
         }
+
+
         private static void TestByRef(string t, ref int a)
         {
-            Console.WriteLine("Testing ByRef. t = "+t);
+            Console.WriteLine("Testing ByRef. t = " + t);
             a = 1;
         }
         private static void ActionAsMethodArgTest(string[] vs, Action<string> action1, Action<string> action2)
@@ -501,5 +507,19 @@ namespace DotNetparserTester
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void DebuggerBreak();
 #endif
+    }
+    public interface IHelloWorldFunction
+    {
+        void SayHello();
+        string HelloMessage { get; set; }
+    }
+    public class HelloWorldFunction : IHelloWorldFunction
+    {
+        public string HelloMessage { get => "This is a field on an interface!"; set => throw new NotImplementedException(); }
+
+        public void SayHello()
+        {
+            Console.WriteLine("Hello world from an interface!");
+        }
     }
 }

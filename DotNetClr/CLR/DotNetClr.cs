@@ -100,6 +100,7 @@ namespace libDotNetClr
                 Startparams.Add(new MethodArgStack() { ArrayLen = 1, type = StackItemType.Array, ArrayItems = itms });
             }
             stack.Clear();
+            CallStack.Clear();
             Localstack = new MethodArgStack[256];
             RunMethod(file.EntryPoint, file, Startparams);
         }
@@ -1174,7 +1175,7 @@ namespace libDotNetClr
                     var array = Arrays.AllocArray((int)arrayLen.value);
 
                     stack.RemoveAt(stack.Count - 1);
-                    stack.Add(new MethodArgStack() { type = StackItemType.Array, value = array.Index});
+                    stack.Add(new MethodArgStack() { type = StackItemType.Array, value = array.Index });
                 }
                 else if (item.OpCodeName == "ldlen")
                 {
@@ -1472,6 +1473,29 @@ namespace libDotNetClr
                     return false;
                 }
             }
+
+            //for interfaces
+            if (m2.RVA == 0 && !m2.IsImplementedByRuntime && !m2.IsInternalCall && m2.Parrent.IsInterface)
+            {
+                //TODO: make sure that the object implements the interface
+                var obj = stack[stack.Count - 1];
+                if (obj.type != StackItemType.Object) throw new InvalidOperationException();
+
+                m2 = null;
+                foreach (var item in obj.ObjectType.Methods)
+                {
+                    if (item.Name == call.FunctionName)
+                    {
+                        m2 = item;
+                    }
+                }
+                if (m2 == null)
+                {
+                    clrError("Cannot resolve method that should be implemented by the interface", "Internal CLR error");
+                    return false;
+                }
+            }
+
             //Extract the params
             int StartParmIndex = stack.Count - m2.AmountOfParms;
             int EndParmIndex = stack.Count - 1;
@@ -1539,20 +1563,36 @@ namespace libDotNetClr
             {
                 if (objectToCallOn.type == StackItemType.Object | IsSpecialType(objectToCallOn, m2))
                 {
-                    if (StartParmIndex == -1)
+                    bool a = false;
+
+                    if (objectToCallOn.type == StackItemType.Object)
                     {
-                        newParms.Add(objectToCallOn);
+                        if (objectToCallOn.ObjectType.FullName != "System.Type")
+                        {
+                            a = true;
+                        }
                     }
                     else
                     {
-                        if (objectToCallOn.ObjectType == m2.Parrent | objectToCallOn.ObjectType == null)
+                        a = true;
+                    }
+                    if (a)
+                    {
+                        if (StartParmIndex == -1)
                         {
                             newParms.Add(objectToCallOn);
                         }
                         else
                         {
-                            //if (m2.Parrent == objectToCallOn.ObjectType)
-                            // newParms.Add(objectToCallOn);
+                            if (objectToCallOn.ObjectType == m2.Parrent | objectToCallOn.ObjectType == null)
+                            {
+                                newParms.Add(objectToCallOn);
+                            }
+                            else
+                            {
+                                //if (m2.Parrent == objectToCallOn.ObjectType)
+                                // newParms.Add(objectToCallOn);
+                            }
                         }
                     }
                 }
@@ -1591,7 +1631,7 @@ namespace libDotNetClr
             //Remove the parameters once we are finished
             if (StartParmIndex != -1 && EndParmIndex != -1)
             {
-                stack.RemoveRange(StartParmIndex, EndParmIndex - StartParmIndex+1);
+                stack.RemoveRange(StartParmIndex, EndParmIndex - StartParmIndex + 1);
             }
             if (returnValue != null)
             {
@@ -1630,7 +1670,7 @@ namespace libDotNetClr
             ArrayRefs[CurrentIndex].Items = new MethodArgStack[arrayLen];
             ArrayRefs[CurrentIndex].Index = CurrentIndex;
             CurrentIndex++;
-            return ArrayRefs[CurrentIndex-1];
+            return ArrayRefs[CurrentIndex - 1];
         }
     }
     internal class ArrayRef

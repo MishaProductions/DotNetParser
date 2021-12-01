@@ -33,7 +33,8 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("Type_FromRefernce", GetTypeFromRefrence);
             RegisterCustomInternalMethod("GetAssemblyFromType", GetAssemblyFromType);
             RegisterCustomInternalMethod("InternalAddItemToList", ListAddItem);
-            //RegisterCustomInternalMethod("String_ToUpper", String_ToUpper);
+            RegisterCustomInternalMethod("String_ToUpper", String_ToUpper);
+            RegisterCustomInternalMethod("String_ToLower", String_ToLower);
 
             RegisterCustomInternalMethod("System_Action..ctor_impl", ActionCtorImpl);
             for (int i = 1; i < 10; i++)
@@ -49,7 +50,6 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("System_Action`5.Invoke_impl", Action5InvokeImpl);
             RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
         }
-
         private void Boolean_GetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var val = stack[stack.Count - 1];
@@ -406,13 +406,19 @@ namespace libDotNetClr
         }
         private void String_ToUpper(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            returnValue = MethodArgStack.String("TODOUPERCASE");
-            return;
-            var str = Stack[Stack.Length - 1];
+            var str = stack[stack.Count - 1];
             if (str.type != StackItemType.String) throw new InvalidOperationException();
             var oldVal = (string)str.value;
             returnValue = MethodArgStack.String(oldVal.ToUpper());
         }
+        private void String_ToLower(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = stack[stack.Count - 1];
+            if (str.type != StackItemType.String) throw new InvalidOperationException();
+            var oldVal = (string)str.value;
+            returnValue = MethodArgStack.String(oldVal.ToLower());
+        }
+
         #endregion
         #region Misc
         private void DebuggerBreak(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)

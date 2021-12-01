@@ -233,6 +233,13 @@ namespace LibDotNetParser.CILApi
                                 ret2.Class = mainFile.Backend.ClrStringsStream.GetByOffset(classs);
                                 ret.Operand = ret2;
                             }
+                            else if (type == MemberRefParentType.TypeRef)
+                            {
+                                var tt = mainFile.Backend.Tabels.TypeDefTabel[(int)(row2 - 1)];
+
+                                ret2.Name = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Name);
+                                ret2.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(tt.Namespace);
+                            }
                             else
                             {
                                 throw new NotImplementedException();
@@ -380,7 +387,7 @@ namespace LibDotNetParser.CILApi
                                 {
                                     foreach (var meth in item.Methods)
                                     {
-                                        if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace  && meth.Signature == sig)
+                                        if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace && meth.Signature == sig)
                                         {
                                             m = meth;
                                         }
@@ -400,7 +407,7 @@ namespace LibDotNetParser.CILApi
                                 }
                                 else
                                 {
-                                   // Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                    // Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
                                 }
                             }
 
@@ -800,7 +807,7 @@ namespace LibDotNetParser.CILApi
         private const uint MemberRefParrent_MODULEREF = 0x2;
         private const uint MemberRefParrent_METHODDEF = 0x3;
         private const uint MemberRefParrent_TYPESPEC = 0x4;
-        private static void DecodeMemberRefParent(uint index, out MemberRefParentType tableIndex, out uint row)
+        public static void DecodeMemberRefParent(uint index, out MemberRefParentType tableIndex, out uint row)
         {
             tableIndex = 0;
             switch (index & MemberRefParrent)
