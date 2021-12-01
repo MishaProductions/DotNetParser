@@ -439,6 +439,11 @@ namespace DotNetparserTester
             IHelloWorldFunction f = new HelloWorldFunction();
             f.SayHello();
             Console.WriteLine(f.HelloMessage);
+
+
+
+            var pType = typeof(Program);
+            Console.WriteLine("Type of program: "+pType.FullName);
             TestsComplete();
         }
 

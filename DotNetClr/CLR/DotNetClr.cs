@@ -639,6 +639,16 @@ namespace libDotNetClr
                         throw new Exception("Attempt to branch to null");
                     i = inst.RelPosition - 1;
                 }
+                else if (item.OpCodeName == "br")
+                {
+                    //find the ILInstruction that is in this position
+                    int i2 = item.Position + (int)item.Operand + 1;
+                    ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                    if (inst == null)
+                        throw new Exception("Attempt to branch to null");
+                    i = inst.RelPosition - 1;
+                }
                 else if (item.OpCodeName == "brfalse.s")
                 {
                     if (stack.Count == 0)
@@ -1238,35 +1248,41 @@ namespace libDotNetClr
                 #region Reflection
                 else if (item.OpCodeName == "ldtoken")
                 {
-                    var index = (int)item.Operand & 0xFF;
-                    if (index >= file.Backend.Tabels.TypeRefTabel.Count)
+                    var index = (FieldInfo)item.Operand;
+                    DotNetType t2 = null;
+                    if (index.IsInFieldTabel)
                     {
-                        index = file.Backend.Tabels.TypeRefTabel.Count;
-                    }
-                    var typeRef = file.Backend.Tabels.TypeRefTabel[index - 1];
-                    var name = file.Backend.ClrStringsStream.GetByOffset(typeRef.TypeName);
-                    var Typenamespace = file.Backend.ClrStringsStream.GetByOffset(typeRef.TypeNamespace);
-                    bool found = false;
-                    foreach (var dll in dlls)
-                    {
-                        foreach (var t in dll.Value.Types)
+                        foreach (var t in m.Parrent.File.Types)
                         {
-                            if (t.Name == name && t.NameSpace == Typenamespace)
+                            if (t.Name == index.Name && t.NameSpace == index.Namespace)
                             {
-                                var handle = CreateType("System", "RuntimeTypeHandle");
-                                WriteStringToType(handle, "_name", t.Name);
-                                WriteStringToType(handle, "_namespace", t.NameSpace);
-                                stack.Add(handle);
-                                found = true;
-                                break;
+                                t2 = t;
                             }
                         }
                     }
-                    if (!found)
+                    else
                     {
-                        clrError("Unable to resolve type: " + Typenamespace + "." + name, "CLR internal error");
+                        foreach (var dll in dlls)
+                        {
+                            foreach (var t in dll.Value.Types)
+                            {
+                                if (t.Name == index.Name && t.NameSpace == index.Namespace)
+                                {
+                                    t2 = t;
+                                }
+                            }
+                        }
+                    }
+                    if (t2 == null)
+                    {
+                        clrError("Failed to resolve token. OpCode: ldtoken", "Internal CLR error");
                         return null;
                     }
+
+                    var handle = CreateType("System", "RuntimeTypeHandle");
+                    WriteStringToType(handle, "_name", t2.Name);
+                    WriteStringToType(handle, "_namespace", t2.NameSpace);
+                    stack.Add(handle);
                 }
                 else if (item.OpCodeName == "ldftn")
                 {
@@ -1344,6 +1360,13 @@ namespace libDotNetClr
                     {
                         clrError("Failed to find target value of pointer", "internal error clr");
                     }
+                }
+                else if (item.OpCodeName == "starg.s")
+                {
+                    var val = stack[stack.Count - 1];
+                    stack[(byte)item.Operand] = val;
+
+                    stack.RemoveAt(stack.Count - 1);
                 }
                 #endregion
                 else
@@ -1511,6 +1534,7 @@ namespace libDotNetClr
             CustomList<MethodArgStack> newParms = new CustomList<MethodArgStack>();
             //Find the object that we are calling it on (if any)
             MethodArgStack objectToCallOn = null;
+            int objectToCallOnIndex = -1;
             if (!isConstructor)
             {
                 if (m2.AmountOfParms > 0)
@@ -1519,10 +1543,12 @@ namespace libDotNetClr
                     if (idx >= 0)
                     {
                         objectToCallOn = stack[idx];
+                        objectToCallOnIndex = idx;
                         //TODO: remove this hack
                         if (objectToCallOn.type != StackItemType.Object && idx != 0 && !IsSpecialType(objectToCallOn, m2))
                         {
                             objectToCallOn = stack[idx - 1];
+                            objectToCallOnIndex = idx - 1;
                         }
                     }
                 }
@@ -1537,6 +1563,7 @@ namespace libDotNetClr
                             if (itm.ObjectType == m2.Parrent)
                             {
                                 objectToCallOn = itm;
+                                objectToCallOnIndex = x;
                                 break;
                             }
                         }
@@ -1554,6 +1581,7 @@ namespace libDotNetClr
                         if (itm.ObjectType == m2.Parrent)
                         {
                             objectToCallOn = itm;
+                            objectToCallOnIndex = i;
                             break;
                         }
                     }
@@ -1636,6 +1664,10 @@ namespace libDotNetClr
             if (returnValue != null)
             {
                 stack.Add(returnValue);
+            }
+            if (objectToCallOnIndex != -1)
+            {
+                stack.RemoveAt(objectToCallOnIndex);
             }
             return true;
         }

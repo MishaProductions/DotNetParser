@@ -97,11 +97,31 @@ namespace LibDotNetParser.CILApi
                         byte s2 = code[Offset + 2];
                         byte t = code[Offset + 3];
                         byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
+                        byte[] num2 = new byte[] { fi, s2, t, 0 };
                         var numb2 = BitConverter.ToInt32(num2, 0);
+                        var info = new FieldInfo();
+                        info.IndexInTabel = numb2;
+                        if (f == 1)
+                        {
+                            // type ref
+                            var typeRef = mainFile.Backend.Tabels.TypeRefTabel[numb2 - 1];
+
+                            info.IsInFieldTabel = false;
+                            info.Name = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.TypeName);
+                            info.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.TypeNamespace);
+                        }
+                        else if (f == 2)
+                        {
+                            //type def
+                            var typeRef = mainFile.Backend.Tabels.TypeDefTabel[numb2 - 1];
+
+                            info.IsInFieldTabel = true;
+                            info.Name = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.Name);
+                            info.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.Namespace);
+                        }
 
                         ret.Size += 4;
-                        ret.Operand = numb2;
+                        ret.Operand = info;
                         return ret;
                     }
                 //8 bit int operand

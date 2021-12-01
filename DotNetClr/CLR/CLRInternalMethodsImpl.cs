@@ -49,7 +49,51 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("System_Action`4.Invoke_impl", Action4InvokeImpl);
             RegisterCustomInternalMethod("System_Action`5.Invoke_impl", Action5InvokeImpl);
             RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
+            RegisterCustomInternalMethod("InternalGetFields", InternalGetFields);
+            RegisterCustomInternalMethod("GetField", InternalGetField);
         }
+
+        private void InternalGetField(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var val = stack[stack.Count - 2];
+            var d = (ObjectValueHolder)val.value;
+            var type = (DotNetType)d.Fields["internal__type"].value;
+
+            DotNetField f = null;
+            foreach (var item in type.Fields)
+            {
+                if (item.Name == (string)Stack[0].value)
+                {
+                    f = item;
+                    break;
+                }
+            }
+            if (f == null) throw new InvalidOperationException();
+
+            var field2 = CreateType("System.Reflection", "FieldInfo");
+            WriteStringToType(field2, "_internalFieldName", f.Name);
+            returnValue = field2;
+        }
+
+
+        private void InternalGetFields(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var val = stack[stack.Count - 1];
+            var d = (ObjectValueHolder)val.value;
+            var type = (DotNetType)d.Fields["internal__type"].value;
+
+            var array = Arrays.AllocArray((int)type.Fields.Count);
+            int i = 0;
+            foreach (var item in type.Fields)
+            {
+                var field2 = CreateType("System.Reflection", "FieldInfo");
+                WriteStringToType(field2, "_internalFieldName", item.Name);
+                Arrays.ArrayRefs[array.Index].Items[i] = field2;
+                i++;
+            }
+            returnValue = new MethodArgStack() { type = StackItemType.Array, value = array.Index };
+        }
+
         private void Boolean_GetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var val = stack[stack.Count - 1];
@@ -74,7 +118,7 @@ namespace libDotNetClr
             parms.Add(Stack[4]);
             parms.Add(Stack[5]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
-            stack.RemoveRange(stack.Count - 5, 5);
+            //stack.RemoveRange(stack.Count - 5, 5);
         }
         private void Action4InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
@@ -92,7 +136,7 @@ namespace libDotNetClr
             parms.Add(Stack[3]);
             parms.Add(Stack[4]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
-            stack.RemoveRange(stack.Count - 4, 4);
+            //stack.RemoveRange(stack.Count - 4, 4);
         }
         private void Action3InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
@@ -109,7 +153,7 @@ namespace libDotNetClr
             parms.Add(Stack[2]);
             parms.Add(Stack[3]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
-            stack.RemoveRange(stack.Count - 3, 3);
+            //stack.RemoveRange(stack.Count - 3, 3);
         }
         private void Action2InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
@@ -125,7 +169,7 @@ namespace libDotNetClr
             parms.Add(Stack[1]);
             parms.Add(Stack[2]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
-            stack.RemoveRange(stack.Count - 2, 2);
+            //stack.RemoveRange(stack.Count - 2, 2);
         }
         private void Action1InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
@@ -196,6 +240,12 @@ namespace libDotNetClr
             var type = CreateType("System", "Type");
             var typeToRead = CreateType(ReadStringFromType(re, "_namespace"), ReadStringFromType(re, "_name"));
             WriteStringToType(type, "internal__fullname", typeToRead.ObjectType.FullName);
+            WriteStringToType(type, "internal__name", typeToRead.ObjectType.Name);
+            WriteStringToType(type, "internal__namespace", typeToRead.ObjectType.NameSpace);
+
+            var d = (ObjectValueHolder)type.value;
+            d.Fields.Add("internal__type", new MethodArgStack() { type = StackItemType.None, value = typeToRead.ObjectType });
+
             returnValue = type;
         }
         private void GetObjType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -209,6 +259,12 @@ namespace libDotNetClr
 
             MethodArgStack a = CreateType("System", "Type");
             WriteStringToType(a, "internal__fullname", obj.ObjectType.FullName);
+            WriteStringToType(a, "internal__name", obj.ObjectType.Name);
+            WriteStringToType(a, "internal__namespace", obj.ObjectType.NameSpace);
+
+            var d = (ObjectValueHolder)obj.value;
+            d.Fields.Add("internal__type", new MethodArgStack() { type = StackItemType.None, value = obj.ObjectType });
+
             returnValue = a;
         }
         #endregion
