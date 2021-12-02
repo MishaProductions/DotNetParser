@@ -6,7 +6,19 @@ namespace LibDotNetParser
     {
         public static readonly MethodArgStack ldnull = new MethodArgStack() { type = StackItemType.ldnull };
         public StackItemType type;
-        public object value;
+        private object _value;
+        public object value
+        {
+            get { return _value; }
+            set
+            {
+                if (type == StackItemType.Object && !(value is int))
+                {
+                    throw new System.Exception("Don't attempt to write something other than an Int32 to an object");
+                }
+                _value = value;
+            }
+        }
 
         public DotNetType ObjectType;
         public DotNetMethod ObjectContructor;

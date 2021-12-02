@@ -28,18 +28,16 @@ namespace libDotNetClr
         private MethodArgStack CreateType(DotNetType type)
         {
             //TODO: Do we need to resolve the constructor?
-            MethodArgStack a = new MethodArgStack() { ObjectContructor = null, ObjectType = type, type = StackItemType.Object, value = new ObjectValueHolder() };
+            MethodArgStack a = new MethodArgStack() { ObjectContructor = null, ObjectType = type, type = StackItemType.Object, value = Objects.AllocObject().Index };
             return a;
         }
         private void WriteStringToType(MethodArgStack objectInstance, string property, string value)
         {
-            var d = (ObjectValueHolder)objectInstance.value;
-            d.Fields.Add(property, new MethodArgStack() { type = StackItemType.String, value = value });
+            Objects.ObjectRefs[(int)objectInstance.value].Fields.Add(property, new MethodArgStack() { type = StackItemType.String, value = value });
         }
         private string ReadStringFromType(MethodArgStack objectInstance, string property)
         {
-            var d = (ObjectValueHolder)objectInstance.value;
-            return (string)d.Fields[property].value;
+            return (string)Objects.ObjectRefs[(int)objectInstance.value].Fields[property].value;
         }
     }
 }

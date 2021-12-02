@@ -978,39 +978,37 @@ namespace libDotNetClr
                         clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
-
-                    MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = new ObjectValueHolder() };
+                    var objAddr = Objects.AllocObject().Index;
+                    MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = objAddr };
 
                     //init fields
                     foreach (var f in m2.Parrent.Fields)
                     {
-                        var h = a.value as ObjectValueHolder;
                         switch (f.ValueType.type)
                         {
                             case StackItemType.String:
-                                h.Fields.Add(f.Name, MethodArgStack.Null());
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
                                 break;
                             case StackItemType.Int32:
-                                h.Fields.Add(f.Name, MethodArgStack.Int32(0));
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Int32(0));
                                 break;
                             case StackItemType.Int64:
-                                h.Fields.Add(f.Name, MethodArgStack.Int64(0));
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Int64(0));
                                 break;
                             case StackItemType.Float32:
-                                h.Fields.Add(f.Name, MethodArgStack.Float32(0));
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Float32(0));
                                 break;
                             case StackItemType.Float64:
-                                h.Fields.Add(f.Name, MethodArgStack.Float64(0));
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Float64(0));
                                 break;
                             case StackItemType.Object:
-                                h.Fields.Add(f.Name, MethodArgStack.Null());
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
                                 break;
                             case StackItemType.Array:
-                                h.Fields.Add(f.Name, MethodArgStack.Null());
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
                                 break;
                             default:
                                 throw new NotImplementedException();
-                                break;
                         }
                     }
 
@@ -1069,6 +1067,7 @@ namespace libDotNetClr
                         return null;
                     }
                     MethodArgStack obj = null;
+
                     //TODO: do we need to do this? Probably not
                     foreach (var t in stack)
                     {
@@ -1087,17 +1086,15 @@ namespace libDotNetClr
                         return null;
                     }
 
-                    var data = (ObjectValueHolder)obj.value;
+                    var data = Objects.ObjectRefs[(int)obj.value];
                     if (data.Fields.ContainsKey(f2.Name))
                     {
-                        data.Fields[f2.Name] = stack[stack.Count - 1];
+                        Objects.ObjectRefs[(int)obj.value].Fields[f2.Name] = stack[stack.Count - 1];
                     }
                     else
                     {
-                        data.Fields.Add(f2.Name, stack[stack.Count - 1]);
+                        Objects.ObjectRefs[(int)obj.value].Fields.Add(f2.Name, stack[stack.Count - 1]);
                     }
-                    obj.value = data;
-                    stack[0] = obj;
                     stack.RemoveAt(stack.Count - 1);
                 }
                 else if (item.OpCodeName == "ldfld")
@@ -1160,7 +1157,7 @@ namespace libDotNetClr
                         return null;
                     }
 
-                    var data = (ObjectValueHolder)obj.value;
+                    var data = Objects.ObjectRefs[(int)obj.value];
                     if (data.Fields.ContainsKey(f2.Name))
                     {
                         stack.Add(data.Fields[f2.Name]);
@@ -1355,7 +1352,7 @@ namespace libDotNetClr
                     }
 
                     var ptr = CreateType("System", "IntPtr");
-                    (ptr.value as ObjectValueHolder).Fields.Add("PtrToMethod", new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
+                    Objects.ObjectRefs[(int)ptr.value].Fields.Add("PtrToMethod", new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
                     stack.RemoveAt(stack.Count - 1); //remove the object
                     stack.Add(ptr);
                 }
@@ -1744,6 +1741,28 @@ namespace libDotNetClr
     {
         public MethodArgStack[] Items;
         public int Length;
+        public int Index { get; internal set; }
+    }
+
+    internal static class Objects
+    {
+        public static ObjectRef[] ObjectRefs = new ObjectRef[100];
+        private static int CurrentIndex = 0;
+        public static int GetIndexFromRef(MethodArgStack r)
+        {
+            return (int)r.value;
+        }
+        public static ObjectRef AllocObject()
+        {
+            ObjectRefs[CurrentIndex] = new ObjectRef();
+            ObjectRefs[CurrentIndex].Index = CurrentIndex;
+            CurrentIndex++;
+            return ObjectRefs[CurrentIndex - 1];
+        }
+    }
+    internal class ObjectRef
+    {
+        public Dictionary<string, MethodArgStack> Fields = new Dictionary<string, MethodArgStack>();
         public int Index { get; internal set; }
     }
 }
