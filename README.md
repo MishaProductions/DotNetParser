@@ -1,5 +1,6 @@
 # DotNetParser
-This project allows you to run .NET executables inside of C#
+This project allows you to run .NET executables inside of C#.
+Discord server: http://discord.gg/SeDrYk79W8
 
 # Will this execute my .NET Project?
 Yes, it will., but only a small amount of .NET Features are working.
