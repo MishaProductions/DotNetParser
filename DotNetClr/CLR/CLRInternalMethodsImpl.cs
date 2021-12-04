@@ -50,18 +50,18 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("System_Action`5.Invoke_impl", Action5InvokeImpl);
             RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
             RegisterCustomInternalMethod("InternalGetFields", InternalGetFields);
-            RegisterCustomInternalMethod("GetField", InternalGetField);
+            RegisterCustomInternalMethod("InternalGetField", InternalGetField);
         }
 
         private void InternalGetField(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var val = stack[stack.Count - 2];
+            var val = Stack[0];
             var type = (DotNetType)Objects.ObjectRefs[(int)val.value].Fields["internal__type"].value;
 
             DotNetField f = null;
             foreach (var item in type.Fields)
             {
-                if (item.Name == (string)Stack[0].value)
+                if (item.Name == (string)Stack[Stack.Length - 1].value)
                 {
                     f = item;
                     break;
@@ -77,7 +77,7 @@ namespace libDotNetClr
 
         private void InternalGetFields(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var val = stack[stack.Count - 1];
+            var val = Stack[0];
             var type = (DotNetType)Objects.ObjectRefs[(int)val.value].Fields["internal__type"].value;
 
             var array = Arrays.AllocArray((int)type.Fields.Count);
@@ -94,9 +94,8 @@ namespace libDotNetClr
 
         private void Boolean_GetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var val = stack[stack.Count - 1];
+            var val = Stack[0];
             returnValue = val;
-            stack.RemoveAt(stack.Count - 1);
         }
         #region Actions
         private void Action5InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -182,7 +181,6 @@ namespace libDotNetClr
             parms.Add(obj); //Is this needed?
             parms.Add(Stack[1]);
             RunMethod(toCallMethod, toCallMethod.File, parms);
-            stack.RemoveAt(stack.Count - 1);
         }
         private void ActionInvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
@@ -221,7 +219,7 @@ namespace libDotNetClr
         #region Reflection
         private void GetAssemblyFromType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var type = Stack[stack.Count - 1];
+            var type = Stack[Stack.Length - 1];
             if (type.type != StackItemType.Object) throw new InvalidOperationException();
             var dotNetType = type.ObjectType;
 
@@ -247,10 +245,10 @@ namespace libDotNetClr
         }
         private void GetObjType(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = stack[stack.Count - 1];
+            var obj = Stack[Stack.Length - 1];
 
             //TODO: Remove this hack
-            if (obj.type != StackItemType.Object) obj = stack[0];
+            if (obj.type != StackItemType.Object) obj = Stack[0];
             if (obj.type != StackItemType.Object) throw new InvalidOperationException();
             //Create the type object
 
@@ -287,7 +285,7 @@ namespace libDotNetClr
         #region Implementation for various ToString methods
         private void Internal__System_Char_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var c = stack[stack.Count - 1].value;
+            var c = Stack[Stack.Length - 1].value;
             returnValue = new MethodArgStack() { value = (int)c, type = StackItemType.Int32 };
         }
 
@@ -301,7 +299,7 @@ namespace libDotNetClr
 
         private void Internal__System_String_Get_Length(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var stringToRead = stack[stack.Count - 1];
+            var stringToRead = Stack[Stack.Length - 1];
             var str = (string)stringToRead.value;
             returnValue = new MethodArgStack() { type = StackItemType.Int32, value = str.Length };
         }
@@ -309,74 +307,74 @@ namespace libDotNetClr
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((uint)(int)stack[stack.Count - 1].value).ToString();
+            str.value = ((uint)(int)Stack[Stack.Length - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_Int32_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((int)stack[stack.Count - 1].value).ToString();
+            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_Int16_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((int)stack[stack.Count - 1].value).ToString();
+            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_UInt16_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((ushort)(int)stack[stack.Count - 1].value).ToString();
+            str.value = ((ushort)(int)Stack[Stack.Length - 1].value).ToString();
             returnValue = str;
         }
         private void Internal__System_SByte_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((sbyte)(int)stack[stack.Count - 1].value).ToString();
+            str.value = ((sbyte)(int)Stack[Stack.Length - 1].value).ToString();
             returnValue = str;
         }
         private void InternalMethod_Byte_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var str = new MethodArgStack();
             str.type = StackItemType.String;
-            str.value = ((int)stack[stack.Count - 1].value).ToString();
+            str.value = ((int)Stack[Stack.Length - 1].value).ToString();
             returnValue = str;
         }
         #endregion
         #region Console class
         private void InternalMethod_Console_Writeline(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            if (stack.Count == 0)
+            if (Stack.Length == 0)
             {
                 Console.WriteLine();
-                return;
             }
-            var s = stack[stack.Count - 1];
-            string val = "<NULL>";
-            if (s.type == StackItemType.Int32)
+            else
             {
-                val = ((int)s.value).ToString();
+                var s = Stack[0];
+                string val = "<NULL>";
+                if (s.type == StackItemType.Int32)
+                {
+                    val = ((int)s.value).ToString();
+                }
+                else if (s.type == StackItemType.Int64)
+                {
+                    val = ((long)s.value).ToString();
+                }
+                else if (s.type == StackItemType.String)
+                {
+                    val = (string)s.value;
+                }
+                Console.WriteLine(val);
             }
-            else if (s.type == StackItemType.Int64)
-            {
-                val = ((long)s.value).ToString();
-            }
-            else if (s.type == StackItemType.String)
-            {
-                val = (string)s.value;
-            }
-            Console.WriteLine(val);
         }
         private void InternalMethod_Console_Write(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            if (stack.Count == 0)
-                throw new Exception("No items on stack for Console.Write!!");
-            var s = stack[stack.Count - 1];
+            var s = Stack[0];
             string val = "<NULL>";
             if (s.type == StackItemType.Int32)
             {
@@ -415,8 +413,8 @@ namespace libDotNetClr
         }
         private void InternalMethod_String_op_Equality(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var a = stack[stack.Count - 2].value;
-            var b = stack[stack.Count - 1].value;
+            var a = Stack[0].value;
+            var b = Stack[1].value;
             string first;
             string second;
             if (a is string)
@@ -458,14 +456,14 @@ namespace libDotNetClr
         }
         private void String_ToUpper(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var str = stack[stack.Count - 1];
+            var str = Stack[0];
             if (str.type != StackItemType.String) throw new InvalidOperationException();
             var oldVal = (string)str.value;
             returnValue = MethodArgStack.String(oldVal.ToUpper());
         }
         private void String_ToLower(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var str = stack[stack.Count - 1];
+            var str = Stack[0];
             if (str.type != StackItemType.String) throw new InvalidOperationException();
             var oldVal = (string)str.value;
             returnValue = MethodArgStack.String(oldVal.ToLower());

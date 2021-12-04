@@ -8,7 +8,7 @@ namespace System
     public class Object
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern Type GetObjType();
+        private static extern Type GetObjType(System.Object a);
         public Object()
         {
             
@@ -25,7 +25,7 @@ namespace System
 
         public virtual Type GetType()
         {
-            return GetObjType();
+            return GetObjType(this);
         }
     }
 }

@@ -9,11 +9,11 @@ namespace System
     {
         public char get_Chars(int index)
         {
-            return String_get_Chars_1(index);
+            return String_get_Chars_1(this, index);
         }
         public int get_Length()
         {
-            return strLen();
+            return strLen(this);
         }
         public static bool IsNullOrEmpty(string s)
         {
@@ -27,11 +27,11 @@ namespace System
         }
         public string ToUpper()
         {
-            return String_ToUpper();
+            return String_ToUpper(this);
         }
         public string ToLower()
         {
-            return String_ToLower();
+            return String_ToLower(this);
         }
         public static bool Equals(string a, string b, StringComparison comparisonType)
         {
@@ -82,14 +82,17 @@ namespace System
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool op_Equality(string a, string b);
+
+
+
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static int strLen();
+        public extern static int strLen(System.String a);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static char String_get_Chars_1(int i);
+        public extern static char String_get_Chars_1(System.String a, int i);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string String_ToUpper();
+        public extern static string String_ToUpper(System.String a);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static string String_ToLower();
+        public extern static string String_ToLower(System.String a);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool String_EqualsOrdinalIgnoreCaseNoLengthCheck(string a, string b);
     }

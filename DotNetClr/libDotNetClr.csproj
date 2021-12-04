@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>DotNetParser</PackageId>
+    <Authors>Misha</Authors>
+    <Company>MishaProductions</Company>
+    <Product>DotNetParser</Product>
+    <Description>Allows to run C# applications in C#.</Description>
+    <RepositoryUrl>https://github.com/MishaTY/DotNetParser</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -33,14 +33,14 @@ namespace LibDotNetParser.CILApi
         {
             get
             {
-                return flags.HasFlag(TypeFlags.tdPublic);
+                return (flags & TypeFlags.tdPublic) != 0;
             }
         }
         public bool IsInterface
         {
             get
             {
-                return flags.HasFlag(TypeFlags.tdInterface);
+                return (flags & TypeFlags.tdInterface) != 0;
             }
         }
 

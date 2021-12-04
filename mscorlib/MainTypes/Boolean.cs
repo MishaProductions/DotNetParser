@@ -11,7 +11,7 @@ namespace System
     {
         public override string ToString()
         {
-            if (Boolean_GetValue())
+            if (Boolean_GetValue(this))
             {
                 return "True";
             }
@@ -21,6 +21,6 @@ namespace System
             }
         }
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern bool Boolean_GetValue();
+        public static extern bool Boolean_GetValue(Boolean a);
     }
 }

@@ -33,7 +33,7 @@ namespace TesterKernel
                 {
                     Console.WriteLine("file: " + d);
                 }
-                if (File.Exists(item.mFullPath + "DOTNETPA.EXE") | File.Exists(item.mFullPath + "DotNetparserTester.exe"))
+                if (File.Exists(item.mFullPath + "TESTAPP.DLL") | File.Exists(item.mFullPath + "dotnetparser.exe"))
                 {
                     Console.WriteLine("Found boot volume: " + item.mFullPath);
                     boot = item.mFullPath;
@@ -55,9 +55,9 @@ namespace TesterKernel
             try
             {
                 byte[] fi = TestApp.file;
-                if (File.Exists(boot + @"DOTNETPA.exe"))
+                if (File.Exists(boot + @"TESTAPP.DLL"))
                 {
-                    fi = File.ReadAllBytes(boot + @"DOTNETPA.exe");
+                    fi = File.ReadAllBytes(boot + @"TESTAPP.DLL");
                 }
                 else if (File.Exists(boot + @"DotNetparserTester.exe"))
                 {

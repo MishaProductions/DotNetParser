@@ -8,7 +8,7 @@ namespace System
     {
         public string ToString()
         {
-            return NumberFormatUtils.Internal__System_Char_ToString();
+            return NumberFormatUtils.Internal__System_Char_ToString(this);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace libDotNetClr
     /// <typeparam name="T"></typeparam>
     internal class CustomList<T>
     {
-        public List<T> backend = new List<T>();
+        public List<T> backend;
         public int Count { get { return backend.Count; } }
 
         public T this[int index]
@@ -31,6 +31,7 @@ namespace libDotNetClr
 
         public CustomList()
         {
+            backend = new List<T>();
         }
         public void Clear()
         {

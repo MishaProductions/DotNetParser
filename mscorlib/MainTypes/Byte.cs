@@ -12,7 +12,7 @@
 
         public override string ToString()
         {
-            return NumberFormatUtils.Internal__System_Byte_ToString(); //this will magicly return our value
+            return NumberFormatUtils.Internal__System_Byte_ToString(this); //this will magicly return our value
         }
     }
 }

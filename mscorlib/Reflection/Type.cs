@@ -18,25 +18,28 @@ namespace System
         }
         public Assembly get_Assembly()
         {
-            return GetAssemblyFromType();
+            return GetAssemblyFromType(this);
         }
         public FieldInfo[] GetFields()
         {
-            return InternalGetFields();
+            return InternalGetFields(this);
         }
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern FieldInfo GetField(string name);
+        public FieldInfo GetField(string s)
+        {
+            return InternalGetField(this, s);
+        }
         public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
         {
             return Type_FromRefernce(handle);
         }
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Type Type_FromRefernce(RuntimeTypeHandle handle);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Assembly GetAssemblyFromType();
+        public extern static Assembly GetAssemblyFromType(Type t);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static FieldInfo[] InternalGetFields();
-
+        public extern static FieldInfo[] InternalGetFields(Type t);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern FieldInfo InternalGetField(Type t, string name);
     }
-
 }
