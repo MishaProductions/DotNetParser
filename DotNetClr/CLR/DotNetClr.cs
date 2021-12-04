@@ -56,8 +56,9 @@ namespace libDotNetClr
 
 
         /// <summary>
-        /// Starts the .NET Executable
+        /// Runs the entry point
         /// </summary>
+        /// <param name="args">String array of arguments</param>
         public void Start(string[] args = null)
         {
             try
@@ -99,6 +100,7 @@ namespace libDotNetClr
         {
             if (InitCorLib)
                 ResolveDLL("mscorlib"); //Always resolve mscorlib, incase the exe uses .net core
+
             //Resolve all of the DLLS
             foreach (var item in file.Backend.Tabels.AssemblyRefTabel)
             {
@@ -116,8 +118,7 @@ namespace libDotNetClr
                         if (m.Name == ".cctor" && m.IsStatic)
                         {
                             Console.WriteLine("Creating " + t.FullName + "." + m.Name);
-                            RunMethod(m, file, new CustomList<MethodArgStack>());
-                            //stack.Clear();
+                            RunMethod(m, file, new CustomList<MethodArgStack>(), false);
                         }
                     }
                 }

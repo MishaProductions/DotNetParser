@@ -13,20 +13,25 @@ namespace DotNetParserRunner
         private static int NumbOfFailedTests = 0;
         static void Main()
         {
+            //This is for debugging purposes
             bool doil2cpu = false;
             string il2cpu = @"C:\Users\Misha\AppData\Roaming\Cosmos User Kit\Build\IL2CPU\IL2CPU.dll";
-            string exe = doil2cpu ? il2cpu : "TestApp.dll";//il2cpu;
+            string exe = doil2cpu ? il2cpu : "TestApp.dll";
+
+
+            //Create a new dotnetfile with the path to the EXE
             var m = new DotNetFile(exe);
 
+            //This is not needed, but this shows the IL code of the entry point
             var decompiler = new IlDecompiler(m.EntryPoint);
             Console.WriteLine("Decompile of Main function:");
-
             var ilFormater = new ILFormater(decompiler.Decompile());
             var outputString = ilFormater.Format();
-
             Console.WriteLine(outputString);
+
+            //This creates an instance of a CLR, and then runs it
             Console.WriteLine("Running program:");
-            DotNetClr clr = new DotNetClr(
+            var clr = new DotNetClr(
                 m,
                 Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location),
                 "framework"));
@@ -36,8 +41,10 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestSuccess", TestSuccess);
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
 
+            //Put arguments in the string array
             clr.Start(new string[] { "testArg" });
-            //Console.ReadLine();
+
+
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);
         }

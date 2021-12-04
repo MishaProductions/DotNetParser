@@ -15,11 +15,12 @@ namespace TesterKernel
         private static int NumbOfFailedTests = 0;
         protected override void BeforeRun()
         {
-            //Init
-            var fs = new Sys.FileSystem.CosmosVFS();
+            //Init the file system
+            var fs = new CosmosVFS();
             VFSManager.RegisterVFS(fs);
             Console.Clear();
 
+            //Find the location where we booted from
             string boot = "";
             bool frame = false;
             foreach (var item in fs.GetVolumes())
@@ -64,18 +65,6 @@ namespace TesterKernel
                     fi = File.ReadAllBytes(boot + @"DotNetparserTester.exe");
                 }
                 var fl = new DotNetFile(fi);
-
-                var decompiler = new IlDecompiler(fl.EntryPoint);
-                Console.WriteLine("Decompiltion of Main function:");
-                Console.WriteLine("");
-                Console.WriteLine(boot);
-                var ilFormater = new ILFormater(decompiler.Decompile());
-                var outputString = ilFormater.Format();
-                Console.WriteLine(outputString);
-                Console.WriteLine();
-                Console.WriteLine("Running program:");
-
-
                 var clr = new DotNetClr(fl, frame ? boot + @"framework" : boot + @"FRAMEW");
 
                 //Register our internal methods
