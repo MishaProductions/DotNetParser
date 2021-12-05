@@ -419,21 +419,20 @@ namespace DotNetparserTester
             //Console.WriteLine("List tests");
             //List<string> s = new List<string>();
             // s.Add("hi!");
-            //TODO
-            //int h = 0;
-            //TestByRef("this is correct", ref h);
-            //if (h == 0)
-            //{
-            //    TestFail("ByRef value did not change!");
-            //}
-            //else if (h == 1)
-            //{
-            //    TestSuccess("ByRef value is correct");
-            //}
-            //else
-            //{
-            //    TestFail("ByRef value is not a 1 or a 0.");
-            //}
+            int h = 0;
+            TestByRef("this is correct", ref h);
+            if (h == 0)
+            {
+                TestFail("ByRef value did not change!");
+            }
+            else if (h == 1)
+            {
+                TestSuccess("ByRef value is correct");
+            }
+            else
+            {
+                TestFail("ByRef value is not a 1 or a 0.");
+            }
 
             Console.WriteLine("Interface tests");
             IHelloWorldFunction f = new HelloWorldFunction();

@@ -1,27 +1,61 @@
 ﻿using LibDotNetParser.CILApi;
+using System.Collections.Generic;
 
 namespace LibDotNetParser
 {
     public class MethodArgStack
     {
         public static readonly MethodArgStack ldnull = new MethodArgStack() { type = StackItemType.ldnull };
-        public StackItemType type;
-        private object _value;
-        public object value
+        public StackItemType type
         {
-            get { return _value; }
+            get
+            {
+                return MethodArgStackHolder.methodArgStackVals[index].type;
+            }
             set
             {
-                if (type == StackItemType.Object && !(value is int))
-                {
-                    throw new System.Exception("Don't attempt to write something other than an Int32 to an object");
-                }
-                _value = value;
+                MethodArgStackHolder.methodArgStackVals[index].type = value;
+            }
+        }
+        public object value
+        {
+            get { return MethodArgStackHolder.methodArgStackVals[index].value; }
+            set
+            {
+                MethodArgStackHolder.methodArgStackVals[index].value = value;
             }
         }
 
-        public DotNetType ObjectType;
-        public DotNetMethod ObjectContructor;
+        public DotNetType ObjectType
+        {
+            get
+            {
+                return MethodArgStackHolder.methodArgStackVals[index].ObjectType;
+            }
+            set
+            {
+                MethodArgStackHolder.methodArgStackVals[index].ObjectType = value;
+            }
+        }
+        public DotNetMethod ObjectContructor
+        {
+            get
+            {
+                return MethodArgStackHolder.methodArgStackVals[index].ObjectContructor;
+            }
+            set
+            {
+                MethodArgStackHolder.methodArgStackVals[index].ObjectContructor = value;
+            }
+        }
+
+        private int index { get; set; }
+
+        public MethodArgStack()
+        {
+            var i = MethodArgStackHolder.AllocMethodArgStack();
+            index = i.Index;
+        }
 
         public override string ToString()
         {
@@ -86,6 +120,30 @@ namespace LibDotNetParser
         }
     }
 
+    internal class MethodArgStackHolder
+    {
+        public static List<MethodArgStackVal> methodArgStackVals = new List<MethodArgStackVal>();
+        private static int CurrentIndex;
+
+        public static MethodArgStackVal AllocMethodArgStack()
+        {
+            var a = new MethodArgStackVal();
+            a.Index = CurrentIndex;
+            methodArgStackVals.Add(a);
+            CurrentIndex++;
+
+            return a;
+        }
+    }
+    internal class MethodArgStackVal
+    {
+        public StackItemType type;
+        public object value;
+        public DotNetType ObjectType;
+        public DotNetMethod ObjectContructor;
+
+        public int Index;
+    }
     public enum StackItemType
     {
         None,

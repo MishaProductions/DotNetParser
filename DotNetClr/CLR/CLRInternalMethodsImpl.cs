@@ -51,6 +51,12 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
             RegisterCustomInternalMethod("InternalGetFields", InternalGetFields);
             RegisterCustomInternalMethod("InternalGetField", InternalGetField);
+            //RegisterCustomInternalMethod("Exists", FileExists);
+        }
+
+        private void FileExists(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            throw new NotImplementedException();
         }
 
         private void InternalGetField(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)

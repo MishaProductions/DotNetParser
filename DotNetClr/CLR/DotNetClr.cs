@@ -1342,25 +1342,9 @@ namespace libDotNetClr
                     var ptr = stack[stack.Count - 2];
                     if (ptr.type != StackItemType.Int32) throw new InvalidOperationException("Invaild pointer!");
 
-                    //Because we ignore the stack after calling the method, and remove everything from it, we need to find the value
-                    bool found = false;
-                    for (int i7 = stack.Count - 3; i7 >= 0; i7--)
-                    {
-                        var itm = stack[i7];
-                        if (itm.type == val.type && itm.value == ptr.value)
-                        {
-                            stack[i7] = val;
-                            found = true;
-                            break;
-                        }
-                    }
+                    ptr.value = val.value;
                     stack[stack.Count - 2] = val; //just in case
                     stack.RemoveAt(stack.Count - 1); //remove value
-
-                    if (!found)
-                    {
-                        clrError("Failed to find target value of pointer", "internal error clr");
-                    }
                 }
                 else if (item.OpCodeName == "starg.s")
                 {
@@ -1451,6 +1435,7 @@ namespace libDotNetClr
 
         internal bool InternalCallMethod(InlineMethodOperandData call, DotNetMethod m, bool addToCallStack, bool IsVirt, bool isConstructor, CustomList<MethodArgStack> stack, MethodArgStack constructorObj = null)
         {
+            Console.WriteLine("Executing: "+call.NameSpace+"."+call.ClassName+"."+call.FunctionName);
             MethodArgStack returnValue;
             DotNetMethod m2 = null;
             if (call.RVA != 0)
