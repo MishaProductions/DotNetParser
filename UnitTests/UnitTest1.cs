@@ -54,7 +54,7 @@ namespace UnitTests
         }
         private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var testName = (string)Stack[Stack.Length - 1].value;
+            var testName = (string)Stack[Stack.Length - 1].value; //Read the 1st argument and cast it to a string
 
             PrintWithColor("Test Success: " + testName, ConsoleColor.Green);
             NumbOfSuccesssTests++;

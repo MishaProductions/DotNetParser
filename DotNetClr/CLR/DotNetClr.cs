@@ -710,7 +710,10 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "brtrue.s")
                 {
                     if (stack[stack.Count - 1].value == null)
+                    {
+                        stack.RemoveAt(stack.Count - 1);
                         continue;
+                    }
                     bool exec = false;
                     if (stack[stack.Count - 1].type != StackItemType.Int32)
                     {
@@ -1320,7 +1323,6 @@ namespace libDotNetClr
 
                     var ptr = CreateType("System", "IntPtr");
                     Objects.ObjectRefs[(int)ptr.value].Fields.Add("PtrToMethod", new MethodArgStack() { value = m2, type = StackItemType.MethodPtr });
-                    stack.RemoveAt(stack.Count - 1); //remove the object
                     stack.Add(ptr);
                 }
                 else if (item.OpCodeName == "leave.s")
