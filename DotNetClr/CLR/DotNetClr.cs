@@ -628,13 +628,28 @@ namespace libDotNetClr
                     stack.RemoveRange(stack.Count - 2, 2);
                     if (numb1 < numb2)
                     {
-                        //push 1
-                        stack.Add(MethodArgStack.Int32(1));
+                        //find the ILInstruction that is in this position
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        i = inst.RelPosition - 1;
                     }
-                    else
+                }
+                else if (item.OpCodeName == "blt.s")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    stack.RemoveRange(stack.Count - 2, 2);
+                    if (numb1 < numb2)
                     {
-                        //push 0
-                        stack.Add(MethodArgStack.Int32(0));
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        i = inst.RelPosition - 1;
                     }
                 }
                 else if (item.OpCodeName == "bge.s")
@@ -651,6 +666,21 @@ namespace libDotNetClr
                     {
                         //push 0
                         stack.Add(MethodArgStack.Int32(0));
+                    }
+                }
+                else if (item.OpCodeName == "beq.s")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    stack.RemoveRange(stack.Count - 2, 2);
+                    if (numb1 == numb2)
+                    {
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        i = inst.RelPosition - 1;
                     }
                 }
                 #endregion
@@ -1222,6 +1252,26 @@ namespace libDotNetClr
 
                     stack.Add(Arrays.ArrayRefs[Arrays.GetIndexFromRef(array)].Items[idx]);
                 }
+                else if (item.OpCodeName == "ldelem")
+                {
+                    var index = stack[stack.Count - 1];
+                    var array = stack[stack.Count - 2];
+                    if (array.type != StackItemType.Array)
+                    {
+                        clrError("Expected array, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error"); return null;
+                    }
+                    if (index.type != StackItemType.Int32)
+                    {
+                        clrError("Expected Int32, but got something else. Fault instruction name: ldelem.ref", "Internal CLR error");
+                        return null;
+                    }
+                    var idx = (int)index.value;
+                    stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array
+
+                    var i2 = Arrays.GetIndexFromRef(array);
+                    stack.Add(Arrays.ArrayRefs[i2].Items[idx]);
+                }
                 else if (item.OpCodeName == "stelem.ref")
                 {
                     var val = stack[stack.Count - 1];
@@ -1242,9 +1292,12 @@ namespace libDotNetClr
                     var index = stack[stack.Count - 2];
                     var array = stack[stack.Count - 3];
                     //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
-                    Arrays.ArrayRefs[Arrays.GetIndexFromRef(array)].Items[(int)index.value] = val;
+                    var idx = Arrays.GetIndexFromRef(array);
+                    Arrays.ArrayRefs[idx].Items[(int)index.value] = val;
 
                     stack.RemoveAt(stack.Count - 1); //Remove value
+                    stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array ref
                 }
                 #endregion
                 #region Reflection
@@ -1435,7 +1488,6 @@ namespace libDotNetClr
 
         internal bool InternalCallMethod(InlineMethodOperandData call, DotNetMethod m, bool addToCallStack, bool IsVirt, bool isConstructor, CustomList<MethodArgStack> stack, MethodArgStack constructorObj = null)
         {
-            Console.WriteLine("Executing: "+call.NameSpace+"."+call.ClassName+"."+call.FunctionName);
             MethodArgStack returnValue;
             DotNetMethod m2 = null;
             if (call.RVA != 0)
@@ -1730,7 +1782,7 @@ namespace libDotNetClr
 
     internal static class Arrays
     {
-        public static ArrayRef[] ArrayRefs = new ArrayRef[100];
+        public static List<ArrayRef> ArrayRefs = new List<ArrayRef>();
         private static int CurrentIndex = 0;
         public static int GetIndexFromRef(MethodArgStack r)
         {
@@ -1738,10 +1790,15 @@ namespace libDotNetClr
         }
         public static ArrayRef AllocArray(int arrayLen)
         {
-            ArrayRefs[CurrentIndex] = new ArrayRef();
-            ArrayRefs[CurrentIndex].Length = arrayLen;
-            ArrayRefs[CurrentIndex].Items = new MethodArgStack[arrayLen];
-            ArrayRefs[CurrentIndex].Index = CurrentIndex;
+            var r = new ArrayRef();
+            r.Length = arrayLen;
+            r.Items = new MethodArgStack[arrayLen];
+            for (int i = 0; i < arrayLen; i++)
+            {
+                r.Items[i] = MethodArgStack.Null();
+            }
+            r.Index = CurrentIndex;
+            ArrayRefs.Add(r);
             CurrentIndex++;
             return ArrayRefs[CurrentIndex - 1];
         }

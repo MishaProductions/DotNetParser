@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-    public struct Void
+    public class Delegate
     {
     }
 }

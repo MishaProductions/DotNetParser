@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace System.Collections.Generic
+﻿namespace System.Collections.Generic
 {
     public class Dictionary<TKey, TValue>
     {
@@ -26,13 +20,13 @@ namespace System.Collections.Generic
             }
             set
             {
-                //_SetValOverwrite(key);
+                _SetVal(key, true);
             }
         }
 
-        private void _SetValOverwrite(TKey key)
+        private void _SetVal(TKey key, bool overwrite)
         {
-            Console.WriteLine("_SetValOverwrite not implemented");
+            
         }
 
         private TValue _getVal(TKey key)
@@ -41,6 +35,33 @@ namespace System.Collections.Generic
             return default(TValue);
         }
 
+        public bool TryGetValue(TKey t, out TValue v)
+        {
+            var i = FindEntry(t);
+            if (i != -1)
+            {
+                v = entries[i].value;
+                return true;
+            }
+            else
+            {
+                v = default(TValue);
+                return false;
+            }
+        }
+
+        private int FindEntry(TKey key)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var v = entries[i];
+                if (v.key.Equals(key))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
         public Dictionary() : this(0, null)
         {
 

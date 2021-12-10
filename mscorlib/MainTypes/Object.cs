@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -26,6 +23,11 @@ namespace System
         public virtual Type GetType()
         {
             return GetObjType(this);
+        }
+        public virtual bool Equals(Object obj)
+        {
+            Console.WriteLine("Object::Equals not implemented!");
+            return false;
         }
     }
 }

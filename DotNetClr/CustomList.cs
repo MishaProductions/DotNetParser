@@ -43,6 +43,8 @@ namespace libDotNetClr
         }
         public void Add(T a)
         {
+            if (a == null)
+                throw new Exception("Cannot add a null item");
             backend.Add(a);
         }
 

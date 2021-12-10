@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace System
+﻿namespace System
 {
-    class Environment
+    public static class Environment
     {
         public static int get_SystemPageSize()
         {

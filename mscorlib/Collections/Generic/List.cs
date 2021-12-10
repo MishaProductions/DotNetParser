@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -11,8 +8,6 @@ namespace System.Collections.Generic
 
         private T[] _items;
         private int _size;
-        private int _version;
-        private Object _syncRoot;
 
         static readonly T[] _emptyArray = new T[0];
         public int Count
@@ -30,15 +25,15 @@ namespace System.Collections.Generic
             else
                 _items = new T[capacity];
         }
-
-        // Adds the given object to the end of this list. The size of the list is
-        // increased by one. If required, the capacity of the list is doubled
-        // before adding the new element.
-        //
         public void Add(T item)
         {
-            _items[_size++] = item;
-            _version++;
+            List_AddItem(this, _size++, item);
         }
+        public T get_Item(int index)
+        {
+            return _items[index];
+        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void List_AddItem(List<T> array, int index, T item);
     }
 }

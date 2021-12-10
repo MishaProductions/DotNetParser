@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Runtime.CompilerServices;
 
 namespace System
 {
-    public class String
+    public sealed class String
     {
+        public int Length { get { return strLen(this); } }
+        public extern string this[int index] { get; set; }
         public char get_Chars(int index)
         {
             return String_get_Chars_1(this, index);
-        }
-        public int get_Length()
-        {
-            return strLen(this);
         }
         public static bool IsNullOrEmpty(string s)
         {
@@ -53,12 +48,15 @@ namespace System
             if (comparisonType == StringComparison.Ordinal)
                 return EqualsHelper(a, b);
 
-            if (comparisonType == StringComparison.OrdinalIgnoreCase) 
+            if (comparisonType == StringComparison.OrdinalIgnoreCase)
                 return String_EqualsOrdinalIgnoreCaseNoLengthCheck(a, b);
             Console.WriteLine("string.cs: end of flow");
             return false;
         }
-
+        public int IndexOf(char c)
+        {
+            return String_IndexOf(this, c);
+        }
         private static bool EqualsHelper(string a, string b)
         {
             if (a.Length != b.Length)
@@ -82,8 +80,14 @@ namespace System
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool op_Equality(string a, string b);
+        public static bool op_Inequality(string a, string b)
+        {
+            return !op_Equality(a, b);
+        }
 
 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static int String_IndexOf(System.String s, char c);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static int strLen(System.String a);

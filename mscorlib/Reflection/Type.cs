@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace System
 {
@@ -41,5 +38,7 @@ namespace System
         public extern static FieldInfo[] InternalGetFields(Type t);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern FieldInfo InternalGetField(Type t, string name);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern MethodInfo GetMethod(string name);
     }
 }

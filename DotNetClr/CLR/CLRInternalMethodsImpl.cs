@@ -51,7 +51,55 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
             RegisterCustomInternalMethod("InternalGetFields", InternalGetFields);
             RegisterCustomInternalMethod("InternalGetField", InternalGetField);
+            RegisterCustomInternalMethod("List_AddItem", List_AddItem);
             //RegisterCustomInternalMethod("Exists", FileExists);
+            RegisterCustomInternalMethod("String_IndexOf", String_IndexOf);
+            RegisterCustomInternalMethod("GetMethod", Type_GetMethod);
+        }
+
+        private void Type_GetMethod(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var type = (DotNetType)Objects.ObjectRefs[(int)Stack[0].value].Fields["internal__type"].value;
+            var methodName = (string)Stack[1].value;
+
+            foreach (var item in type.Methods)
+            {
+                if (item.Name == methodName)
+                {
+                    var field2 = CreateType("System.Reflection", "MethodInfo");
+                    WriteStringToType(field2, "_internalName", methodName);
+                    returnValue = field2;
+                    return;
+                }
+            }
+            returnValue = MethodArgStack.Null();
+        }
+
+        private void String_IndexOf(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = (string)Stack[0].value;
+            var c = (char)(int)Stack[1].value;
+            returnValue = MethodArgStack.Int32(str.IndexOf(c));
+        }
+
+        private void List_AddItem(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var list = Stack[0];
+            var index = Stack[1];
+            var val = Stack[2];
+            var list2 = Objects.ObjectRefs[Objects.GetIndexFromRef(list)];
+            var arr = list2.Fields["_items"];
+            var arrIdx = Arrays.GetIndexFromRef(arr);
+            var arr2 = Arrays.ArrayRefs[arrIdx].Items;
+            //Resize the array
+            Array.Resize(ref arr2, arr2.Length + 1);
+            //Set the value
+            arr2[(int)index.value] = val;
+
+            //Save everything
+            Arrays.ArrayRefs[arrIdx].Items = arr2;
+            list2.Fields["_items"].value = arrIdx;
+            Objects.ObjectRefs[Objects.GetIndexFromRef(list)] = list2;
         }
 
         private void FileExists(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -409,7 +457,7 @@ namespace libDotNetClr
             {
                 if (Stack[i].type != StackItemType.String)
                 {
-                    clrError("fatal error see InternalMethod_String_Concat method", "******BIG FATAL ERROR********");
+                    clrError("Fatal error see InternalMethod_String_Concat method (stack corruption)", "Internal CLR error");
                     return;
                 }
                 returnVal += (string)Stack[i].value;

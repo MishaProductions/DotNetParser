@@ -3,21 +3,16 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-		<IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
-		<IlcInvariantGlobalization>true</IlcInvariantGlobalization>
-		<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
-		<NoStdLib>true</NoStdLib>
-		<NoConfig>true</NoConfig>
 		<RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
-		<Optimize>true</Optimize>
-		<IlcOptimizationPreference>Size</IlcOptimizationPreference>
-		<IlcDisableReflection>true</IlcDisableReflection>
-		<IncludePal>true</IncludePal>
+		<DisableStandardFrameworkResolution>true</DisableStandardFrameworkResolution>
+		<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-		<IlcSystemModule>noruntime</IlcSystemModule>
 		<RootNamespace>System</RootNamespace>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Folder Include="Linq\" />
+	</ItemGroup>
 
 </Project>

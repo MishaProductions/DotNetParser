@@ -80,6 +80,7 @@ namespace LibDotNetParser.CILApi
                         return item;
                     }
                 }
+                throw new Exception("Target instruction not found!");
             }
             //TODO: Implment the rest of these
             switch (opCode.OpCodeOperandType)
@@ -128,21 +129,21 @@ namespace LibDotNetParser.CILApi
                 case OpCodeOperandType.ShortInlineVar:
                     {
                         byte fi = code[Offset + 1];
-                        ret.Size = +1;
+                        ret.Size += 1;
                         ret.Operand = fi;
                         return ret;
                     }
                 case OpCodeOperandType.ShortInlineBrTarget:
                     {
                         sbyte fi = (sbyte)code[Offset + 1];
-                        ret.Size = +1;
+                        ret.Size += 1;
                         ret.Operand = fi + 1;
                         return ret;
                     }
                 case OpCodeOperandType.ShortInlineI:
                     {
                         byte fi = code[Offset + 1];
-                        ret.Size = +1;
+                        ret.Size += 1;
                         ret.Operand = fi;
                         return ret;
                     }
@@ -173,7 +174,7 @@ namespace LibDotNetParser.CILApi
                         var numb2 = BitConverter.ToInt32(num2, 0);
 
                         ret.Size += 4;
-                        ret.Operand = numb2;
+                        ret.Operand = numb2 + 4; //add the size
                         return ret;
                     }
                 case OpCodeOperandType.InlineField:

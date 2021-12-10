@@ -367,22 +367,6 @@ namespace DotNetparserTester
                 TestSuccess("78 <= 76");
             }
 
-            //Console.WriteLine("Extensive array / list<string> test / gerneric test");
-            //List<string> list = new List<string>();
-            //list.Add("item 1");
-            //list.Add("item 2");
-            //list.RemoveAt(1);
-            //list.Remove("item 1");
-
-            //if(list.Count != 0)
-            //{
-            //    TestFail("List count is not zero!");
-            //}
-            //else
-            //{
-            //    TestSuccess("List count is zero");
-            //}
-
             Action<string> action = (string parm) => Console.WriteLine(parm);
             action.Invoke("hi there :)");
             Action<string, string> action2 = (string parm, string b) => Console.WriteLine(parm + b);
@@ -416,9 +400,6 @@ namespace DotNetparserTester
             Console.WriteLine("Action as argument tests");
             ActionAsMethodArgTest(new string[] { "hi", "bye" }, action, action);
             ActionAsMethodArgTest2(new string[] { "a", "b" });
-            //Console.WriteLine("List tests");
-            //List<string> s = new List<string>();
-            // s.Add("hi!");
             int h = 0;
             TestByRef("this is correct", ref h);
             if (h == 0)
@@ -442,11 +423,57 @@ namespace DotNetparserTester
 
 
             var pType = typeof(Program);
-            Console.WriteLine("Type of program: "+pType.FullName);
+            Console.WriteLine("Type of program: " + pType.FullName);
+            Console.WriteLine("List tests");
+            List<string> list = new List<string>();
+            list.Add("item 1");
+            list.Add("item 2");
+            //list.RemoveAt(1);
+            //list.Remove("item 1");
+
+            //if(list.Count != 0)
+            //{
+            //    TestFail("List count is not zero!");
+            //}
+            //else
+            //{
+            //    TestSuccess("List count is zero");
+            //}
+
+            if (list[0] == "item 1")
+            {
+                TestSuccess("Adding item to list");
+            }
+            else
+            {
+                TestFail("Adding item to list failed.");
+            }
+
+            var str3 = "AB";
+            if (str3.IndexOf('B') == 1)
+            {
+                TestSuccess("String.IndexOf() is 1");
+            }
+            else
+            {
+                TestFail("String.IndexOf() is not 1");
+            }
+            string[] strArray2 = new string[] { "Hi","i" };
+            ArrayTest(strArray2);
             TestsComplete();
         }
 
-
+        private static void ArrayTest(string[] a)
+        {
+            foreach (var item in a)
+            {
+                var s = item.IndexOf('i');
+                if (s != -1)
+                {
+                    Console.WriteLine(s);
+                }
+            }
+        }
         private static void TestByRef(string t, ref int a)
         {
             Console.WriteLine("Testing ByRef. t = " + t);

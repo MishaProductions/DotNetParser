@@ -22,6 +22,8 @@ namespace LibDotNetParser
             get { return MethodArgStackHolder.methodArgStackVals[index].value; }
             set
             {
+                if (value == null)
+                    throw new System.Exception("Cannot write null to value");
                 MethodArgStackHolder.methodArgStackVals[index].value = value;
             }
         }
