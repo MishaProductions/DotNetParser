@@ -11,8 +11,4 @@
 		<RootNamespace>System</RootNamespace>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <Folder Include="Linq\" />
-	</ItemGroup>
-
 </Project>

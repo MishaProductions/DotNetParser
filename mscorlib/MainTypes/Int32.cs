@@ -4,7 +4,7 @@
     {
         public override string ToString()
         {
-            return NumberFormatUtils.Internal__System_Int32_ToString(this);
+            return Internal.NumberFormatUtils.Internal__System_Int32_ToString(this);
         }
     }
 }

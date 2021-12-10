@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace System
+namespace System.Internal
 {
     internal class NumberFormatUtils
     {

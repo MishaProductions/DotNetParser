@@ -9,8 +9,6 @@ namespace libDotNetClr
         public override string ToString()
         {
             return method.ToString();
-            var s = "a";
-            var b = s[0];
         }
     }
 }

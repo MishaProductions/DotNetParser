@@ -4,9 +4,9 @@
     {
         private class Entry
         {
-            public int next;        // Index of next entry, -1 if last
-            public TKey key;           // Key of entry
-            public TValue value;         // Value of entry
+            public int next = 0;        // Index of next entry, -1 if last
+            public TKey key = default;           // Key of entry
+            public TValue value = default;         // Value of entry
         }
         private Entry[] entries;
         private int count = 0;
@@ -32,7 +32,7 @@
         private TValue _getVal(TKey key)
         {
             Console.WriteLine("_getVal not implemented");
-            return default(TValue);
+            return default;
         }
 
         public bool TryGetValue(TKey t, out TValue v)
@@ -45,7 +45,7 @@
             }
             else
             {
-                v = default(TValue);
+                v = default;
                 return false;
             }
         }

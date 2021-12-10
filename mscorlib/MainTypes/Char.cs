@@ -2,9 +2,9 @@
 {
     public struct Char
     {
-        public string ToString()
+        public override string ToString()
         {
-            return NumberFormatUtils.Internal__System_Char_ToString(this);
+            return Internal.NumberFormatUtils.Internal__System_Char_ToString(this);
         }
     }
 }

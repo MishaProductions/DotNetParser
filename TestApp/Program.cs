@@ -458,21 +458,7 @@ namespace DotNetparserTester
             {
                 TestFail("String.IndexOf() is not 1");
             }
-            string[] strArray2 = new string[] { "Hi","i" };
-            ArrayTest(strArray2);
             TestsComplete();
-        }
-
-        private static void ArrayTest(string[] a)
-        {
-            foreach (var item in a)
-            {
-                var s = item.IndexOf('i');
-                if (s != -1)
-                {
-                    Console.WriteLine(s);
-                }
-            }
         }
         private static void TestByRef(string t, ref int a)
         {

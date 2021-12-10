@@ -491,6 +491,36 @@ namespace libDotNetClr
                     }
                 }
                 #endregion
+                #region Ldind* opcodes
+                else if (item.OpCodeName == "ldind.u1")
+                {
+                    //TODO: implement this opcode
+                }
+                else if (item.OpCodeName == "ldind.u2")
+                {
+                    //TODO: implement this opcode
+                }
+                else if (item.OpCodeName == "ldind.u4")
+                {
+                    //TODO: implement this opcode
+                }
+                else if (item.OpCodeName == "ldind.i1")
+                {
+                    //TODO: implement this opcode
+                }
+                else if (item.OpCodeName == "ldind.i2")
+                {
+                    //TODO: implement this opcode
+                }
+                else if (item.OpCodeName == "ldind.i4")
+                {
+                    //TODO: implement this opcode
+                }
+                else if (item.OpCodeName == "ldind.i8")
+                {
+                    //TODO: implement this opcode
+                }
+                #endregion
                 #region Math
                 else if (item.OpCodeName == "add")
                 {
@@ -556,6 +586,10 @@ namespace libDotNetClr
                     {
                         Numb1 = (int)(char)numb1;
                     }
+                    else if (numb1 is null)
+                    {
+                        Numb1 = 0;
+                    }
                     else
                     {
                         clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
@@ -569,6 +603,10 @@ namespace libDotNetClr
                     else if (numb2 is char)
                     {
                         Numb2 = (int)(char)numb2;
+                    }
+                    else if (numb2 is null)
+                    {
+                        Numb2 = 0;
                     }
                     else
                     {

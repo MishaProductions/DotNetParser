@@ -6,12 +6,20 @@ namespace System
     public abstract class Type
     {
         //TODO: make this abstract
-        private string internal__fullname;
-        private string internal__name;
-        private string internal__namespace;
+        private string internal__fullname = "Error! value was never assigned.";
+        private string internal__name = "Error! value was never assigned.";
+        private string internal__namespace = "Error! value was never assigned.";
         public string get_FullName()
         {
             return internal__fullname; //Implemented in the CLR
+        }
+        public string get_Name()
+        {
+            return internal__name; //Implemented in the CLR
+        }
+        public string get_Namespace()
+        {
+            return internal__namespace; //Implemented in the CLR
         }
         public Assembly get_Assembly()
         {
