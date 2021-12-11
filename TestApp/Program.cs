@@ -260,7 +260,7 @@ namespace DotNetparserTester
                 TestFail("Int32.ToString test fail, ToString returned " + intStr + " when it should be -520000.");
             }
             //Test uint
-            var uintStr = (uint.MaxValue).ToString();
+            var uintStr = uint.MaxValue.ToString();
             if (uintStr == "4294967295")
             {
                 TestSuccess("UInt32.ToString test");
@@ -269,6 +269,28 @@ namespace DotNetparserTester
             {
                 TestFail("UInt32.ToString test fail, ToString returned " + uintStr + " when it should be 4294967295.");
             }
+            //Test ulong
+            var ulongStr = ulong.MaxValue.ToString();
+            if (ulongStr == "18446744073709551615")
+            {
+                TestSuccess("UInt64.ToString test");
+            }
+            else
+            {
+                TestFail("UInt64.ToString test fail, ToString returned " + ulongStr + " when it should be 18446744073709551615.");
+            }
+
+            //Test long
+            //var longStr = long.MinValue.ToString();
+            //if (ulongStr == "-9223372036854775808")
+            //{
+            //    TestSuccess("Int64.ToString test");
+            //}
+            //else
+            //{
+            //    TestFail("Int64.ToString test fail, ToString returned " + ulongStr + " when it should be -9223372036854775808.");
+            //}
+
 
             //Test strings
             var testString = "TEST";

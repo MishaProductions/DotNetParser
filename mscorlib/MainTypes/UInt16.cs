@@ -4,7 +4,7 @@
     {
         public override string ToString()
         {
-            return Internal.NumberFormatUtils.Internal__System_UInt16_ToString(this); //this will magicly return our value
+            return Internal.NumberFormatUtils.UInt16ToString(this); //this will magicly return our value
         }
     }
 }

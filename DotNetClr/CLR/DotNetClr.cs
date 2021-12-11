@@ -1797,6 +1797,14 @@ namespace libDotNetClr
             {
                 return true;
             }
+            if (m.Parrent.FullName == "System.UInt64" && obj.type == StackItemType.Int64)
+            {
+                return true;
+            }
+            if (m.Parrent.FullName == "System.Int64" && obj.type == StackItemType.Int64)
+            {
+                return true;
+            }
             if (m.Parrent.FullName == "System.Char" && obj.type == StackItemType.Int32)
             {
                 return true;

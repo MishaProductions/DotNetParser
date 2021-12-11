@@ -16,13 +16,17 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("Write", InternalMethod_Console_Write);
             RegisterCustomInternalMethod("Clear", InternalMethod_Console_Clear);
             RegisterCustomInternalMethod("Concat", InternalMethod_String_Concat);
-            RegisterCustomInternalMethod("Internal__System_Byte_ToString", InternalMethod_Byte_ToString);
-            RegisterCustomInternalMethod("Internal__System_SByte_ToString", Internal__System_SByte_ToString);
-            RegisterCustomInternalMethod("Internal__System_UInt16_ToString", Internal__System_UInt16_ToString);
-            RegisterCustomInternalMethod("Internal__System_Int16_ToString", Internal__System_Int16_ToString);
-            RegisterCustomInternalMethod("Internal__System_Int32_ToString", Internal__System_Int32_ToString);
-            RegisterCustomInternalMethod("Internal__System_UInt32_ToString", Internal__System_UInt32_ToString);
-            RegisterCustomInternalMethod("Internal__System_Char_ToString", Internal__System_Char_ToString);
+            RegisterCustomInternalMethod("ByteToString", InternalMethod_Byte_ToString);
+            RegisterCustomInternalMethod("SByteToString", Internal__System_SByte_ToString);
+            RegisterCustomInternalMethod("UInt16ToString", Internal__System_UInt16_ToString);
+            RegisterCustomInternalMethod("Int16ToString", Internal__System_Int16_ToString);
+            RegisterCustomInternalMethod("Int32ToString", Internal__System_Int32_ToString);
+            RegisterCustomInternalMethod("UInt32ToString", Internal__System_UInt32_ToString);
+            RegisterCustomInternalMethod("UInt64ToString", Internal__System_UInt64_ToString);
+            RegisterCustomInternalMethod("Int64ToString", Internal__System_Int64_ToString);
+            
+
+            RegisterCustomInternalMethod("CharToString", Internal__System_Char_ToString);
 
 
             RegisterCustomInternalMethod("op_Equality", InternalMethod_String_op_Equality);
@@ -356,6 +360,20 @@ namespace libDotNetClr
             var stringToRead = Stack[Stack.Length - 1];
             var str = (string)stringToRead.value;
             returnValue = new MethodArgStack() { type = StackItemType.Int32, value = str.Length };
+        }
+        private void Internal__System_Int64_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((long)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
+        }
+        private void Internal__System_UInt64_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = ((ulong)(long)Stack[Stack.Length - 1].value).ToString();
+            returnValue = str;
         }
         private void Internal__System_UInt32_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
