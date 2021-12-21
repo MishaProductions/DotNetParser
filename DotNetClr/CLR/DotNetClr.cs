@@ -464,7 +464,7 @@ namespace libDotNetClr
                 {
                     stack.Add(MethodArgStack.Int64((long)item.Operand));
                 }
-                //push float64
+                //push float32
                 else if (item.OpCodeName == "ldc.r4")
                 {
                     //Puts an float32 with value onto the arg stack
@@ -493,6 +493,11 @@ namespace libDotNetClr
                     if (numb.type == StackItemType.Int32)
                     {
                         //We don't need to do anything because it's already int32
+                    }
+                    else if (numb.type == StackItemType.Float32)
+                    {
+                        stack.RemoveAt(stack.Count - 1);
+                        stack.Add(MethodArgStack.Int32((int)(float)numb.value));
                     }
                     else
                     {

@@ -495,6 +495,17 @@ namespace DotNetparserTester
             {
                 TestFail("Float is incorrect value after adding .1");
             }
+
+            float temp = 5;
+            if ((int)temp == 5)
+            {
+                TestSuccess("float was 5");
+            }
+            else
+            {
+                TestFail("float equality failed");
+            }
+
             TestsComplete();
         }
         private static void TestByRef(string t, ref int a)
