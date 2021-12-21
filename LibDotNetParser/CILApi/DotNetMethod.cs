@@ -499,8 +499,13 @@ namespace LibDotNetParser.CILApi
                 case 0x1E:
                     //MVar
                     var num = IlDecompiler.ParseNumber(r);
-                    sig = "MVAR";
+                    sig = "T" + num;
 
+                    break;
+                case 0x20:
+                    var num2 = IlDecompiler.ParseNumber(r);
+                    IlDecompiler.DecodeTypeDefOrRef((uint)num2, out uint rowType2, out uint index2);
+                    sig = "TODO: 0x20";
                     break;
                 default:
                     throw new System.NotImplementedException("Unknown byte: 0x" + parm.ToString("X"));

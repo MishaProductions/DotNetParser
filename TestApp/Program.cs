@@ -12,15 +12,12 @@ namespace DotNetparserTester
         public Action<string> s;
         public MyObject()
         {
-            WelcomeMessage = "lol";
-            Console.WriteLine("constructor end....");
-            s = (string s) => { Console.WriteLine(s); };
+            WelcomeMessage = "Second Message";
         }
         public void Hello(string SecondMessage)
         {
             Console.WriteLine(WelcomeMessage);
             Console.WriteLine(SecondMessage);
-            s("hi from action");
         }
 
         public class SubClass

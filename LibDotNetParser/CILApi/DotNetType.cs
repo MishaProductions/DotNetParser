@@ -156,7 +156,14 @@ namespace LibDotNetParser.CILApi
                         m= file.Tabels.MethodTabel[(int)i];
                     else
                         m = file.Tabels.MethodTabel[(int)i - 1];
-                    methods.Add(new DotNetMethod(file, m, this));
+                    try
+                    {
+                        methods.Add(new DotNetMethod(file, m, this));
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("Error while creating method: " + ex);
+                    }
                 }
             }
         }

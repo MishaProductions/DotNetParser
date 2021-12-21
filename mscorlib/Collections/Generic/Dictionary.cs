@@ -66,7 +66,7 @@
         {
 
         }
-        public Dictionary(IEqualityComparer<TKey> comparer) : this(0, comparer)
+        public Dictionary(IEqualityComparer<TKey> comparer)
         {
             entries = new Entry[100];
         }

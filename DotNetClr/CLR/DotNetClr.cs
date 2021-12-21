@@ -167,7 +167,8 @@ namespace libDotNetClr
 
             else
             {
-                PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
+                if (!fileName.StartsWith("System") && fileName != "netstandard")
+                    PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
             }
             //}
             // catch (Exception x)
@@ -360,7 +361,16 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldloca.s")
                 {
                     var oldItem = Localstack[(byte)item.Operand];
-                    stack.Add(oldItem);
+
+                    if (oldItem == null)
+                    {
+                        Localstack[(byte)item.Operand] = MethodArgStack.Null();
+                        stack.Add(Localstack[(byte)item.Operand]);
+                    }
+                    else
+                    {
+                        stack.Add(oldItem);
+                    }
                 }
                 else if (item.OpCodeName == "ldloc.0")
                 {
@@ -615,7 +625,6 @@ namespace libDotNetClr
                     }
 
                     stack.RemoveRange(stack.Count - 2, 2);
-                    ;
                     if (Numb1 == Numb2)
                     {
                         //push 1
@@ -708,10 +717,79 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "beq.s")
                 {
+                    var numb1 = stack[stack.Count - 2].value;
+                    var numb2 = stack[stack.Count - 1].value;
+                    int Numb1;
+                    int Numb2;
+
+                    if (numb1 is int)
+                    {
+                        Numb1 = (int)numb1;
+                    }
+                    else if (numb1 is char)
+                    {
+                        Numb1 = (int)(char)numb1;
+                    }
+                    else if (numb1 is null)
+                    {
+                        Numb1 = 0;
+                    }
+                    else
+                    {
+                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                        return null;
+                    }
+
+                    if (numb2 is int)
+                    {
+                        Numb2 = (int)numb2;
+                    }
+                    else if (numb2 is char)
+                    {
+                        Numb2 = (int)(char)numb2;
+                    }
+                    else if (numb2 is null)
+                    {
+                        Numb2 = 0;
+                    }
+                    else
+                    {
+                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                        return null;
+                    }
+
+                    stack.RemoveRange(stack.Count - 2, 2);
+                    if (Numb1 == Numb2)
+                    {
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        i = inst.RelPosition - 1;
+                    }
+                }
+                else if (item.OpCodeName == "bne.un.s")
+                {
                     var numb1 = (int)stack[stack.Count - 2].value;
                     var numb2 = (int)stack[stack.Count - 1].value;
                     stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 == numb2)
+                    if (numb1 != numb2)
+                    {
+                        int i2 = item.Position + (int)item.Operand + 1;
+                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                        if (inst == null)
+                            throw new Exception("Attempt to branch to null");
+                        i = inst.RelPosition - 1;
+                    }
+                }
+                else if (item.OpCodeName == "ble.s")
+                {
+                    var numb1 = (int)stack[stack.Count - 2].value;
+                    var numb2 = (int)stack[stack.Count - 1].value;
+                    stack.RemoveRange(stack.Count - 2, 2);
+                    if (numb1 <= numb2)
                     {
                         int i2 = item.Position + (int)item.Operand + 1;
                         ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
