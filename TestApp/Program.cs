@@ -480,6 +480,17 @@ namespace DotNetparserTester
             {
                 TestFail("String.IndexOf() is not 1");
             }
+
+            float temp = 5;
+            if ((int)temp == 5)
+            {
+                TestSuccess("float was 5");
+            }
+            else
+            {
+                TestFail("float equality failed");
+            }
+
             TestsComplete();
         }
         private static void TestByRef(string t, ref int a)

@@ -106,7 +106,7 @@ namespace LibDotNetParser
         }
         public static MethodArgStack Float32(float value)
         {
-            return new MethodArgStack() { type = StackItemType.String, value = value };
+            return new MethodArgStack() { type = StackItemType.Float32, value = value };
         }
         public static MethodArgStack Float64(float value)
         {
