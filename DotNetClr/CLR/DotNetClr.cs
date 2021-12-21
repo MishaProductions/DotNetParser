@@ -91,6 +91,7 @@ namespace libDotNetClr
                 }
 
                 var array = Arrays.AllocArray(itms.Length);
+                array.Items = itms;
                 Startparams.Add(new MethodArgStack() { type = StackItemType.Array, value = array.Index });
             }
             CallStack.Clear();
