@@ -477,6 +477,24 @@ namespace DotNetparserTester
             {
                 TestFail("String.IndexOf() is not 1");
             }
+            float fl = 0.1f;
+            if (fl == 0.1f)
+            {
+                TestSuccess("Float is correct value");
+            }
+            else
+            {
+                TestFail("Float is incorrect value");
+            }
+            fl += 0.1f;
+            if (fl == 0.2f)
+            {
+                TestSuccess("Float is correct value after adding .1");
+            }
+            else
+            {
+                TestFail("Float is incorrect value after adding .1");
+            }
             TestsComplete();
         }
         private static void TestByRef(string t, ref int a)

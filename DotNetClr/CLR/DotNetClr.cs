@@ -536,22 +536,32 @@ namespace libDotNetClr
                 {
                     var a = stack[stack.Count - 2];
                     var b = stack[stack.Count - 1];
-                    if (a.type != StackItemType.Int32)
+                    if (a.type != StackItemType.Int32 && a.type != StackItemType.Float32)
                     {
-                        clrError("invaild datas a", "fatal stack fault");
+                        clrError("Error in add opcode: type is not int32 or float (operand 1)", "Internal CLR error");
                         return null;
                     }
-                    if (b.type != StackItemType.Int32)
+                    if (b.type != StackItemType.Int32 && b.type != StackItemType.Float32)
                     {
-                        clrError("invaild datas b", "fatal stack fault");
+                        clrError("Error in add opcode: type is not int32 or float (operand 1)", "Internal CLR error");
                         return null;
                     }
-
-                    var numb1 = (int)a.value;
-                    var numb2 = (int)b.value;
-                    var result = numb1 + numb2;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(MethodArgStack.Int32(result));
+                    if (a.type == StackItemType.Float32)
+                    {
+                        var numb1 = (float)a.value;
+                        var numb2 = (float)b.value;
+                        var result = numb1 + numb2;
+                        stack.RemoveRange(stack.Count - 2, 2);
+                        stack.Add(MethodArgStack.Float32(result));
+                    }
+                    else
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (int)b.value;
+                        var result = numb1 + numb2;
+                        stack.RemoveRange(stack.Count - 2, 2);
+                        stack.Add(MethodArgStack.Int32(result));
+                    }
                 }
                 else if (item.OpCodeName == "sub")
                 {
@@ -588,52 +598,67 @@ namespace libDotNetClr
                     int Numb1;
                     int Numb2;
 
-                    if (numb1 is int)
+                    if (numb1 is float)
                     {
-                        Numb1 = (int)numb1;
-                    }
-                    else if (numb1 is char)
-                    {
-                        Numb1 = (int)(char)numb1;
-                    }
-                    else if (numb1 is null)
-                    {
-                        Numb1 = 0;
+                        stack.RemoveRange(stack.Count - 2, 2);
+                        if ((float)numb1 == (float)numb2)
+                        {
+                            stack.Add(MethodArgStack.Int32(1));
+                        }
+                        else
+                        {
+                            stack.Add(MethodArgStack.Int32(0));
+                        }
                     }
                     else
                     {
-                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
-                        return null;
-                    }
+                        if (numb1 is int)
+                        {
+                            Numb1 = (int)numb1;
+                        }
+                        else if (numb1 is char)
+                        {
+                            Numb1 = (int)(char)numb1;
+                        }
+                        else if (numb1 is null)
+                        {
+                            Numb1 = 0;
+                        }
+                        else
+                        {
+                            clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                            return null;
+                        }
 
-                    if (numb2 is int)
-                    {
-                        Numb2 = (int)numb2;
-                    }
-                    else if (numb2 is char)
-                    {
-                        Numb2 = (int)(char)numb2;
-                    }
-                    else if (numb2 is null)
-                    {
-                        Numb2 = 0;
-                    }
-                    else
-                    {
-                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
-                        return null;
-                    }
+                        if (numb2 is int)
+                        {
+                            Numb2 = (int)numb2;
+                        }
+                        else if (numb2 is char)
+                        {
+                            Numb2 = (int)(char)numb2;
+                        }
+                        else if (numb2 is null)
+                        {
+                            Numb2 = 0;
+                        }
+                        else
+                        {
+                            clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                            return null;
+                        }
 
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (Numb1 == Numb2)
-                    {
-                        //push 1
-                        stack.Add(MethodArgStack.Int32(1));
-                    }
-                    else
-                    {
-                        //push 0
-                        stack.Add(MethodArgStack.Int32(0));
+                        stack.RemoveRange(stack.Count - 2, 2);
+                        if (Numb1 == Numb2)
+                        {
+                            //push 1
+                            stack.Add(MethodArgStack.Int32(1));
+                        }
+                        else
+                        {
+                            //push 0
+                            stack.Add(MethodArgStack.Int32(0));
+                        }
                     }
                 }
                 else if (item.OpCodeName == "cgt")
