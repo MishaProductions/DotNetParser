@@ -108,18 +108,16 @@ namespace libDotNetClr
                 ResolveDLL(fileName);
             }
             Running = true;
+
             //Call all static contructors
-            foreach (var dll in dlls)
+            foreach (var t in file.Types)
             {
-                foreach (var t in dll.Value.Types)
+                foreach (var m in t.Methods)
                 {
-                    foreach (var m in t.Methods)
+                    if (m.Name == ".cctor" && m.IsStatic)
                     {
-                        if (m.Name == ".cctor" && m.IsStatic)
-                        {
-                            Console.WriteLine("Creating " + t.FullName + "." + m.Name);
-                            RunMethod(m, file, new CustomList<MethodArgStack>(), false);
-                        }
+                        Console.WriteLine("Creating " + t.FullName + "." + m.Name);
+                        RunMethod(m, file, new CustomList<MethodArgStack>(), false);
                     }
                 }
             }
@@ -160,8 +158,8 @@ namespace libDotNetClr
             if (!string.IsNullOrEmpty(fullPath))
             {
                 var file2 = new DotNetFile(fullPath);
-                InitAssembly(file2, false);
                 dlls.Add(fileName, file2);
+                InitAssembly(file2, false);
                 PrintColor("[OK] Loaded assembly: " + fileName, ConsoleColor.Green);
             }
 
