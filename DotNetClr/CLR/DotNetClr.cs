@@ -504,6 +504,25 @@ namespace libDotNetClr
                         throw new NotImplementedException();
                     }
                 }
+                else if (item.OpCodeName == "conv.r4")
+                {
+                    if (ThrowIfStackIsZero(stack, "conv.r4")) return null;
+
+                    var numb = stack[stack.Count - 1];
+                    if (numb.type == StackItemType.Int32)
+                    {
+                        stack.RemoveAt(stack.Count - 1);
+                        stack.Add(MethodArgStack.Float32((int)numb.value));
+                    }
+                    else if (numb.type == StackItemType.Float32)
+                    {
+                        //We don't need to do anything because it's already float32
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
                 #endregion
                 #region Ldind* opcodes
                 else if (item.OpCodeName == "ldind.u1")

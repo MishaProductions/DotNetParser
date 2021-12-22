@@ -495,15 +495,24 @@ namespace DotNetparserTester
             {
                 TestFail("Float is incorrect value after adding .1");
             }
-
-            float temp = 5;
-            if ((int)temp == 5)
+            fl = 5;
+            if ((int)fl == 5)
             {
-                TestSuccess("float was 5");
+                TestSuccess("float was 5 and correctly converted from float to int");
             }
             else
             {
-                TestFail("float equality failed");
+                TestFail("float was not correctly converted to an int");
+            }
+            h = 3;
+            fl = h;
+            if ((int)fl == 3)
+            {
+                TestSuccess("float was 3 and correctly converted from int to float");
+            }
+            else
+            {
+                TestFail("float was not correctly converted from an int");
             }
 
             TestsComplete();
