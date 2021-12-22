@@ -2017,7 +2017,7 @@ namespace libDotNetClr
 
     internal static class Objects
     {
-        public static ObjectRef[] ObjectRefs = new ObjectRef[100];
+        public static List<ObjectRef> ObjectRefs = new List<ObjectRef>();
         private static int CurrentIndex = 0;
         public static int GetIndexFromRef(MethodArgStack r)
         {
@@ -2025,8 +2025,10 @@ namespace libDotNetClr
         }
         public static ObjectRef AllocObject()
         {
-            ObjectRefs[CurrentIndex] = new ObjectRef();
-            ObjectRefs[CurrentIndex].Index = CurrentIndex;
+            var r = new ObjectRef();
+            r.Index = CurrentIndex;
+            ObjectRefs.Add(r);
+
             CurrentIndex++;
             return ObjectRefs[CurrentIndex - 1];
         }
