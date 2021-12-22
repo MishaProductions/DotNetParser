@@ -1470,7 +1470,7 @@ namespace libDotNetClr
                     }
                     if (t2 == null)
                     {
-                        clrError("Failed to resolve token. OpCode: ldtoken", "Internal CLR error");
+                        clrError("Failed to resolve token. OpCode: ldtoken. Type: "+index.Namespace+"."+index.Name, "Internal CLR error");
                         return null;
                     }
 
@@ -1557,6 +1557,10 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldobj")
                 {
                     stack.Add(stack[0]);
+                }
+                else if (item.OpCodeName == "initobj")
+                {
+                    stack.Add(MethodArgStack.Null());
                 }
                 #endregion
                 else
@@ -1780,43 +1784,9 @@ namespace libDotNetClr
                     throw new Exception("An attempt was made to call a virtual method with no object");
                 }
             }
-            if (objectToCallOn != null)
+            if (objectToCallOn != null && m2.HasThis)
             {
-                if (objectToCallOn.type == StackItemType.Object | IsSpecialType(objectToCallOn, m2))
-                {
-                    bool a = true;
-
-                    if (objectToCallOn.type == StackItemType.Object)
-                    {
-                        if (objectToCallOn.ObjectType.FullName != "System.Type")
-                        {
-                            //a = true;
-                        }
-                    }
-                    else
-                    {
-                        a = true;
-                    }
-                    if (a)
-                    {
-                        if (StartParmIndex == -1)
-                        {
-                            newParms.Add(objectToCallOn);
-                        }
-                        else
-                        {
-                            if (objectToCallOn.ObjectType == m2.Parrent | objectToCallOn.ObjectType == null)
-                            {
-                                newParms.Add(objectToCallOn);
-                            }
-                            else
-                            {
-                                //if (m2.Parrent == objectToCallOn.ObjectType)
-                                // newParms.Add(objectToCallOn);
-                            }
-                        }
-                    }
-                }
+                newParms.Add(objectToCallOn);
             }
             if (isConstructor)
             {

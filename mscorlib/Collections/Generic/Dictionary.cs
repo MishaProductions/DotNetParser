@@ -26,13 +26,13 @@
 
         private void _SetVal(TKey key, bool overwrite)
         {
-            
+            Console.WriteLine("_SetVal not implemented");
         }
 
         private TValue _getVal(TKey key)
         {
-            Console.WriteLine("_getVal not implemented");
-            return default;
+            var i = FindEntry(key);
+            return entries[i].value;
         }
 
         public bool TryGetValue(TKey t, out TValue v)
@@ -68,6 +68,7 @@
         }
         public Dictionary(IEqualityComparer<TKey> comparer)
         {
+            this.comparer = comparer;
             entries = new Entry[100];
         }
         public Dictionary(int capacity, IEqualityComparer<TKey> comparer)

@@ -495,8 +495,42 @@ namespace DotNetparserTester
             {
                 TestFail("Float is incorrect value after adding .1");
             }
+
+            Func<string> func0 = GetTestMessage;
+            var val = func0();
+            if (val == "Func test")
+            {
+                TestSuccess("Func<string> works correctly");
+            }
+            else
+            {
+                TestFail("Func<string> works incorrectly");
+            }
+
+            Func<string, string> func1 = GetTestMessage2;
+            var val2 = func1("arg");
+            if (val2 == "this function has 2 args")
+            {
+                TestSuccess("Func<string, string> works correctly");
+            }
+            else
+            {
+                TestFail("Func<string, string> works incorrectly");
+            }
+
             TestsComplete();
         }
+
+        private static string GetTestMessage2(string arg)
+        {
+            return "this function has 2 " + arg + "s";
+        }
+
+        private static string GetTestMessage()
+        {
+             return "Func test";
+        }
+
         private static void TestByRef(string t, ref int a)
         {
             Console.WriteLine("Testing ByRef. t = " + t);

@@ -52,13 +52,63 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("System_Action`3.Invoke_impl", Action3InvokeImpl);
             RegisterCustomInternalMethod("System_Action`4.Invoke_impl", Action4InvokeImpl);
             RegisterCustomInternalMethod("System_Action`5.Invoke_impl", Action5InvokeImpl);
+
+            for (int i = 1; i < 10; i++)
+            {
+                RegisterCustomInternalMethod($"System_Func`{i}..ctor_impl", FuncCtorImpl);
+            }
+
+            RegisterCustomInternalMethod("System_Func`1.Invoke_impl", Func1InvokeImpl);
+            RegisterCustomInternalMethod("System_Func`2.Invoke_impl", Func2InvokeImpl);
+
             RegisterCustomInternalMethod("Boolean_GetValue", Boolean_GetValue);
             RegisterCustomInternalMethod("InternalGetFields", InternalGetFields);
             RegisterCustomInternalMethod("InternalGetField", InternalGetField);
             RegisterCustomInternalMethod("List_AddItem", List_AddItem);
-            //RegisterCustomInternalMethod("Exists", FileExists);
+            //RegisterCustomInternalMethod("File__Exists", FileExists);
             RegisterCustomInternalMethod("String_IndexOf", String_IndexOf);
             RegisterCustomInternalMethod("GetMethod", Type_GetMethod);
+        }
+
+        private void Func2InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            MethodArgStack obj = Stack[0];
+            var d = Objects.ObjectRefs[(int)obj.value];
+            if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Func");
+            var toCall = d.Fields["__internal_method"];
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
+
+            var toCallMethod = (DotNetMethod)Objects.ObjectRefs[(int)toCall.value].Fields["PtrToMethod"].value;
+            var parms = new CustomList<MethodArgStack>();
+            parms.Add(Stack[1]); //Is this needed?
+            returnValue = RunMethod(toCallMethod, toCallMethod.File, parms);
+        }
+
+        private void Func1InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            MethodArgStack obj = Stack[0];
+            var d = Objects.ObjectRefs[(int)obj.value];
+            if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Func");
+            var toCall = d.Fields["__internal_method"];
+            if (toCall.type != StackItemType.Object) throw new InvalidOperationException();
+
+            var toCallMethod = (DotNetMethod)Objects.ObjectRefs[(int)toCall.value].Fields["PtrToMethod"].value;
+            var parms = new CustomList<MethodArgStack>();
+            parms.Add(obj); //Is this needed?
+            returnValue = RunMethod(toCallMethod, toCallMethod.File, parms);
+        }
+
+        private void FuncCtorImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var theFunc = Stack[0];
+            var obj = Stack[1];
+            var methodPtr = Stack[2];
+            if (theFunc.type != StackItemType.Object) throw new InvalidOperationException();
+            if (methodPtr.type != StackItemType.Object) throw new InvalidOperationException();
+
+            //store the method in a secret field
+            var d = (int)theFunc.value;
+            Objects.ObjectRefs[d].Fields.Add("__internal_method", methodPtr);
         }
 
         private void Type_GetMethod(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -242,10 +292,8 @@ namespace libDotNetClr
         }
         private void ActionInvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var obj = Stack[Stack.Length - 1];
-            if (obj.type != StackItemType.Object) throw new InvalidOperationException();
-
-            var d = (ObjectValueHolder)obj.value;
+            MethodArgStack obj = Stack[0];
+            var d = Objects.ObjectRefs[(int)obj.value];
             if (!d.Fields.ContainsKey("__internal_method")) throw new Exception("Invaild instance of Action");
             var toCall = d.Fields["__internal_method"];
             if (toCall.type != StackItemType.MethodPtr) throw new InvalidOperationException();

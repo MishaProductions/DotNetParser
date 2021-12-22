@@ -72,6 +72,8 @@ namespace LibDotNetParser.CILApi
                 return RVA == 0;
             }
         }
+
+        public bool HasThis { get; }
         public DotNetType Parrent { get; }
         public bool HasReturnValue { get; private set; }
 
@@ -100,6 +102,7 @@ namespace LibDotNetParser.CILApi
             this.Signature = SignatureInfo.Signature;
             this.AmountOfParms = SignatureInfo.AmountOfParms;
             Parms = SignatureInfo.Params;
+            this.HasThis = SignatureInfo.HasThis;
 
             if (SignatureInfo.ReturnVal.type != StackItemType.None)
                 HasReturnValue = true;
@@ -167,6 +170,10 @@ namespace LibDotNetParser.CILApi
                 //Static method
                 sig += "static ";
                 ret.IsStatic = true;
+            }
+            if((type & 0x20) != 0)
+            {
+                ret.HasThis = true;
             }
             sig += returnVal.TypeInString;
             sig += " " + FunctionName;
@@ -521,6 +528,7 @@ namespace LibDotNetParser.CILApi
             public bool IsStatic { get; set; } = false;
             public string Signature { get; set; } = "";
             public int AmountOfParms { get; set; } = 0;
+            public bool HasThis { get; internal set; }
         }
         public class MethodSignatureParam
         {
