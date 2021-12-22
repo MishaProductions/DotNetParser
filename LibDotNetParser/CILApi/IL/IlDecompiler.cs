@@ -153,12 +153,7 @@ namespace LibDotNetParser.CILApi
                 // 32 bit int
                 case OpCodeOperandType.InlineI:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToInt32(num2, 0);
+                        var numb2 = BitConverter.ToInt32(code, Offset + 1);
 
                         ret.Size += 4;
                         ret.Operand = numb2;
@@ -166,12 +161,7 @@ namespace LibDotNetParser.CILApi
                     }
                 case OpCodeOperandType.InlineBrTarget:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToInt32(num2, 0);
+                        var numb2 = BitConverter.ToInt32(code, Offset + 1);
 
                         ret.Size += 4;
                         ret.Operand = numb2 + 4; //add the size
@@ -179,12 +169,8 @@ namespace LibDotNetParser.CILApi
                     }
                 case OpCodeOperandType.InlineField:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
                         byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2 };
-                        var numb2 = BitConverter.ToUInt16(num2, 0);
+                        var numb2 = BitConverter.ToUInt16(code, Offset + 1);
 
                         ret.Size += 4;
 
@@ -702,12 +688,7 @@ namespace LibDotNetParser.CILApi
                     }
                 case OpCodeOperandType.InlineSig:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToInt32(num2, 0);
+                        var numb2 = BitConverter.ToInt32(code, Offset + 1);
 
                         ret.Size += 4;
                         ret.Operand = numb2;
@@ -743,12 +724,7 @@ namespace LibDotNetParser.CILApi
                     throw new NotImplementedException();
                 case OpCodeOperandType.ShortInlineR:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToSingle(num2, 0);
+                        var numb2 = BitConverter.ToSingle(code, Offset + 1);
 
                         ret.Size += 4;
                         ret.Operand = numb2;
@@ -757,11 +733,6 @@ namespace LibDotNetParser.CILApi
                 case OpCodeOperandType.InlineType:
                     {
                         byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToInt32(num2, 0);
 
                         ret.Size += 4;
                         ret.Operand = fi;
@@ -770,30 +741,14 @@ namespace LibDotNetParser.CILApi
                 // 64 bit int
                 case OpCodeOperandType.InlineI8:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-                        byte a = code[Offset + 5];
-                        byte b = code[Offset + 6];
-                        byte c = code[Offset + 7];
-                        byte d = code[Offset + 8];
-
-                        byte[] num2 = new byte[] { fi, s2, t, f, a, b, c, d };
-                        var numb2 = BitConverter.ToInt64(num2, 0);
+                        var numb2 = BitConverter.ToInt64(code, Offset + 1);
                         ret.Size += 8;
                         ret.Operand = numb2;
                         return ret;
                     }
                 case OpCodeOperandType.InlineR:
                     {
-                        byte fi = code[Offset + 1];
-                        byte s2 = code[Offset + 2];
-                        byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
-
-                        byte[] num2 = new byte[] { fi, s2, t, f };
-                        var numb2 = BitConverter.ToSingle(num2, 0);
+                        var numb2 = BitConverter.ToSingle(code, Offset + 1);
                         ret.Size += 4;
                         ret.Operand = numb2;
                         return ret;
