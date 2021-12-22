@@ -302,7 +302,7 @@ namespace libDotNetClr
             var decompiler = new IlDecompiler(m);
             foreach (var item in dlls)
             {
-                decompiler.AddRefernce(item.Value);
+                decompiler.AddReference(item.Value);
             }
             var code = decompiler.Decompile();
             int i;

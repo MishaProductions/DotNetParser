@@ -35,11 +35,11 @@ namespace System
         }
         public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
         {
-            return Type_FromRefernce(handle);
+            return Type_FromReference(handle);
         }
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public extern static Type Type_FromRefernce(RuntimeTypeHandle handle);
+        public extern static Type Type_FromReference(RuntimeTypeHandle handle);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Assembly GetAssemblyFromType(Type t);
         [MethodImpl(MethodImplOptions.InternalCall)]

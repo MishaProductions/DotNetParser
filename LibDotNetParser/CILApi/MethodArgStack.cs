@@ -80,7 +80,7 @@ namespace LibDotNetParser
                 case StackItemType.Array:
                     return "Array";
                 case StackItemType.ObjectRef:
-                    return "Object refrence to " + ObjectType.FullName;
+                    return "Object reference to " + ObjectType.FullName;
                 case StackItemType.MethodPtr:
                     return "Method Pointer to " + ((DotNetMethod)value).ToString();
                 default:
