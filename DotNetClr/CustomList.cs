@@ -71,5 +71,22 @@ namespace libDotNetClr
 
         }
         public T Current { get { return backend.GetEnumerator().Current; } }
+
+        // since this data structure is being used as the type stack it is helpful to include some stack-like methods
+        public T Pop()
+        {
+            if (Count == 0) throw new InvalidOperationException("Stack empty.");
+
+            var item = backend[Count - 1];
+            backend.RemoveAt(Count - 1);
+            return item;
+        }
+
+        public T Peek()
+        {
+            if (Count == 0) throw new InvalidOperationException("Stack empty.");
+
+            return backend[Count - 1];
+        }
     }
 }
