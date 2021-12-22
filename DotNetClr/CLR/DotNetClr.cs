@@ -592,14 +592,11 @@ namespace libDotNetClr
                 {
                     if (stack.Count < 2)
                         throw new Exception("There has to be 2 or more items on the stack for ceq instruction to work!");
-                    var numb1 = stack[stack.Count - 2].value;
-                    var numb2 = stack[stack.Count - 1].value;
-                    int Numb1;
-                    int Numb2;
+                    var numb1 = stack.Pop().value;
+                    var numb2 = stack.Pop().value;
 
                     if (numb1 is float)
                     {
-                        stack.RemoveRange(stack.Count - 2, 2);
                         if ((float)numb1 == (float)numb2)
                         {
                             stack.Add(MethodArgStack.Int32(1));
@@ -611,6 +608,9 @@ namespace libDotNetClr
                     }
                     else
                     {
+                        int Numb1;
+                        int Numb2;
+
                         if (numb1 is int)
                         {
                             Numb1 = (int)numb1;
@@ -647,7 +647,6 @@ namespace libDotNetClr
                             return null;
                         }
 
-                        stack.RemoveRange(stack.Count - 2, 2);
                         if (Numb1 == Numb2)
                         {
                             //push 1
