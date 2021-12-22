@@ -34,7 +34,7 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("strLen", Internal__System_String_Get_Length);
             RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
             RegisterCustomInternalMethod("GetObjType", GetObjType);
-            RegisterCustomInternalMethod("Type_FromRefernce", GetTypeFromReference);
+            RegisterCustomInternalMethod("Type_FromReference", GetTypeFromReference);
             RegisterCustomInternalMethod("GetAssemblyFromType", GetAssemblyFromType);
             RegisterCustomInternalMethod("InternalAddItemToList", ListAddItem);
             RegisterCustomInternalMethod("String_ToUpper", String_ToUpper);

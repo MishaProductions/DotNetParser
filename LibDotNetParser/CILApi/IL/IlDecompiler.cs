@@ -21,9 +21,9 @@ namespace LibDotNetParser.CILApi
             m = method;
             mainFile = m.File;
             code = m.GetBody();
-            AddRefernce(m.Parrent.File);
+            AddReference(m.Parrent.File);
         }
-        public void AddRefernce(DotNetFile f)
+        public void AddReference(DotNetFile f)
         {
             ContextTypes.Add(f);
         }
@@ -428,7 +428,7 @@ namespace LibDotNetParser.CILApi
                                 }
                                 else
                                 {
-                                    // Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                    // Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddReference()??. Method data: {anamespace}.{typeName}.{funcName}");
                                 }
                             }
 
@@ -674,7 +674,7 @@ namespace LibDotNetParser.CILApi
                                     }
                                     else
                                     {
-                                        Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddRefernce()??. Method data: {anamespace}.{typeName}.{funcName}");
+                                        Console.WriteLine($"[ILDecompiler: WARN] Cannot resolve method RVA. Are you missing a call to AddReference()??. Method data: {anamespace}.{typeName}.{funcName}");
                                     }
                                 }
 
