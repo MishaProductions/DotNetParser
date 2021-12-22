@@ -24,7 +24,7 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("UInt32ToString", Internal__System_UInt32_ToString);
             RegisterCustomInternalMethod("UInt64ToString", Internal__System_UInt64_ToString);
             RegisterCustomInternalMethod("Int64ToString", Internal__System_Int64_ToString);
-            
+
 
             RegisterCustomInternalMethod("CharToString", Internal__System_Char_ToString);
 
@@ -67,7 +67,64 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("List_AddItem", List_AddItem);
             //RegisterCustomInternalMethod("File__Exists", FileExists);
             RegisterCustomInternalMethod("String_IndexOf", String_IndexOf);
+            RegisterCustomInternalMethod("String_EndsWith", String_EndsWith);
+            RegisterCustomInternalMethod("String_SubString", String_SubString);
+
             RegisterCustomInternalMethod("GetMethod", Type_GetMethod);
+            RegisterCustomInternalMethod("FieldInfo_SetValue", FieldInfo_SetValue);
+        }
+
+        private void FieldInfo_SetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var field = Stack[0];
+            var objToSetOn = Stack[1];
+            var value = Stack[2];
+
+            var fieldType = (DotNetType)Objects.ObjectRefs[(int)field.value].Fields["ParrentObjectID"].value;
+            var Thefield = (DotNetField)Objects.ObjectRefs[(int)field.value].Fields["InternalField"].value;
+
+            if (objToSetOn == MethodArgStack.ldnull)
+            {
+                //set on static field
+                int idx = -1;
+                foreach (var item in StaticFieldHolder.staticFields)
+                {
+                    if (item.theField == Thefield)
+                    {
+                        break;
+                    }
+                    idx++;
+                }
+
+                StaticFieldHolder.staticFields[idx].value = value;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private void String_SubString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = (string)Stack[0].value;
+            var startIndex = (int)Stack[1].value;
+            var len = (int)Stack[2].value;
+
+            returnValue = MethodArgStack.String(str.Substring(startIndex, len));
+        }
+
+        private void String_EndsWith(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var str = (string)Stack[0].value;
+            var cmp = (string)Stack[1].value;
+            if (str.EndsWith(cmp))
+            {
+                returnValue = MethodArgStack.Int32(1);
+            }
+            else
+            {
+                returnValue = MethodArgStack.Int32(0);
+            }
         }
 
         private void Func2InvokeImpl(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -178,7 +235,10 @@ namespace libDotNetClr
             if (f == null) throw new InvalidOperationException();
 
             var field2 = CreateType("System.Reflection", "FieldInfo");
-            WriteStringToType(field2, "_internalFieldName", f.Name);
+            WriteStringToType(field2, "_internalName", f.Name);
+            Objects.ObjectRefs[(int)field2.value].Fields.Add("ParrentObjectID", new MethodArgStack() { type = StackItemType.Object, value = type });
+            Objects.ObjectRefs[(int)field2.value].Fields.Add("InternalField", new MethodArgStack() { type = StackItemType.Object, value = f });
+
             returnValue = field2;
         }
 
@@ -193,7 +253,9 @@ namespace libDotNetClr
             foreach (var item in type.Fields)
             {
                 var field2 = CreateType("System.Reflection", "FieldInfo");
-                WriteStringToType(field2, "_internalFieldName", item.Name);
+                WriteStringToType(field2, "_internalName", item.Name);
+                Objects.ObjectRefs[(int)field2.value].Fields.Add("ParrentObjectID", new MethodArgStack() { type = StackItemType.Object, value = type });
+                Objects.ObjectRefs[(int)field2.value].Fields.Add("InternalField", new MethodArgStack() { type = StackItemType.Object, value = item });
                 Arrays.ArrayRefs[array.Index].Items[i] = field2;
                 i++;
             }

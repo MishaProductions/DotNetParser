@@ -1,12 +1,14 @@
-﻿namespace System.Reflection
-{
-    public class FieldInfo
-    {
-        public string _internalFieldName;
+﻿using System.Runtime.CompilerServices;
 
-        public string get_Name()
+namespace System.Reflection
+{
+    public class FieldInfo : MemberInfo
+    {
+        public void SetValue(object obj, object value)
         {
-            return _internalFieldName;
+            FieldInfo_SetValue(this, obj, value);
         }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public static extern void FieldInfo_SetValue(FieldInfo fieldInfo, object obj, object value);
     }
 }

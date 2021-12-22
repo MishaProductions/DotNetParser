@@ -932,7 +932,7 @@ namespace libDotNetClr
                         throw new Exception("Attempt to branch to null");
                     i = inst.RelPosition - 1;
                 }
-                else if (item.OpCodeName == "brfalse.s")
+                else if (item.OpCodeName == "brfalse.s" || item.OpCodeName == "brfalse")
                 {
                     if (stack.Count == 0)
                     {

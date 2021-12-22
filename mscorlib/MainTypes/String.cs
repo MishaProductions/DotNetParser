@@ -57,6 +57,15 @@ namespace System
         {
             return String_IndexOf(this, c);
         }
+        public bool EndsWith(string s)
+        {
+            return String_EndsWith(this, s);
+        }
+        public string Substring(int startIndex, int length)
+        {
+            return String_SubString(this, startIndex, length);
+        }
+
         private static bool EqualsHelper(string a, string b)
         {
             if (a.Length != b.Length)
@@ -97,6 +106,12 @@ namespace System
         public extern static string String_ToUpper(System.String a);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static string String_ToLower(System.String a);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static bool String_EndsWith(string instance, string b);
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern static string String_SubString(string instance, int startIndex, int length);
+        
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static bool String_EqualsOrdinalIgnoreCaseNoLengthCheck(string a, string b);
     }
