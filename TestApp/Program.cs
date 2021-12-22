@@ -563,8 +563,29 @@ namespace DotNetparserTester
             {
                 TestFail("float was not correctly converted from an int");
             }
+            i = 7;
+            TestAssert((i % 3) == 1, "int32 modulus");
+            fl = 2.5f;
+            TestAssert((fl % 1f) == 0.5f, "float32 modulus");
+            i = 0x12345678;
+            i2 = 0x00ff00ff;
+            TestAssert((i & i2) == 0x00340078, "int32 bitwise and");
+            i = 0x12345678;
+            i2 = 0x0f0f0f0f;
+            TestAssert((i | i2) == 0x1f3f5f7f, "int32 bitwise or");
+            i = 0x12345678;
+            i2 = 0x0a0a0a0a;
+            TestAssert((i ^ i2) == 0x183E5C72, "int32 bitwise xor");
+            uint ui = 0x12345678;
+            TestAssert(~ui == 0xEDCBA987, "uint32 bitwise not");
 
             TestsComplete();
+        }
+
+        private static void TestAssert(bool test, string info)
+        {
+            if (test) TestSuccess($"{info} works correctly");
+            else TestFail($"{info} works incorrectly");
         }
 
         private static string GetTestMessage2(string arg)
