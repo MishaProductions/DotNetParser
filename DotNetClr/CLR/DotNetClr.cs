@@ -559,14 +559,15 @@ namespace libDotNetClr
                 {
                     var a = stack[stack.Count - 2];
                     var b = stack[stack.Count - 1];
+                    stack.RemoveRange(stack.Count - 2, 2);
                     if (a.type != StackItemType.Int32 && a.type != StackItemType.Float32)
                     {
-                        clrError("Error in add opcode: type is not int32 or float (operand 1)", "Internal CLR error");
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 1)", "Internal CLR error");
                         return null;
                     }
                     if (b.type != StackItemType.Int32 && b.type != StackItemType.Float32)
                     {
-                        clrError("Error in add opcode: type is not int32 or float (operand 1)", "Internal CLR error");
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 2)", "Internal CLR error");
                         return null;
                     }
                     if (a.type == StackItemType.Float32)
@@ -574,7 +575,6 @@ namespace libDotNetClr
                         var numb1 = (float)a.value;
                         var numb2 = (float)b.value;
                         var result = numb1 + numb2;
-                        stack.RemoveRange(stack.Count - 2, 2);
                         stack.Add(MethodArgStack.Float32(result));
                     }
                     else
@@ -582,35 +582,99 @@ namespace libDotNetClr
                         var numb1 = (int)a.value;
                         var numb2 = (int)b.value;
                         var result = numb1 + numb2;
-                        stack.RemoveRange(stack.Count - 2, 2);
                         stack.Add(MethodArgStack.Int32(result));
                     }
                 }
                 else if (item.OpCodeName == "sub")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    var result = numb1 - numb2;
+                    var a = stack[stack.Count - 2];
+                    var b = stack[stack.Count - 1];
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(MethodArgStack.Int32(result));
+                    if (a.type != StackItemType.Int32 && a.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 1)", "Internal CLR error");
+                        return null;
+                    }
+                    if (b.type != StackItemType.Int32 && b.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 2)", "Internal CLR error");
+                        return null;
+                    }
+                    if (a.type == StackItemType.Float32)
+                    {
+                        var numb1 = (float)a.value;
+                        var numb2 = (float)b.value;
+                        var result = numb1 - numb2;
+                        stack.Add(MethodArgStack.Float32(result));
+                    }
+                    else
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (int)b.value;
+                        var result = numb1 - numb2;
+                        stack.Add(MethodArgStack.Int32(result));
+                    }
                 }
                 else if (item.OpCodeName == "div")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-
-                    //TODO: Check if dividing by zero
-                    var result = numb1 / numb2;
+                    var a = stack[stack.Count - 2];
+                    var b = stack[stack.Count - 1];
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(MethodArgStack.Int32(result));
+                    //TODO: Check if dividing by zero
+                    if (a.type != StackItemType.Int32 && a.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 1)", "Internal CLR error");
+                        return null;
+                    }
+                    if (b.type != StackItemType.Int32 && b.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 2)", "Internal CLR error");
+                        return null;
+                    }
+                    if (a.type == StackItemType.Float32)
+                    {
+                        var numb1 = (float)a.value;
+                        var numb2 = (float)b.value;
+                        var result = numb1 / numb2;
+                        stack.Add(MethodArgStack.Float32(result));
+                    }
+                    else
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (int)b.value;
+                        var result = numb1 / numb2;
+                        stack.Add(MethodArgStack.Int32(result));
+                    }
                 }
                 else if (item.OpCodeName == "mul")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    var result = numb1 * numb2;
+                    var a = stack[stack.Count - 2];
+                    var b = stack[stack.Count - 1];
                     stack.RemoveRange(stack.Count - 2, 2);
-                    stack.Add(MethodArgStack.Int32(result));
+                    if (a.type != StackItemType.Int32 && a.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 1)", "Internal CLR error");
+                        return null;
+                    }
+                    if (b.type != StackItemType.Int32 && b.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 2)", "Internal CLR error");
+                        return null;
+                    }
+                    if (a.type == StackItemType.Float32)
+                    {
+                        var numb1 = (float)a.value;
+                        var numb2 = (float)b.value;
+                        var result = numb1 * numb2;
+                        stack.Add(MethodArgStack.Float32(result));
+                    }
+                    else
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (int)b.value;
+                        var result = numb1 * numb2;
+                        stack.Add(MethodArgStack.Int32(result));
+                    }
                 }
                 else if (item.OpCodeName == "ceq")
                 {
