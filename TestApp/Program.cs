@@ -495,7 +495,6 @@ namespace DotNetparserTester
             {
                 TestFail("Float is incorrect value after adding .1");
             }
-
             Func<string> func0 = GetTestMessage;
             var val = func0();
             if (val == "Func test")
@@ -516,6 +515,53 @@ namespace DotNetparserTester
             else
             {
                 TestFail("Func<string, string> works incorrectly");
+            }
+            fl -= 0.2f;
+            if (fl == 0)
+            {
+                TestSuccess("Float is correct value after subtracting .2");
+            }
+            else
+            {
+                TestFail("Float is incorrect value after subtracting .2");
+            }
+            fl = 2.5f;
+            fl *= 2;
+            if (fl == 5)
+            {
+                TestSuccess("Float is correct value after multiplying 2.5f*2");
+            }
+            else
+            {
+                TestFail("Float is incorrect value after multiplying 2.5f*2");
+            }
+            fl /= 2.5f;
+            if (fl == 2)
+            {
+                TestSuccess("Float is correct value after dividing by 2.5f");
+            }
+            else
+            {
+                TestFail("Float is incorrect value after dividing by 2.5f");
+            }
+            fl = 5;
+            if ((int)fl == 5)
+            {
+                TestSuccess("float was 5 and correctly converted from float to int");
+            }
+            else
+            {
+                TestFail("float was not correctly converted to an int");
+            }
+            h = 3;
+            fl = h;
+            if ((int)fl == 3)
+            {
+                TestSuccess("float was 3 and correctly converted from int to float");
+            }
+            else
+            {
+                TestFail("float was not correctly converted from an int");
             }
 
             TestsComplete();
