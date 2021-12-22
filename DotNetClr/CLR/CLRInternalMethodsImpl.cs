@@ -34,7 +34,7 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("strLen", Internal__System_String_Get_Length);
             RegisterCustomInternalMethod("String_get_Chars_1", Internal__System_String_get_Chars_1);
             RegisterCustomInternalMethod("GetObjType", GetObjType);
-            RegisterCustomInternalMethod("Type_FromRefernce", GetTypeFromRefrence);
+            RegisterCustomInternalMethod("Type_FromRefernce", GetTypeFromReference);
             RegisterCustomInternalMethod("GetAssemblyFromType", GetAssemblyFromType);
             RegisterCustomInternalMethod("InternalAddItemToList", ListAddItem);
             RegisterCustomInternalMethod("String_ToUpper", String_ToUpper);
@@ -334,7 +334,7 @@ namespace libDotNetClr
 
             returnValue = assembly;
         }
-        private void GetTypeFromRefrence(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        private void GetTypeFromReference(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var re = Stack[Stack.Length - 1];
             if (re.type != StackItemType.Object) throw new InvalidOperationException();
