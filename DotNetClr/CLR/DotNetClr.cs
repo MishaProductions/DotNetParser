@@ -676,6 +676,98 @@ namespace libDotNetClr
                         stack.Add(MethodArgStack.Int32(result));
                     }
                 }
+                else if (item.OpCodeName == "rem")
+                {
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    if (a.type != StackItemType.Int32 && a.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 1)", "Internal CLR error");
+                        return null;
+                    }
+                    if (b.type != StackItemType.Int32 && b.type != StackItemType.Float32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32 or float (operand 2)", "Internal CLR error");
+                        return null;
+                    }
+                    if (a.type == StackItemType.Float32)
+                    {
+                        var numb1 = (float)a.value;
+                        var numb2 = (float)b.value;
+                        var result = numb2 % numb1;
+                        stack.Add(MethodArgStack.Float32(result));
+                    }
+                    else
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (int)b.value;
+                        var result = numb2 % numb1;
+                        stack.Add(MethodArgStack.Int32(result));
+                    }
+                }
+                else if (item.OpCodeName == "and")
+                {
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    if (a.type != StackItemType.Int32 || b.type != StackItemType.Int32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var numb2 = (int)b.value;
+                    var result = numb1 & numb2;
+                    stack.Add(MethodArgStack.Int32(result));
+                }
+                else if (item.OpCodeName == "or")
+                {
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    if (a.type != StackItemType.Int32 || b.type != StackItemType.Int32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var numb2 = (int)b.value;
+                    var result = numb1 | numb2;
+                    stack.Add(MethodArgStack.Int32(result));
+                }
+                else if (item.OpCodeName == "xor")
+                {
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    if (a.type != StackItemType.Int32 || b.type != StackItemType.Int32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var numb2 = (int)b.value;
+                    var result = numb1 ^ numb2;
+                    stack.Add(MethodArgStack.Int32(result));
+                }
+                else if (item.OpCodeName == "not")
+                {
+                    var a = stack.Pop();
+
+                    if (a.type != StackItemType.Int32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var result = ~numb1;
+                    stack.Add(MethodArgStack.Int32(result));
+                }
                 else if (item.OpCodeName == "ceq")
                 {
                     if (stack.Count < 2)
@@ -1557,7 +1649,7 @@ namespace libDotNetClr
                     }
                     if (t2 == null)
                     {
-                        clrError("Failed to resolve token. OpCode: ldtoken. Type: "+index.Namespace+"."+index.Name, "Internal CLR error");
+                        clrError("Failed to resolve token. OpCode: ldtoken. Type: " + index.Namespace + "." + index.Name, "Internal CLR error");
                         return null;
                     }
 
