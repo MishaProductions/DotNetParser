@@ -473,15 +473,8 @@ namespace libDotNetClr
                 //Push float64
                 else if (item.OpCodeName == "ldc.r8")
                 {
-                    //Puts an float32 with value onto the arg stack
-                    if (item.Operand is float)
-                    {
-                        stack.Add(MethodArgStack.Float64((float)item.Operand));
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    //Puts an float64 with value onto the arg stack
+                    stack.Add(MethodArgStack.Float64((double)item.Operand));
                 }
                 #endregion
                 #region conv* opcodes
