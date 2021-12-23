@@ -754,6 +754,38 @@ namespace libDotNetClr
                     var result = numb1 ^ numb2;
                     stack.Add(MethodArgStack.Int32(result));
                 }
+                else if (item.OpCodeName == "shl")
+                {
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    if (a.type != StackItemType.Int32 || b.type != StackItemType.Int32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var numb2 = (int)b.value;
+                    var result = numb2 << numb1;
+                    stack.Add(MethodArgStack.Int32(result));
+                }
+                else if (item.OpCodeName == "shr")
+                {
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    if (a.type != StackItemType.Int32 || b.type != StackItemType.Int32)
+                    {
+                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
+                        return null;
+                    }
+
+                    var numb1 = (int)a.value;
+                    var numb2 = (int)b.value;
+                    var result = numb2 >> numb1;
+                    stack.Add(MethodArgStack.Int32(result));
+                }
                 else if (item.OpCodeName == "not")
                 {
                     var a = stack.Pop();
