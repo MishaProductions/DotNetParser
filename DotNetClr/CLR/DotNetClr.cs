@@ -649,22 +649,17 @@ namespace libDotNetClr
                 {
                     if (stack.Count < 2)
                         throw new Exception("There has to be 2 or more items on the stack for ceq instruction to work!");
-                    var numb1 = stack.Pop().value;
-                    var numb2 = stack.Pop().value;
+                    var a = stack.Pop();
+                    var b = stack.Pop();
 
-                    if (numb1 is float)
+                    if (a.type == b.type && a.type != StackItemType.Int32)
                     {
-                        if ((float)numb1 == (float)numb2)
-                        {
-                            stack.Add(MethodArgStack.Int32(1));
-                        }
-                        else
-                        {
-                            stack.Add(MethodArgStack.Int32(0));
-                        }
+                        stack.Add(MathOperations.Op(a, b, MathOperations.Operation.Equality));
                     }
                     else
                     {
+                        var numb1 = a.value;
+                        var numb2 = b.value;
                         int Numb1;
                         int Numb2;
 
