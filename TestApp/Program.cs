@@ -578,6 +578,10 @@ namespace DotNetparserTester
             TestAssert((i ^ i2) == 0x183E5C72, "int32 bitwise xor");
             uint ui = 0x12345678;
             TestAssert(~ui == 0xEDCBA987, "uint32 bitwise not");
+            i = 0x12345678;
+            TestAssert((i >> 4) == 0x01234567, "int32 shift right");
+            i = 0x12345678;
+            TestAssert((i << 4) == 0x23456780, "int32 shift left");
 
             TestsComplete();
         }
