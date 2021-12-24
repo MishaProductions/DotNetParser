@@ -5,8 +5,8 @@
         private class Entry
         {
             public int next = 0;        // Index of next entry, -1 if last
-            public TKey key = default;           // Key of entry
-            public TValue value = default;         // Value of entry
+            public TKey key;           // Key of entry
+            public TValue value;         // Value of entry
         }
         private Entry[] entries;
         private int count = 0;
@@ -20,13 +20,34 @@
             }
             set
             {
-                _SetVal(key, true);
+                _SetVal(key, value, true);
             }
         }
 
-        private void _SetVal(TKey key, bool overwrite)
+        private void _SetVal(TKey key, TValue value, bool overwrite)
         {
-            Console.WriteLine("_SetVal not implemented");
+            if (overwrite)
+            {
+                var i = FindEntry(key);
+                if (i != -1)
+                {
+                    entries[i].value = value;
+                }
+                else
+                {
+                    Console.WriteLine("Cannot find target entry");
+                }
+            }
+            else
+            {
+                Console.WriteLine("_SetVal non overwrite");
+                var e = new Entry();
+                e.value = value;
+                e.key = key;
+                
+                entries[count] = e;
+                count++;
+            }
         }
 
         private TValue _getVal(TKey key)
@@ -49,13 +70,17 @@
                 return false;
             }
         }
+        public void Add(TKey t, TValue v)
+        {
+            _SetVal(t, v, false);
+        }
 
         private int FindEntry(TKey key)
         {
             for (int i = 0; i < count; i++)
             {
                 var v = entries[i];
-                if (v.key.Equals(key))
+                if (object.GetObjectInstanceID(v.key) == object.GetObjectInstanceID(key))
                 {
                     return i;
                 }
@@ -64,7 +89,7 @@
         }
         public Dictionary() : this(0, null)
         {
-
+            entries = new Entry[100];
         }
         public Dictionary(IEqualityComparer<TKey> comparer)
         {

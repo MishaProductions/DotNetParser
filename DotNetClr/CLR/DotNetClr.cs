@@ -1258,6 +1258,9 @@ namespace libDotNetClr
                             case StackItemType.Array:
                                 Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
                                 break;
+                            case StackItemType.Any:
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
+                                break;
                             default:
                                 throw new NotImplementedException();
                         }
@@ -1557,7 +1560,7 @@ namespace libDotNetClr
                     }
                     if (t2 == null)
                     {
-                        clrError("Failed to resolve token. OpCode: ldtoken. Type: "+index.Namespace+"."+index.Name, "Internal CLR error");
+                        clrError("Failed to resolve token. OpCode: ldtoken. Type: " + index.Namespace + "." + index.Name, "Internal CLR error");
                         return null;
                     }
 
@@ -1648,6 +1651,35 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "initobj")
                 {
                     stack.Add(MethodArgStack.Null());
+                }
+                else if (item.OpCodeName == "ldflda")
+                {
+                    var obj = stack.Pop();
+                    var type = obj.ObjectType;
+                    var fld = (FieldInfo)item.Operand;
+                    if (fld.Name == null)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    DotNetField theField = null;
+                    int idx = 0;
+                    foreach (var f in type.Fields)
+                    {
+                        if (f.Name == fld.Name)
+                        {
+                            theField = f;
+                        }
+                        idx++;
+                    }
+                    if (theField == null)
+                        throw new NotImplementedException();
+
+
+                    stack.Add(MethodArgStack.Int32(idx));
+                }
+                else if (item.OpCodeName == "box")
+                {
+                    ;
                 }
                 #endregion
                 else
