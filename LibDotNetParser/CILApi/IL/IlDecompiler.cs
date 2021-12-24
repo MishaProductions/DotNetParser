@@ -748,8 +748,8 @@ namespace LibDotNetParser.CILApi
                     }
                 case OpCodeOperandType.InlineR:
                     {
-                        var numb2 = BitConverter.ToSingle(code, Offset + 1);
-                        ret.Size += 4;
+                        var numb2 = BitConverter.ToDouble(code, Offset + 1);
+                        ret.Size += 8;
                         ret.Operand = numb2;
                         return ret;
                     }
