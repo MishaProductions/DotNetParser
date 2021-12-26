@@ -149,17 +149,26 @@ namespace LibDotNetParser
     public enum StackItemType
     {
         None,
-        String,
+        Boolean,
+        Char,
+        SByte,
+        Byte,
+        Int16,
+        UInt16,
         Int32,
+        UInt32,
         Int64,
-        ldnull,
+        UInt64,
         Float32,
         Float64,
+        String,
+        ldnull,
         Object,
         Array,
         ObjectRef,
         MethodPtr,
         IntPtr,
+        UIntPtr,
         Any
     }
 }

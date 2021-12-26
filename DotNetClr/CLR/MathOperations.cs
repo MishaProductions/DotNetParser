@@ -19,8 +19,25 @@ namespace libDotNetClr
             Equality
         }
 
+        private static MethodArgStack ConvertToInt32(MethodArgStack arg)
+        {
+            switch (arg.type)
+            {
+                case StackItemType.Int32: return arg;
+                case StackItemType.Char: return MethodArgStack.Int32((int)(char)arg.value);
+                default: throw new Exception("Unsupported type conversion");
+            }
+        }
+
         public static MethodArgStack Op(MethodArgStack arg1, MethodArgStack arg2, Operation op)
         {
+            if (arg1.type == StackItemType.Int32 || arg2.type == StackItemType.Int32)
+            {
+                // int32 is a special case where types such as 'char' and 'boolean' can be converted to an int32 implicitely
+                arg1 = ConvertToInt32(arg1);
+                arg2 = ConvertToInt32(arg2);
+            }
+
             if (arg1.type != arg2.type) throw new Exception("Inconsistent type definitions");
 
             switch (arg1.type)
