@@ -89,7 +89,7 @@ namespace LibDotNetParser.CILApi
                 {
                     if (m2.BackendTabel == peFile.Tabels.MethodTabel[(int)entryPoint - 1])
                     {
-                        entryType = m2.Parrent;
+                        entryType = m2.Parent;
                         entryMethod = m2;
                         break;
                     }

@@ -74,7 +74,7 @@ namespace LibDotNetParser.CILApi
         }
 
         public bool HasThis { get; }
-        public DotNetType Parrent { get; }
+        public DotNetType Parent { get; }
         public bool HasReturnValue { get; private set; }
 
         public MethodSignatureInfoV2 SignatureInfo { get; }
@@ -90,7 +90,7 @@ namespace LibDotNetParser.CILApi
         {
             this.file = file;
             this.BackendTabel = item;
-            this.Parrent = parrent;
+            this.Parent = parrent;
             this.flags = (MethodAttr)item.Flags;
             this.implFlags = (MethodImp)item.ImplFlags;
             this.file2 = parrent.File;
@@ -193,7 +193,7 @@ namespace LibDotNetParser.CILApi
         }
         public override string ToString()
         {
-            return $"{Name} in {Parrent.FullName}";
+            return $"{Name} in {Parent.FullName}";
         }
         internal static MethodSignatureParam ReadParam(BinaryReader r, DotNetFile file)
         {
@@ -218,37 +218,37 @@ namespace LibDotNetParser.CILApi
                 case 0x02:
                     {
                         sig = "bool";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Boolean;
                         break;
                     }
                 case 0x03:
                     {
                         sig = "char";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Char;
                         break;
                     }
                 case 0x04:
                     {
                         sig = "sbyte";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.SByte;
                         break;
                     }
                 case 0x05:
                     {
                         sig = "byte";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Byte;
                         break;
                     }
                 case 0x06:
                     {
                         sig = "short";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Int16;
                         break;
                     }
                 case 0x07:
                     {
                         sig = "ushort";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.UInt16;
                         break;
                     }
                 case 0x08:
@@ -260,7 +260,7 @@ namespace LibDotNetParser.CILApi
                 case 0x09:
                     {
                         sig = "uint";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.UInt32;
                         break;
                     }
                 case 0x0A:
@@ -272,7 +272,7 @@ namespace LibDotNetParser.CILApi
                 case 0x0B:
                     {
                         sig = "ulong";
-                        ret.type = StackItemType.Int64;
+                        ret.type = StackItemType.UInt64;
                         break;
                     }
                 case 0x0C:
@@ -473,14 +473,14 @@ namespace LibDotNetParser.CILApi
                     {
                         //IntPtr
                         sig = "IntPtr";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.IntPtr;
                         break;
                     }
                 case 0x19:
                     {
                         //UIntPtr
                         sig = "UIntPtr";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.UIntPtr;
                         break;
                     }
                 case 0x1B:

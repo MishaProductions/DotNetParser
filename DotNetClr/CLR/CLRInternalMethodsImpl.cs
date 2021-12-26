@@ -462,7 +462,7 @@ namespace libDotNetClr
             var str = (string)Stack[0].value;
             var index = (int)Stack[1].value;
 
-            returnValue = new MethodArgStack() { type = StackItemType.String, value = str[index] };
+            returnValue = new MethodArgStack() { type = StackItemType.Char, value = str[index] };
         }
 
         private void Internal__System_String_Get_Length(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
