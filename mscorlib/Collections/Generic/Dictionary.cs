@@ -80,7 +80,7 @@
             for (int i = 0; i < count; i++)
             {
                 var v = entries[i];
-                if (object.GetObjectInstanceID(v.key) == object.GetObjectInstanceID(key))
+                if (key.Equals(v.key))
                 {
                     return i;
                 }
