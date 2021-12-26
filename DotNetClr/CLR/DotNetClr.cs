@@ -187,7 +187,7 @@ namespace libDotNetClr
         private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file, CustomList<MethodArgStack> parms, bool addToCallStack = true)
         {
             CustomList<MethodArgStack> stack = new CustomList<MethodArgStack>();
-            if (m.Name == ".ctor" && m.Parrent.FullName == "System.Object")
+            if (m.Name == ".ctor" && m.Parent.FullName == "System.Object")
                 return null;
             if (!Running)
                 return null;
@@ -198,7 +198,7 @@ namespace libDotNetClr
                 string properName = m.Name;
                 if (m.IsImplementedByRuntime)
                 {
-                    properName = m.Parrent.FullName.Replace(".", "_") + "." + m.Name + "_impl";
+                    properName = m.Parent.FullName.Replace(".", "_") + "." + m.Name + "_impl";
                 }
                 foreach (var item in CustomInternalMethods)
                 {
@@ -287,7 +287,7 @@ namespace libDotNetClr
             }
             else if (m.RVA == 0)
             {
-                clrError($"Cannot find the method body for {m.Parrent.FullName}.{m.Name}", "System.Exception");
+                clrError($"Cannot find the method body for {m.Parent.FullName}.{m.Name}", "System.Exception");
                 return null;
             }
             #endregion
@@ -1029,7 +1029,7 @@ namespace libDotNetClr
                     //get value from static field
                     DotNetField f2 = null;
                     FieldInfo info = item.Operand as FieldInfo;
-                    foreach (var f in m.Parrent.File.Types)
+                    foreach (var f in m.Parent.File.Types)
                     {
                         foreach (var tttt in f.Fields)
                         {
@@ -1088,7 +1088,7 @@ namespace libDotNetClr
                     FieldInfo info = item.Operand as FieldInfo;
                     //write value to field.
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.File.Types)
+                    foreach (var f in m.Parent.File.Types)
                     {
                         foreach (var tttt in f.Fields)
                         {
@@ -1226,10 +1226,10 @@ namespace libDotNetClr
                         return null;
                     }
                     var objAddr = Objects.AllocObject().Index;
-                    MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parrent, type = StackItemType.Object, value = objAddr };
+                    MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parent, type = StackItemType.Object, value = objAddr };
 
                     //init fields
-                    foreach (var f in m2.Parrent.Fields)
+                    foreach (var f in m2.Parent.Fields)
                     {
                         switch (f.ValueType.type)
                         {
@@ -1276,7 +1276,7 @@ namespace libDotNetClr
                     //write value to field.
                     FieldInfo info = item.Operand as FieldInfo;
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.File.Types)
+                    foreach (var f in m.Parent.File.Types)
                     {
                         foreach (var tttt in f.Fields)
                         {
@@ -1337,7 +1337,7 @@ namespace libDotNetClr
                     //read value from field.
                     FieldInfo info = item.Operand as FieldInfo;
                     DotNetField f2 = null;
-                    foreach (var f in m.Parrent.File.Types)
+                    foreach (var f in m.Parent.File.Types)
                     {
                         foreach (var tttt in f.Fields)
                         {
@@ -1533,7 +1533,7 @@ namespace libDotNetClr
                     DotNetType t2 = null;
                     if (index.IsInFieldTabel)
                     {
-                        foreach (var t in m.Parrent.File.Types)
+                        foreach (var t in m.Parent.File.Types)
                         {
                             if (t.Name == index.Name && t.NameSpace == index.Namespace)
                             {
@@ -1584,7 +1584,7 @@ namespace libDotNetClr
                                     if (string.IsNullOrEmpty(call.NameSpace))
                                         fullName = call.ClassName;
 
-                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == fullName)
+                                    if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parent.FullName == fullName)
                                     {
                                         m2 = meth;
                                         break;
@@ -1718,7 +1718,7 @@ namespace libDotNetClr
             string stackTrace = "";
             foreach (var itm in CallStack)
             {
-                stackTrace += "at " + itm.method.Parrent.NameSpace + "." + itm.method.Parrent.Name + "." + itm.method.Name + "()\n";
+                stackTrace += "at " + itm.method.Parent.NameSpace + "." + itm.method.Parent.Name + "." + itm.method.Name + "()\n";
             }
             if (stackTrace.Length > 0)
             {
@@ -1762,7 +1762,7 @@ namespace libDotNetClr
                             if (string.IsNullOrEmpty(call.NameSpace))
                                 s = call.ClassName;
 
-                            if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parrent.FullName == s)
+                            if (meth.RVA == call.RVA && meth.Name == call.FunctionName && meth.Signature == call.Signature && meth.Parent.FullName == s)
                             {
                                 m2 = meth;
                                 break;
@@ -1790,7 +1790,7 @@ namespace libDotNetClr
                     {
                         foreach (var meth in item3.Methods)
                         {
-                            if (meth.Name == call.FunctionName && meth.Parrent.Name == call.ClassName && meth.Parrent.NameSpace == call.NameSpace && meth.Signature == call.Signature)
+                            if (meth.Name == call.FunctionName && meth.Parent.Name == call.ClassName && meth.Parent.NameSpace == call.NameSpace && meth.Signature == call.Signature)
                             {
                                 m2 = meth;
                                 break;
@@ -1806,7 +1806,7 @@ namespace libDotNetClr
             }
 
             //for interfaces
-            if (m2.RVA == 0 && !m2.IsImplementedByRuntime && !m2.IsInternalCall && m2.Parrent.IsInterface)
+            if (m2.RVA == 0 && !m2.IsImplementedByRuntime && !m2.IsInternalCall && m2.Parent.IsInterface)
             {
                 //TODO: make sure that the object implements the interface
                 var obj = stack[stack.Count - 1];
@@ -1855,7 +1855,7 @@ namespace libDotNetClr
                         bool a = false;
                         if (objectToCallOn.type == StackItemType.Object)
                         {
-                            if (objectToCallOn.ObjectType != m2.Parrent)
+                            if (objectToCallOn.ObjectType != m2.Parent)
                             {
                                 a = true;
                             }
@@ -1867,7 +1867,7 @@ namespace libDotNetClr
                             objectToCallOnIndex = idx - 1;
                             if (objectToCallOn.type == StackItemType.Object)
                             {
-                                if (objectToCallOn.ObjectType != m2.Parrent)
+                                if (objectToCallOn.ObjectType != m2.Parent)
                                 {
                                     objectToCallOn = null;
                                     objectToCallOnIndex = -1;
@@ -1885,7 +1885,7 @@ namespace libDotNetClr
                     var itm = stack[i];
                     if (itm.type == StackItemType.Object)
                     {
-                        if (itm.ObjectType == m2.Parrent)
+                        if (itm.ObjectType == m2.Parent)
                         {
                             objectToCallOn = itm;
                             objectToCallOnIndex = i;
@@ -1931,7 +1931,7 @@ namespace libDotNetClr
 
             //Call it
             var oldStack = stack.backend.GetRange(0, stack.Count);
-            returnValue = RunMethod(m2, m.Parrent.File, newParms, addToCallStack);
+            returnValue = RunMethod(m2, m.Parent.File, newParms, addToCallStack);
             stack.backend = oldStack;
 
             //Remove the parameters once we are finished
@@ -1952,59 +1952,59 @@ namespace libDotNetClr
 
         private bool IsSpecialType(MethodArgStack obj, DotNetMethod m)
         {
-            if (m.Parrent.FullName == "System.String" && obj.type == StackItemType.String)
+            if (m.Parent.FullName == "System.String" && obj.type == StackItemType.String)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.IntPtr" && obj.type == StackItemType.IntPtr)
+            if (m.Parent.FullName == "System.IntPtr" && obj.type == StackItemType.IntPtr)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Byte" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.Byte" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.SByte" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.SByte" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.UInt16" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.UInt16" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Int16" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.Int16" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.UInt32" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.UInt32" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Int32" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.Int32" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.UInt64" && obj.type == StackItemType.Int64)
+            if (m.Parent.FullName == "System.UInt64" && obj.type == StackItemType.Int64)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Int64" && obj.type == StackItemType.Int64)
+            if (m.Parent.FullName == "System.Int64" && obj.type == StackItemType.Int64)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Char" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.Char" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Object" && obj.type == StackItemType.Object)
+            if (m.Parent.FullName == "System.Object" && obj.type == StackItemType.Object)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Type" && obj.type == StackItemType.Object)
+            if (m.Parent.FullName == "System.Type" && obj.type == StackItemType.Object)
             {
                 return true;
             }
-            if (m.Parrent.FullName == "System.Boolean" && obj.type == StackItemType.Int32)
+            if (m.Parent.FullName == "System.Boolean" && obj.type == StackItemType.Int32)
             {
                 return true;
             }
