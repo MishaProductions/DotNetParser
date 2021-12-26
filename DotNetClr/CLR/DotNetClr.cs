@@ -684,64 +684,7 @@ namespace libDotNetClr
                     var a = stack.Pop();
                     var b = stack.Pop();
 
-                    if (a.type == b.type && a.type != StackItemType.Int32)
-                    {
-                        stack.Add(MathOperations.Op(a, b, MathOperations.Operation.Equality));
-                    }
-                    else
-                    {
-                        var numb1 = a.value;
-                        var numb2 = b.value;
-                        int Numb1;
-                        int Numb2;
-
-                        if (numb1 is int)
-                        {
-                            Numb1 = (int)numb1;
-                        }
-                        else if (numb1 is char)
-                        {
-                            Numb1 = (int)(char)numb1;
-                        }
-                        else if (numb1 is null)
-                        {
-                            Numb1 = 0;
-                        }
-                        else
-                        {
-                            clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
-                            return null;
-                        }
-
-                        if (numb2 is int)
-                        {
-                            Numb2 = (int)numb2;
-                        }
-                        else if (numb2 is char)
-                        {
-                            Numb2 = (int)(char)numb2;
-                        }
-                        else if (numb2 is null)
-                        {
-                            Numb2 = 0;
-                        }
-                        else
-                        {
-                            clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
-                            return null;
-                        }
-
-                        if (Numb1 == Numb2)
-                        {
-                            //push 1
-                            stack.Add(MethodArgStack.Int32(1));
-                        }
-                        else
-                        {
-                            //push 0
-                            stack.Add(MethodArgStack.Int32(0));
-                        }
-                    }
+                    stack.Add(MathOperations.Op(a, b, MathOperations.Operation.Equality));
                 }
                 else if (item.OpCodeName == "cgt")
                 {
