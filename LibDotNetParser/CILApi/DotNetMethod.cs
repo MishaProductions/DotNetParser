@@ -74,7 +74,7 @@ namespace LibDotNetParser.CILApi
         }
 
         public bool HasThis { get; }
-        public DotNetType Parrent { get; }
+        public DotNetType Parent { get; }
         public bool HasReturnValue { get; private set; }
 
         public MethodSignatureInfoV2 SignatureInfo { get; }
@@ -90,7 +90,7 @@ namespace LibDotNetParser.CILApi
         {
             this.file = file;
             this.BackendTabel = item;
-            this.Parrent = parrent;
+            this.Parent = parrent;
             this.flags = (MethodAttr)item.Flags;
             this.implFlags = (MethodImp)item.ImplFlags;
             this.file2 = parrent.File;
@@ -193,7 +193,7 @@ namespace LibDotNetParser.CILApi
         }
         public override string ToString()
         {
-            return $"{Name} in {Parrent.FullName}";
+            return $"{Name} in {Parent.FullName}";
         }
         internal static MethodSignatureParam ReadParam(BinaryReader r, DotNetFile file)
         {

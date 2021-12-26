@@ -21,7 +21,7 @@ namespace LibDotNetParser.CILApi
             m = method;
             mainFile = m.File;
             code = m.GetBody();
-            AddReference(m.Parrent.File);
+            AddReference(m.Parent.File);
         }
         public void AddReference(DotNetFile f)
         {
@@ -394,7 +394,7 @@ namespace LibDotNetParser.CILApi
                                 {
                                     foreach (var meth in item.Methods)
                                     {
-                                        if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace && meth.Signature == sig)
+                                        if (meth.Name == funcName && meth.Parent.Name == typeName && meth.Parent.NameSpace == anamespace && meth.Signature == sig)
                                         {
                                             m = meth;
                                         }
@@ -453,8 +453,8 @@ namespace LibDotNetParser.CILApi
 
                             if (m != null)
                             {
-                                className = m.Parrent.Name;
-                                Namespace = m.Parrent.NameSpace;
+                                className = m.Parent.Name;
+                                Namespace = m.Parent.NameSpace;
                             }
                             ret.Size += 4;
                             ret.Operand = new InlineMethodOperandData()
@@ -499,8 +499,8 @@ namespace LibDotNetParser.CILApi
 
                                 if (m != null)
                                 {
-                                    className = m.Parrent.Name;
-                                    Namespace = m.Parrent.NameSpace;
+                                    className = m.Parent.Name;
+                                    Namespace = m.Parent.NameSpace;
                                 }
                                 ret.Size += 4;
                                 ret.Operand = new InlineMethodOperandData()
@@ -640,7 +640,7 @@ namespace LibDotNetParser.CILApi
                                     {
                                         foreach (var meth in item.Methods)
                                         {
-                                            if (meth.Name == funcName && meth.Parrent.Name == typeName && meth.Parrent.NameSpace == anamespace)
+                                            if (meth.Name == funcName && meth.Parent.Name == typeName && meth.Parent.NameSpace == anamespace)
                                             {
                                                 m = meth;
                                             }
