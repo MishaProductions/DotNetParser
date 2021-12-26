@@ -16,7 +16,12 @@ namespace libDotNetClr
             Multiply,
             Divide,
             Remainder,
-            Equality
+            Equal,
+            NotEqual,
+            GreaterThan,
+            LessThan,
+            GreaterThanEqual,
+            LessThanEqual
         }
 
         private static MethodArgStack ConvertToInt32(MethodArgStack arg)
@@ -63,7 +68,11 @@ namespace libDotNetClr
                 case Operation.Multiply: return MethodArgStack.Float32(v1 * v2);
                 case Operation.Divide: return MethodArgStack.Float32(v1 / v2);
                 case Operation.Remainder: return MethodArgStack.Float32(v1 % v2);
-                case Operation.Equality: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.GreaterThan: return MethodArgStack.Int32(v1 > v2 ? 1 : 0);
+                case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
+                case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
+                case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -80,7 +89,11 @@ namespace libDotNetClr
                 case Operation.Multiply: return MethodArgStack.Float64(v1 * v2);
                 case Operation.Divide: return MethodArgStack.Float64(v1 / v2);
                 case Operation.Remainder: return MethodArgStack.Float64(v1 % v2);
-                case Operation.Equality: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.GreaterThan: return MethodArgStack.Int32(v1 > v2 ? 1 : 0);
+                case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
+                case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
+                case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -97,7 +110,11 @@ namespace libDotNetClr
                 case Operation.Multiply: return MethodArgStack.Int32(v1 * v2);
                 case Operation.Divide: return MethodArgStack.Int32(v1 / v2);
                 case Operation.Remainder: return MethodArgStack.Int32(v1 % v2);
-                case Operation.Equality: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.GreaterThan: return MethodArgStack.Int32(v1 > v2 ? 1 : 0);
+                case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
+                case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
+                case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -114,7 +131,11 @@ namespace libDotNetClr
                 case Operation.Multiply: return MethodArgStack.Int64(v1 * v2);
                 case Operation.Divide: return MethodArgStack.Int64(v1 / v2);
                 case Operation.Remainder: return MethodArgStack.Int64(v1 % v2);
-                case Operation.Equality: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.GreaterThan: return MethodArgStack.Int32(v1 > v2 ? 1 : 0);
+                case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
+                case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
+                case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -126,7 +147,7 @@ namespace libDotNetClr
 
             switch (op)
             {
-                case Operation.Equality: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
                 default: throw new Exception("Invalid operation");
             }
         }

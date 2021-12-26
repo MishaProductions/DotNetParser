@@ -684,7 +684,7 @@ namespace libDotNetClr
                     var a = stack.Pop();
                     var b = stack.Pop();
 
-                    stack.Add(MathOperations.Op(a, b, MathOperations.Operation.Equality));
+                    stack.Add(MathOperations.Op(b, a, MathOperations.Operation.Equal));
                 }
                 else if (item.OpCodeName == "cgt")
                 {
@@ -733,7 +733,7 @@ namespace libDotNetClr
                             throw new Exception("Attempt to branch to null");
                         i = inst.RelPosition - 1;
                     }
-                }
+                    }
                 else if (item.OpCodeName == "blt.s")
                 {
                     var numb1 = (int)stack[stack.Count - 2].value;
@@ -775,13 +775,13 @@ namespace libDotNetClr
                     if (numb1 is int)
                     {
                         Numb1 = (int)numb1;
-                    }
+                }
                     else if (numb1 is char)
                     {
                         Numb1 = (int)(char)numb1;
                     }
                     else if (numb1 is null)
-                    {
+                {
                         Numb1 = 0;
                     }
                     else
@@ -793,31 +793,31 @@ namespace libDotNetClr
                     if (numb2 is int)
                     {
                         Numb2 = (int)numb2;
-                    }
+                }
                     else if (numb2 is char)
-                    {
+                {
                         Numb2 = (int)(char)numb2;
-                    }
+                }
                     else if (numb2 is null)
-                    {
+                {
                         Numb2 = 0;
-                    }
+                }
                     else
-                    {
+                {
                         clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
                         return null;
-                    }
+                }
 
                     stack.RemoveRange(stack.Count - 2, 2);
                     if (Numb1 == Numb2)
-                    {
+                {
                         int i2 = item.Position + (int)item.Operand + 1;
                         ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
 
                         if (inst == null)
                             throw new Exception("Attempt to branch to null");
                         i = inst.RelPosition - 1;
-                    }
+                }
                 }
                 else if (item.OpCodeName == "bne.un.s")
                 {
@@ -825,7 +825,7 @@ namespace libDotNetClr
                     var numb2 = (int)stack[stack.Count - 1].value;
                     stack.RemoveRange(stack.Count - 2, 2);
                     if (numb1 != numb2)
-                    {
+                {
                         int i2 = item.Position + (int)item.Operand + 1;
                         ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
 
@@ -840,7 +840,7 @@ namespace libDotNetClr
                     var numb2 = (int)stack[stack.Count - 1].value;
                     stack.RemoveRange(stack.Count - 2, 2);
                     if (numb1 <= numb2)
-                    {
+                {
                         int i2 = item.Position + (int)item.Operand + 1;
                         ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
 
