@@ -1630,6 +1630,37 @@ namespace libDotNetClr
             return null;
         }
         /// <summary>
+        /// Branches to a target instruction (short form) if a given operation returns true.
+        /// Pops two elements off the stack as part of the comparison.
+        /// </summary>
+        /// <param name="stack"></param>
+        /// <param name="op"></param>
+        private void BranchSWithOp(ILInstruction instruction, CustomList<MethodArgStack> stack, IlDecompiler decompiler, MathOperations.Operation op, ref int i)
+        {
+            var a = stack.Pop();
+            var b = stack.Pop();
+
+            bool invert = false;
+            if (op == MathOperations.Operation.NotEqual)
+            {
+                op = MathOperations.Operation.Equal;
+                invert = true;
+            }
+
+            var result = MathOperations.Op(b, a, op);
+            if (invert) result.value = (int)result.value == 1 ? 0 : 1;
+
+            if ((int)result.value == 1)
+            {
+                int i2 = instruction.Position + (int)instruction.Operand + 1;
+                ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
+
+                if (inst == null)
+                    throw new Exception("Attempt to branch to null");
+                i = inst.RelPosition - 1;
+            }
+        }
+        /// <summary>
         /// Returns true if there is a problem
         /// </summary>
         /// <param name="stack"></param>
