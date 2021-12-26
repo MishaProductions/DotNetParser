@@ -218,37 +218,37 @@ namespace LibDotNetParser.CILApi
                 case 0x02:
                     {
                         sig = "bool";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Boolean;
                         break;
                     }
                 case 0x03:
                     {
                         sig = "char";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Char;
                         break;
                     }
                 case 0x04:
                     {
                         sig = "sbyte";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.SByte;
                         break;
                     }
                 case 0x05:
                     {
                         sig = "byte";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Byte;
                         break;
                     }
                 case 0x06:
                     {
                         sig = "short";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.Int16;
                         break;
                     }
                 case 0x07:
                     {
                         sig = "ushort";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.UInt16;
                         break;
                     }
                 case 0x08:
@@ -260,7 +260,7 @@ namespace LibDotNetParser.CILApi
                 case 0x09:
                     {
                         sig = "uint";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.UInt32;
                         break;
                     }
                 case 0x0A:
@@ -272,7 +272,7 @@ namespace LibDotNetParser.CILApi
                 case 0x0B:
                     {
                         sig = "ulong";
-                        ret.type = StackItemType.Int64;
+                        ret.type = StackItemType.UInt64;
                         break;
                     }
                 case 0x0C:
@@ -473,14 +473,14 @@ namespace LibDotNetParser.CILApi
                     {
                         //IntPtr
                         sig = "IntPtr";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.IntPtr;
                         break;
                     }
                 case 0x19:
                     {
                         //UIntPtr
                         sig = "UIntPtr";
-                        ret.type = StackItemType.Int32;
+                        ret.type = StackItemType.UIntPtr;
                         break;
                     }
                 case 0x1B:
