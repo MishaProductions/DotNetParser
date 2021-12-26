@@ -680,7 +680,11 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ceq")
                 {
                     if (stack.Count < 2)
-                        throw new Exception("There has to be 2 or more items on the stack for ceq instruction to work!");
+                    {
+                        clrError($"There has to be 2 or more items on the stack for {item.OpCodeName} instruction to work!", "Internal CLR error");
+                        return null;
+                    }
+
                     var a = stack.Pop();
                     var b = stack.Pop();
 
@@ -688,180 +692,61 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "cgt")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 > numb2)
+                    if (stack.Count < 2)
                     {
-                        //push 1
-                        stack.Add(MethodArgStack.Int32(1));
+                        clrError($"There has to be 2 or more items on the stack for {item.OpCodeName} instruction to work!", "Internal CLR error");
+                        return null;
                     }
-                    else
-                    {
-                        //push 0
-                        stack.Add(MethodArgStack.Int32(0));
-                    }
+
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    stack.Add(MathOperations.Op(b, a, MathOperations.Operation.GreaterThan));
                 }
                 else if (item.OpCodeName == "clt")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 < numb2)
+                    if (stack.Count < 2)
                     {
-                        //push 1
-                        stack.Add(MethodArgStack.Int32(1));
-                    }
-                    else
-                    {
-                        //push 0
-                        stack.Add(MethodArgStack.Int32(0));
-                    }
-                }
-                else if (item.OpCodeName == "blt")
-                {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 < numb2)
-                    {
-                        //find the ILInstruction that is in this position
-                        int i2 = item.Position + (int)item.Operand + 1;
-                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                        if (inst == null)
-                            throw new Exception("Attempt to branch to null");
-                        i = inst.RelPosition - 1;
-                    }
-                    }
-                else if (item.OpCodeName == "blt.s")
-                {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 < numb2)
-                    {
-                        int i2 = item.Position + (int)item.Operand + 1;
-                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                        if (inst == null)
-                            throw new Exception("Attempt to branch to null");
-                        i = inst.RelPosition - 1;
-                    }
-                }
-                else if (item.OpCodeName == "bge.s")
-                {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 >= numb2)
-                    {
-                        //push 1
-                        stack.Add(MethodArgStack.Int32(1));
-                    }
-                    else
-                    {
-                        //push 0
-                        stack.Add(MethodArgStack.Int32(0));
-                    }
-                }
-                else if (item.OpCodeName == "beq.s")
-                {
-                    var numb1 = stack[stack.Count - 2].value;
-                    var numb2 = stack[stack.Count - 1].value;
-                    int Numb1;
-                    int Numb2;
-
-                    if (numb1 is int)
-                    {
-                        Numb1 = (int)numb1;
-                }
-                    else if (numb1 is char)
-                    {
-                        Numb1 = (int)(char)numb1;
-                    }
-                    else if (numb1 is null)
-                {
-                        Numb1 = 0;
-                    }
-                    else
-                    {
-                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
+                        clrError($"There has to be 2 or more items on the stack for {item.OpCodeName} instruction to work!", "Internal CLR error");
                         return null;
                     }
 
-                    if (numb2 is int)
-                    {
-                        Numb2 = (int)numb2;
-                }
-                    else if (numb2 is char)
-                {
-                        Numb2 = (int)(char)numb2;
-                }
-                    else if (numb2 is null)
-                {
-                        Numb2 = 0;
-                }
-                    else
-                {
-                        clrError("Do not know where to branch, as the stack is corrupt", "Internal CLR error");
-                        return null;
-                }
+                    var a = stack.Pop();
+                    var b = stack.Pop();
 
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (Numb1 == Numb2)
-                {
-                        int i2 = item.Position + (int)item.Operand + 1;
-                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                        if (inst == null)
-                            throw new Exception("Attempt to branch to null");
-                        i = inst.RelPosition - 1;
+                    stack.Add(MathOperations.Op(b, a, MathOperations.Operation.LessThan));
                 }
+                else if (item.OpCodeName == "beq" || item.OpCodeName == "beq.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.Equal, ref i);
                 }
-                else if (item.OpCodeName == "bne.un.s")
+                else if (item.OpCodeName == "bge" || item.OpCodeName == "bge.s")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 != numb2)
-                {
-                        int i2 = item.Position + (int)item.Operand + 1;
-                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                        if (inst == null)
-                            throw new Exception("Attempt to branch to null");
-                        i = inst.RelPosition - 1;
-                    }
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.GreaterThanEqual, ref i);
                 }
-                else if (item.OpCodeName == "ble.s")
+                // TODO: Implement bge.un and bge.un.s
+                else if (item.OpCodeName == "bgt" || item.OpCodeName == "bgt.s")
                 {
-                    var numb1 = (int)stack[stack.Count - 2].value;
-                    var numb2 = (int)stack[stack.Count - 1].value;
-                    stack.RemoveRange(stack.Count - 2, 2);
-                    if (numb1 <= numb2)
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.GreaterThan, ref i);
+                }
+                // TODO: Implement bgt.un and bgt.un.s
+                else if (item.OpCodeName == "ble" || item.OpCodeName == "ble.s")
                 {
-                        int i2 = item.Position + (int)item.Operand + 1;
-                        ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                        if (inst == null)
-                            throw new Exception("Attempt to branch to null");
-                        i = inst.RelPosition - 1;
-                    }
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.LessThanEqual, ref i);
+                }
+                // TODO: Implement ble.un and ble.un.s
+                else if (item.OpCodeName == "blt" || item.OpCodeName == "blt.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.LessThan, ref i);
+                }
+                // TODO: Implement blt.un and blt.un.s
+                else if (item.OpCodeName == "bne.un" || item.OpCodeName == "bne.un.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.NotEqual, ref i);
                 }
                 #endregion
                 #region Branch instructions
-                else if (item.OpCodeName == "br.s")
-                {
-                    //find the ILInstruction that is in this position
-                    int i2 = item.Position + (int)item.Operand + 1;
-                    ILInstruction inst = decompiler.GetInstructionAtOffset(i2, -1);
-
-                    if (inst == null)
-                        throw new Exception("Attempt to branch to null");
-                    i = inst.RelPosition - 1;
-                }
-                else if (item.OpCodeName == "br")
+                else if (item.OpCodeName == "br" || item.OpCodeName == "br.s")
                 {
                     //find the ILInstruction that is in this position
                     int i2 = item.Position + (int)item.Operand + 1;
@@ -903,7 +788,7 @@ namespace libDotNetClr
                         i = inst.RelPosition - 1;
                     }
                 }
-                else if (item.OpCodeName == "brtrue.s")
+                else if (item.OpCodeName == "brtrue.s" || item.OpCodeName == "brtrue")
                 {
                     if (stack[stack.Count - 1].value == null)
                     {
@@ -1635,7 +1520,7 @@ namespace libDotNetClr
         /// </summary>
         /// <param name="stack"></param>
         /// <param name="op"></param>
-        private void BranchSWithOp(ILInstruction instruction, CustomList<MethodArgStack> stack, IlDecompiler decompiler, MathOperations.Operation op, ref int i)
+        private void BranchWithOp(ILInstruction instruction, CustomList<MethodArgStack> stack, IlDecompiler decompiler, MathOperations.Operation op, ref int i)
         {
             var a = stack.Pop();
             var b = stack.Pop();
