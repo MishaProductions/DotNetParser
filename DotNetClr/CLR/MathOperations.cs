@@ -21,7 +21,8 @@ namespace libDotNetClr
             GreaterThan,
             LessThan,
             GreaterThanEqual,
-            LessThanEqual
+            LessThanEqual,
+            Negate
         }
 
         private static MethodArgStack ConvertToInt32(MethodArgStack arg)
@@ -31,6 +32,18 @@ namespace libDotNetClr
                 case StackItemType.Int32: return arg;
                 case StackItemType.Char: return MethodArgStack.Int32((int)(char)arg.value);
                 default: throw new Exception("Unsupported type conversion");
+            }
+        }
+
+        public static MethodArgStack Op(MethodArgStack arg, Operation op)
+        {
+            switch (arg.type)
+            {
+                case StackItemType.Float32: return OpWithFloat32(arg, arg, op);
+                case StackItemType.Float64: return OpWithFloat64(arg, arg, op);
+                case StackItemType.Int32: return OpWithInt32(arg, arg, op);
+                case StackItemType.Int64: return OpWithInt64(arg, arg, op);
+                default: throw new NotImplementedException();
             }
         }
 
@@ -73,6 +86,7 @@ namespace libDotNetClr
                 case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
                 case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
                 case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
+                case Operation.Negate: return MethodArgStack.Float32(-v1);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -94,6 +108,7 @@ namespace libDotNetClr
                 case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
                 case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
                 case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
+                case Operation.Negate: return MethodArgStack.Float64(-v1);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -115,6 +130,7 @@ namespace libDotNetClr
                 case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
                 case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
                 case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
+                case Operation.Negate: return MethodArgStack.Int32(-v1);
                 default: throw new Exception("Invalid operation");
             }
         }
@@ -136,6 +152,7 @@ namespace libDotNetClr
                 case Operation.LessThan: return MethodArgStack.Int32(v1 < v2 ? 1 : 0);
                 case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
                 case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
+                case Operation.Negate: return MethodArgStack.Int64(-v1);
                 default: throw new Exception("Invalid operation");
             }
         }

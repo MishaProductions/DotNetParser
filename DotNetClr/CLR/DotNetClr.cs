@@ -583,6 +583,12 @@ namespace libDotNetClr
 
                     stack.Add(MathOperations.Op(b, a, MathOperations.Operation.Remainder));
                 }
+                else if (item.OpCodeName == "neg")
+                {
+                    var a = stack.Pop();
+
+                    stack.Add(MathOperations.Op(a, MathOperations.Operation.Negate));
+                }
                 else if (item.OpCodeName == "and")
                 {
                     var a = stack.Pop();

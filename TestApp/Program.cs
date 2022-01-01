@@ -586,6 +586,12 @@ namespace DotNetparserTester
             TestAssert(l1 + l2 == 8L, "long addition");
             double d1 = 5, d2 = 3.5;
             TestAssert(d1 + d2 == 8.5, "double addition");
+            short s1 = 5, s2 = 11;
+            TestAssert(s1 + s2 == (short)16, "short addition");
+            i = -100;
+            TestAssert(-i == 100, "integer negation");
+            d1 = -50.5;
+            TestAssert(-d1 == 50.5, "double negation");
 
             TestsComplete();
         }
