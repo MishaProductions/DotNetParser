@@ -9,7 +9,6 @@ namespace DotNetparserTester
     class MyObject
     {
         public string WelcomeMessage;
-        public Action<string> s;
         public MyObject()
         {
             WelcomeMessage = "Second Message";
@@ -416,7 +415,7 @@ namespace DotNetparserTester
             {
                 TestFail("Array.Empty() returned non empty array");
             }
-            Console.WriteLine("Action as argument tests");
+
             ActionAsMethodArgTest(new string[] { "hi", "bye" }, action, action);
             ActionAsMethodArgTest2(new string[] { "a", "b" });
             int h = 0;
@@ -434,7 +433,6 @@ namespace DotNetparserTester
                 TestFail("ByRef value is not a 1 or a 0.");
             }
 
-            Console.WriteLine("Interface tests");
             IHelloWorldFunction f = new HelloWorldFunction();
             f.SayHello();
             Console.WriteLine(f.HelloMessage);
@@ -442,8 +440,6 @@ namespace DotNetparserTester
 
 
             var pType = typeof(Program);
-            Console.WriteLine("Type of program: " + pType.FullName);
-            Console.WriteLine("List tests");
             List<string> list = new List<string>();
             list.Add("item 1");
             list.Add("item 2");
@@ -633,20 +629,12 @@ namespace DotNetparserTester
             console(vs[0]);
             console(vs[1]);
         }
-        private static void test5(string[] v, object f, int a)
-        {
-            Console.WriteLine(v[a]);
-        }
 
         /// <summary>
         /// Returns 90.
         /// </summary>
         /// <returns>90</returns>
         public static int ClrTest() { return 90; }
-        public static void Test(Type t, string[] a, int b)
-        {
-
-        }
 #if NoInternalCalls
         private static void TestSuccess(string name)
         {

@@ -31,6 +31,10 @@ namespace libDotNetClr
         /// List of custom internal methods
         /// </summary>
         private Dictionary<string, ClrCustomInternalMethod> CustomInternalMethods = new Dictionary<string, ClrCustomInternalMethod>();
+        /// <summary>
+        /// Should debug messages be printed to the console?
+        /// </summary>
+        public bool ShouldPrintDebugMessages { get; set; }
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -77,7 +81,12 @@ namespace libDotNetClr
                 return;
             }
             InitAssembly(file, true);
-            PrintColor("Jumping to entry point", ConsoleColor.DarkMagenta);
+            if (ShouldPrintDebugMessages)
+            {
+                Console.WriteLine();
+                PrintColor("Jumping to entry point", ConsoleColor.DarkMagenta);
+            }
+
             Running = true;
 
             //Run the entry point
@@ -117,7 +126,11 @@ namespace libDotNetClr
                 {
                     if (m.Name == ".cctor" && m.IsStatic)
                     {
-                        Console.WriteLine("Creating " + t.FullName + "." + m.Name);
+                        if (ShouldPrintDebugMessages)
+                        {
+                            Console.WriteLine("Creating " + t.FullName + "." + m.Name);
+                        }
+
                         RunMethod(m, file, new CustomList<MethodArgStack>(), false);
                     }
                 }
@@ -148,14 +161,8 @@ namespace libDotNetClr
             {
                 fullPath = fileName + ".dll";
             }
-            else
-            {
-                //Console.WriteLine("File: " + fileName + ".dll does not exist in " + EXEPath + "!", "System.FileNotFoundException");
-                //Console.WriteLine("DotNetParser will not be stopped.");
-                //  return;
-            }
-            //try
-            //{
+
+
             if (!string.IsNullOrEmpty(fullPath))
             {
                 var file2 = new DotNetFile(fullPath);
@@ -163,19 +170,11 @@ namespace libDotNetClr
                 InitAssembly(file2, false);
                 PrintColor("[OK] Loaded assembly: " + fileName, ConsoleColor.Green);
             }
-
             else
             {
                 if (!fileName.StartsWith("System") && fileName != "netstandard")
                     PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
             }
-            //}
-            // catch (Exception x)
-            //{
-            //    clrError("File: " + fileName + " has an unknown error in it. The error is: " + x.Message, "System.UnknownClrError");
-            //   throw;
-            //    return;
-            //}
         }
         /// <summary>
         /// Runs a method
