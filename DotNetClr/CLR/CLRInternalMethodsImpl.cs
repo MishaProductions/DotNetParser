@@ -72,6 +72,27 @@ namespace libDotNetClr
 
             RegisterCustomInternalMethod("GetMethod", Type_GetMethod);
             RegisterCustomInternalMethod("FieldInfo_SetValue", FieldInfo_SetValue);
+            RegisterCustomInternalMethod("Split", String_Split);
+        }
+
+        private void String_Split(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var toSplit = (string)Stack[0].value;
+            var seperators = Arrays.ArrayRefs[Arrays.GetIndexFromRef(Stack[1])];
+            List<char> chars = new List<char>();
+            foreach (var item in seperators.Items)
+            {
+                chars.Add((char)(int)item.value);
+            }
+
+            var r = toSplit.Split(chars.ToArray());
+            var arr= Arrays.AllocArray(r.Length);
+            for (int i = 0; i < r.Length; i++)
+            {
+                arr.Items[i] = MethodArgStack.String(r[i]);
+            }
+            returnValue = MethodArgStack.Array(arr);
+            ;
         }
 
         private void FieldInfo_SetValue(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -170,7 +191,8 @@ namespace libDotNetClr
 
         private void Type_GetMethod(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var type = (DotNetType)Objects.ObjectRefs[(int)Stack[0].value].Fields["internal__type"].value;
+            var obj = Objects.ObjectRefs[(int)Stack[0].value];
+            var type = (DotNetType)obj.Fields["internal__type"].value;
             var methodName = (string)Stack[1].value;
 
             foreach (var item in type.Methods)

@@ -589,6 +589,23 @@ namespace DotNetparserTester
             d1 = -50.5;
             TestAssert(-d1 == 50.5, "double negation");
 
+            var arr = new string[] { "a", "b", "c" };
+            foreach (var item in arr)
+            {
+                if (item == "b")
+                {
+                    TestSuccess("ForEach test");
+                    break;
+                }
+                else if (item == "c")
+                {
+                    TestFail("Break; does not work in foreach");
+                }
+            }
+
+            
+            
+
             TestsComplete();
         }
 

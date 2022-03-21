@@ -1,4 +1,5 @@
 ﻿using LibDotNetParser.CILApi;
+using System;
 using System.Collections.Generic;
 
 namespace LibDotNetParser
@@ -119,6 +120,15 @@ namespace LibDotNetParser
         public static MethodArgStack MethodPtr(DotNetMethod method)
         {
             return new MethodArgStack() { type = StackItemType.MethodPtr, value = method };
+        }
+        public static MethodArgStack Bool(bool val)
+        {
+            return new MethodArgStack() { type = StackItemType.Boolean, value = val };
+        }
+
+        public static MethodArgStack Array(ArrayRef a)
+        {
+            return new MethodArgStack() { type = StackItemType.Array, value = (int)a.Index };
         }
     }
 

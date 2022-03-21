@@ -1,7 +1,15 @@
-﻿namespace System
+﻿using System.Runtime.CompilerServices;
+
+namespace System
 {
     public abstract class Array
     {
+        public extern int Length
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
         public static T[] Empty<T>()
         {
             return EmptyArray<T>.Value;

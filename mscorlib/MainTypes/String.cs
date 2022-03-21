@@ -77,6 +77,9 @@ namespace System
             }
             return true;
         }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern string[] Split(params char[] separator);
+
 
         //Internal calls
 
@@ -123,5 +126,11 @@ namespace System
         InvariantCultureIgnoreCase,
         Ordinal,
         OrdinalIgnoreCase
+    }
+    [Flags]
+    public enum StringSplitOptions
+    {
+        None = 0,
+        RemoveEmptyEntries = 1
     }
 }

@@ -1090,6 +1090,9 @@ namespace libDotNetClr
                             case StackItemType.Any:
                                 Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
                                 break;
+                            case StackItemType.Boolean:
+                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Bool(false));
+                                break;
                             default:
                                 throw new NotImplementedException();
                         }
@@ -1346,6 +1349,19 @@ namespace libDotNetClr
                     stack.RemoveAt(stack.Count - 1); //Remove array ref
                 }
                 else if (item.OpCodeName == "stelem")
+                {
+                    var val = stack[stack.Count - 1];
+                    var index = stack[stack.Count - 2];
+                    var array = stack[stack.Count - 3];
+                    //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
+                    var idx = Arrays.GetIndexFromRef(array);
+                    Arrays.ArrayRefs[idx].Items[(int)index.value] = val;
+
+                    stack.RemoveAt(stack.Count - 1); //Remove value
+                    stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array ref
+                }
+                else if (item.OpCodeName == "stelem.i2")
                 {
                     var val = stack[stack.Count - 1];
                     var index = stack[stack.Count - 2];
@@ -1900,12 +1916,7 @@ namespace libDotNetClr
             return ArrayRefs[CurrentIndex - 1];
         }
     }
-    internal class ArrayRef
-    {
-        public MethodArgStack[] Items;
-        public int Length;
-        public int Index { get; internal set; }
-    }
+
 
     internal static class Objects
     {
