@@ -102,6 +102,9 @@ namespace LibDotNetParser.CILApi
                         var numb2 = BitConverter.ToInt32(num2, 0);
                         var info = new FieldInfo();
                         info.IndexInTabel = numb2;
+
+                        //TODO: fix this as the below if statement maybe incorrect
+
                         if (f == 1)
                         {
                             // type ref
@@ -119,6 +122,11 @@ namespace LibDotNetParser.CILApi
                             info.IsInFieldTabel = true;
                             info.Name = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.Name);
                             info.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.Namespace);
+                        }
+                        else
+                        {
+                            //throw new NotImplementedException();
+                            info.Namespace = "FIXME 129";
                         }
 
                         ret.Size += 4;

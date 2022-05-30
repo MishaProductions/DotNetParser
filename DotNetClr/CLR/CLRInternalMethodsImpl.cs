@@ -201,6 +201,7 @@ namespace libDotNetClr
                 {
                     var field2 = CreateType("System.Reflection", "MethodInfo");
                     WriteStringToType(field2, "_internalName", methodName);
+                    Objects.ObjectRefs[(int)field2.value].Fields.Add("internal__type", new MethodArgStack() { type = StackItemType.None, value = type });
                     returnValue = field2;
                     return;
                 }
