@@ -9,7 +9,7 @@ using System.IO;
 namespace libDotNetClr
 {
     /// <summary>
-    /// DotNetCLR Class
+    /// .NET code executor
     /// </summary>
     public partial class DotNetClr
     {
@@ -1696,6 +1696,12 @@ namespace libDotNetClr
                     clrError($"Cannot resolve method: {call.NameSpace}.{call.ClassName}.{call.FunctionName}. Method signature is {call.Signature}", "System.MethodNotFound");
                     return false;
                 }
+            }
+
+
+            if(m2.AmountOfParms > stack.Count)
+            {
+                throw new Exception("Error: wrong amount of parameters supplied to function: " + m2.Name);
             }
 
             //for interfaces

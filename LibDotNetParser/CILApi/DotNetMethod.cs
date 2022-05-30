@@ -161,7 +161,15 @@ namespace LibDotNetParser.CILApi
             blobStreamReader.BaseStream.Seek(signature, SeekOrigin.Begin);
             var length = IlDecompiler.ParseNumber(blobStreamReader);
             var type = IlDecompiler.ParseNumber(blobStreamReader);
-            var parmaters = IlDecompiler.ParseNumber(blobStreamReader);
+            var parmaters = IlDecompiler.ParseNumber(blobStreamReader); //This field becomes "generic parameters" if type & 10 != 0
+            if ((type & 0x10) != 0)
+            {
+                ret.AmountOfGenericParams = (int)parmaters;
+                //The "real" generic param amount
+                parmaters = IlDecompiler.ParseNumber(blobStreamReader);
+            }
+
+
             var returnVal = ReadParam(blobStreamReader, file); //read return value
             ret.ReturnVal = returnVal;
 
@@ -171,7 +179,7 @@ namespace LibDotNetParser.CILApi
                 sig += "static ";
                 ret.IsStatic = true;
             }
-            if((type & 0x20) != 0)
+            if ((type & 0x20) != 0)
             {
                 ret.HasThis = true;
             }
@@ -528,6 +536,7 @@ namespace LibDotNetParser.CILApi
             public bool IsStatic { get; set; } = false;
             public string Signature { get; set; } = "";
             public int AmountOfParms { get; set; } = 0;
+            public int AmountOfGenericParams { get; set; } = 0;
             public bool HasThis { get; internal set; }
         }
         public class MethodSignatureParam
