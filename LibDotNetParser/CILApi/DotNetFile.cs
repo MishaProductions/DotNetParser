@@ -106,5 +106,20 @@ namespace LibDotNetParser.CILApi
                 i++;
             }
         }
+
+        public DotNetMethod GetMethod(string Namespace, string Classname, string MethodName)
+        {
+            foreach (var t in types)
+            {
+                foreach (var m in t.Methods)
+                {
+                    if (m.Name == MethodName && t.Name == Classname&&t.NameSpace == Namespace)
+                    {
+                        return m;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

@@ -56,7 +56,9 @@ namespace libDotNetClr
                 arg2 = ConvertToInt32(arg2);
             }
 
-            if (arg1.type != arg2.type) throw new Exception("Inconsistent type definitions");
+
+
+            if (arg1.type != arg2.type && arg2.type != StackItemType.ldnull) throw new Exception("Inconsistent type definitions");
 
             switch (arg1.type)
             {
@@ -65,7 +67,20 @@ namespace libDotNetClr
                 case StackItemType.Int32: return OpWithInt32(arg1, arg2, op);
                 case StackItemType.Int64: return OpWithInt64(arg1, arg2, op);
                 case StackItemType.ldnull: return OpWithLdNull(arg1, arg2, op);
+                case StackItemType.Object: return OpWithObject(arg1, arg2, op);
                 default: throw new NotImplementedException();
+            }
+        }
+
+        private static MethodArgStack OpWithObject(MethodArgStack arg1, MethodArgStack arg2, Operation op)
+        {
+            object v1 = arg1.value;
+            object v2 = arg2.value;
+
+            switch (op)
+            {
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                default: throw new Exception("Invalid operation");
             }
         }
 

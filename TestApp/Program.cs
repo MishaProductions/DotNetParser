@@ -603,8 +603,24 @@ namespace DotNetparserTester
                 }
             }
 
-            
-            
+            var r = TestsRxObject();
+            if (r == null)
+            {
+                TestFail("TestsRxObject() returned null");
+            }
+            else
+            {
+                if (r.TestProperty != "value")
+                {
+                    TestFail("TestsRxObject() object has incorrect property value, which is "+ r.TestProperty);
+                }
+                else
+                {
+                    TestSuccess("TestsRxObject() object has correct property value");
+                }
+            }
+
+
 
             TestsComplete();
         }
@@ -679,8 +695,19 @@ namespace DotNetparserTester
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void TestsComplete();
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public static extern TestObject TestsRxObject();
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void DebuggerBreak();
 #endif
+    }
+    public class TestObject
+    {
+        public string TestProperty;
+
+        public TestObject(string prop)
+        {
+            TestProperty = prop;
+        }
     }
     public interface IHelloWorldFunction
     {

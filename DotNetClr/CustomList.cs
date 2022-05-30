@@ -11,7 +11,7 @@ namespace libDotNetClr
     /// This class is used for debugging a List<>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class CustomList<T>
+    public class CustomList<T>
     {
         public List<T> backend;
         public int Count { get { return backend.Count; } }

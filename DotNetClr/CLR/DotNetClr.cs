@@ -1058,52 +1058,7 @@ namespace libDotNetClr
                         clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
-                    var objAddr = Objects.AllocObject().Index;
-                    MethodArgStack a = new MethodArgStack() { ObjectContructor = m2, ObjectType = m2.Parent, type = StackItemType.Object, value = objAddr };
-
-                    //init fields
-                    foreach (var f in m2.Parent.Fields)
-                    {
-                        switch (f.ValueType.type)
-                        {
-                            case StackItemType.String:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
-                                break;
-                            case StackItemType.Int32:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Int32(0));
-                                break;
-                            case StackItemType.Int64:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Int64(0));
-                                break;
-                            case StackItemType.Float32:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Float32(0));
-                                break;
-                            case StackItemType.Float64:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Float64(0));
-                                break;
-                            case StackItemType.Object:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
-                                break;
-                            case StackItemType.Array:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
-                                break;
-                            case StackItemType.Any:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
-                                break;
-                            case StackItemType.Boolean:
-                                Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Bool(false));
-                                break;
-                            default:
-                                throw new NotImplementedException();
-                        }
-                    }
-
-                    //Call the contructor
-                    if (!InternalCallMethod(call, m, true, true, true, stack, a))
-                    {
-                        Console.WriteLine("Error occured, returning null.");
-                        return null; //error occured
-                    }
+                    var a = CreateObject(m2, stack);
 
                     stack.Add(a);
                 }
@@ -1536,6 +1491,64 @@ namespace libDotNetClr
             return null;
         }
         /// <summary>
+        /// Creates an instance of an object
+        /// </summary>
+        /// <param name="Constructor">The class's constructor method</param>
+        /// <param name="Constructorparamss">The parameters of the constructor. Can be an empty list if there are no parameters</param>
+        /// <returns>A ready object to be pushed to the stack</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public MethodArgStack CreateObject(DotNetMethod Constructor, CustomList<MethodArgStack> Constructorparamss)
+        {
+            var objAddr = Objects.AllocObject().Index;
+            MethodArgStack a = new MethodArgStack() { ObjectContructor = Constructor, ObjectType = Constructor.Parent, type = StackItemType.Object, value = objAddr };
+
+            //init fields
+            foreach (var f in Constructor.Parent.Fields)
+            {
+                switch (f.ValueType.type)
+                {
+                    case StackItemType.String:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
+                        break;
+                    case StackItemType.Int32:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Int32(0));
+                        break;
+                    case StackItemType.Int64:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Int64(0));
+                        break;
+                    case StackItemType.Float32:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Float32(0));
+                        break;
+                    case StackItemType.Float64:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Float64(0));
+                        break;
+                    case StackItemType.Object:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
+                        break;
+                    case StackItemType.Array:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
+                        break;
+                    case StackItemType.Any:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Null());
+                        break;
+                    case StackItemType.Boolean:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Bool(false));
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+
+            //Call the contructor
+            if (!InternalCallMethod(new InlineMethodOperandData() { ClassName = Constructor.Parent.Name, FunctionName = Constructor.Name, NameSpace = Constructor.Parent.NameSpace, Signature = Constructor.Signature, RVA = Constructor.RVA }, null, true, true, true, Constructorparamss, a))
+            {
+                Console.WriteLine("Error occured, returning null.");
+                return null; //error occured
+            }
+            return a;
+        }
+
+        /// <summary>
         /// Branches to a target instruction (short form) if a given operation returns true.
         /// Pops two elements off the stack as part of the comparison.
         /// </summary>
@@ -1811,7 +1824,11 @@ namespace libDotNetClr
 
             //Call it
             var oldStack = stack.backend.GetRange(0, stack.Count);
-            returnValue = RunMethod(m2, m.Parent.File, newParms, addToCallStack);
+
+            if (m != null)
+                returnValue = RunMethod(m2, m.Parent.File, newParms, addToCallStack);
+            else
+                returnValue = RunMethod(m2, m2.Parent.File, newParms, addToCallStack);
             stack.backend = oldStack;
 
             //Remove the parameters once we are finished

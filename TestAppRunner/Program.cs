@@ -11,6 +11,8 @@ namespace DotNetParserRunner
     {
         private static int NumbOfSuccesssTests = 0;
         private static int NumbOfFailedTests = 0;
+        private static DotNetClr clr;
+        private static DotNetFile m;
         static void Main()
         {
             //This is for debugging purposes
@@ -20,7 +22,7 @@ namespace DotNetParserRunner
 
 
             //Create a new dotnetfile with the path to the EXE
-            var m = new DotNetFile(exe);
+            m = new DotNetFile(exe);
 
             //This is not needed, but this shows the IL code of the entry point
             var decompiler = new IlDecompiler(m.EntryPoint);
@@ -31,7 +33,7 @@ namespace DotNetParserRunner
 
             //This creates an instance of a CLR, and then runs it
             Console.WriteLine("Running program:");
-            var clr = new DotNetClr(
+            clr = new DotNetClr(
                 m,
                 Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location),
                 "framework"));
@@ -40,6 +42,7 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestsComplete", TestsComplete);
             clr.RegisterCustomInternalMethod("TestSuccess", TestSuccess);
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
+            clr.RegisterCustomInternalMethod("TestsRxObject", TestRxObject);
 
             //Put arguments in the string array
             clr.Start(new string[] { "testArg" });
@@ -48,6 +51,17 @@ namespace DotNetParserRunner
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);
         }
+
+        private static void TestRxObject(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var cctor = m.GetMethod("DotNetparserTester", "TestObject", ".ctor");
+            if (cctor == null)
+                throw new NullReferenceException();
+            var s = new CustomList<MethodArgStack>();
+            s.Add(MethodArgStack.String("value"));
+            returnValue = clr.CreateObject(cctor, s);
+        }
+
         private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
