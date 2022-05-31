@@ -1249,6 +1249,13 @@ namespace libDotNetClr
 
                     stack.Add(parms[(byte)item.Operand]);
                 }
+                else if (item.OpCodeName == "ldarga.s")
+                {
+                    if (parms.Count == 0)
+                        continue;
+
+                    stack.Add(parms[(byte)item.Operand]);
+                }
                 else if (item.OpCodeName == "callvirt")
                 {
                     var call = (InlineMethodOperandData)item.Operand;
