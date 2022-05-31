@@ -35,12 +35,12 @@
                 }
                 else
                 {
-                    Console.WriteLine("Cannot find target entry");
+                    Console.WriteLine("Dictionary: Cannot find target entry");
                 }
             }
             else
             {
-                Console.WriteLine("_SetVal non overwrite");
+                Console.WriteLine("Dictionary: Making new entry");
                 var e = new Entry();
                 e.value = value;
                 e.key = key;

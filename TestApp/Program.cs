@@ -622,6 +622,20 @@ namespace DotNetparserTester
 
 
 
+            Dictionary<int, string> dictionary = new Dictionary<int, string>();
+
+            dictionary.Add(2, "Test string #2");
+
+            //todo: constrained. opcode
+            //if (dictionary[2] == "Test string #2")
+            //{
+            //    TestSuccess("Dictionary: adding key/value and reading value by key works");
+            //}
+            //else
+            //{
+            //    TestFail("Dictionary: adding key/value and reading value by key doesn't work");
+            //}
+
             TestsComplete();
         }
 
