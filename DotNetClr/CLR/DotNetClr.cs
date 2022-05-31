@@ -708,7 +708,33 @@ namespace libDotNetClr
 
                     stack.Add(MathOperations.Op(b, a, MathOperations.Operation.GreaterThan));
                 }
+                else if (item.OpCodeName == "cgt.un")
+                {
+                    if (stack.Count < 2)
+                    {
+                        clrError($"There has to be 2 or more items on the stack for {item.OpCodeName} instruction to work!", "Internal CLR error");
+                        return null;
+                    }
+
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    stack.Add(MathOperations.Op(b, a, MathOperations.Operation.GreaterThan));
+                }
                 else if (item.OpCodeName == "clt")
+                {
+                    if (stack.Count < 2)
+                    {
+                        clrError($"There has to be 2 or more items on the stack for {item.OpCodeName} instruction to work!", "Internal CLR error");
+                        return null;
+                    }
+
+                    var a = stack.Pop();
+                    var b = stack.Pop();
+
+                    stack.Add(MathOperations.Op(b, a, MathOperations.Operation.LessThan));
+                }
+                else if (item.OpCodeName == "clt.un")
                 {
                     if (stack.Count < 2)
                     {
@@ -1000,6 +1026,11 @@ namespace libDotNetClr
                     {
                         clrError("Object reference not set to an instance of an object.", "System.NullReferenceException");
                         return null;
+                    }
+                    else if (exp.type == StackItemType.Object)
+                    {
+                        var obj = Objects.ObjectRefs[(int)exp.value];
+                        clrError((string)obj.Fields["_message"].value, "System.Exception");
                     }
                     else
                     {
@@ -1450,6 +1481,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "initobj")
                 {
+                    stack.Pop();
                     stack.Add(MethodArgStack.Null());
                 }
                 else if (item.OpCodeName == "ldflda")

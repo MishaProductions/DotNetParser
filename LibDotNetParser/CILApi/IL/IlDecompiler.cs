@@ -97,15 +97,19 @@ namespace LibDotNetParser.CILApi
                         byte fi = code[Offset + 1];
                         byte s2 = code[Offset + 2];
                         byte t = code[Offset + 3];
-                        byte f = code[Offset + 4];
+                        byte Tabel = code[Offset + 4];
                         byte[] num2 = new byte[] { fi, s2, t, 0 };
                         var numb2 = BitConverter.ToInt32(num2, 0);
+                        var tabel2 = BitConverter.ToInt32(code, Offset+1);
+                        var tabel = tabel2 >> 24;
+
+
                         var info = new FieldInfo();
                         info.IndexInTabel = numb2;
 
                         //TODO: fix this as the below if statement maybe incorrect
 
-                        if (f == 1)
+                        if (Tabel == 1)
                         {
                             // type ref
                             var typeRef = mainFile.Backend.Tabels.TypeRefTabel[numb2 - 1];
@@ -114,7 +118,7 @@ namespace LibDotNetParser.CILApi
                             info.Name = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.TypeName);
                             info.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.TypeNamespace);
                         }
-                        else if (f == 2)
+                        else if (Tabel == 2)
                         {
                             //type def
                             var typeRef = mainFile.Backend.Tabels.TypeDefTabel[numb2 - 1];
@@ -123,10 +127,13 @@ namespace LibDotNetParser.CILApi
                             info.Name = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.Name);
                             info.Namespace = mainFile.Backend.ClrStringsStream.GetByOffset(typeRef.Namespace);
                         }
+                        else if (Tabel == 0x1B)
+                        {
+                            throw new NotImplementedException();
+                        }
                         else
                         {
-                            //throw new NotImplementedException();
-                            info.Namespace = "FIXME 129";
+                            throw new NotImplementedException();
                         }
 
                         ret.Size += 4;

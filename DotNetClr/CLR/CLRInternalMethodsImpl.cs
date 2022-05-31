@@ -73,6 +73,34 @@ namespace libDotNetClr
             RegisterCustomInternalMethod("GetMethod", Type_GetMethod);
             RegisterCustomInternalMethod("FieldInfo_SetValue", FieldInfo_SetValue);
             RegisterCustomInternalMethod("Split", String_Split);
+            RegisterCustomInternalMethod("get_Rank", Array_GetRank);
+            RegisterCustomInternalMethod("GetLowerBound", Array_GetLowerBound);
+            RegisterCustomInternalMethod("get_Length", Array_GetLength);
+        }
+
+        private void Array_GetLength(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var array = Stack[0];
+            if (array.type != StackItemType.Array) throw new Exception();
+
+            returnValue = MethodArgStack.Int32(Arrays.ArrayRefs[(int)array.value].Length);
+        }
+
+        private void Array_GetLowerBound(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var array = Stack[0];
+            var bound = Stack[1];
+
+            if (array.type != StackItemType.Array) throw new Exception();
+
+            //todo
+            returnValue = MethodArgStack.Int32(0);
+        }
+
+        private void Array_GetRank(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            //We only support 1d arrays
+            returnValue = MethodArgStack.Int32(1);
         }
 
         private void String_Split(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)

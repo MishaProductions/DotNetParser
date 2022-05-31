@@ -443,18 +443,6 @@ namespace DotNetparserTester
             List<string> list = new List<string>();
             list.Add("item 1");
             list.Add("item 2");
-            //list.RemoveAt(1);
-            //list.Remove("item 1");
-
-            //if(list.Count != 0)
-            //{
-            //    TestFail("List count is not zero!");
-            //}
-            //else
-            //{
-            //    TestSuccess("List count is zero");
-            //}
-
             if (list[0] == "item 1")
             {
                 TestSuccess("Adding item to list");
@@ -462,6 +450,18 @@ namespace DotNetparserTester
             else
             {
                 TestFail("Adding item to list failed.");
+            }
+
+            TestAssert(list.Count == 2, "List.Add works");
+            list.Clear();
+
+            if (list.Count != 0)
+            {
+                TestFail("List count is not zero!");
+            }
+            else
+            {
+                TestSuccess("List count is zero");
             }
 
             var str3 = "AB";
@@ -612,7 +612,7 @@ namespace DotNetparserTester
             {
                 if (r.TestProperty != "value")
                 {
-                    TestFail("TestsRxObject() object has incorrect property value, which is "+ r.TestProperty);
+                    TestFail("TestsRxObject() object has incorrect property value, which is " + r.TestProperty);
                 }
                 else
                 {

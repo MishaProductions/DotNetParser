@@ -474,8 +474,10 @@ namespace LibDotNetParser.CILApi
                     }
                 case 0x16:
                     {
-                        //TypeRef
-                        throw new System.NotImplementedException();
+                        //TypedRefrerence structure
+                        sig = "TypedReference";
+                        ret.type = StackItemType.Object;
+                        break;
                     }
                 case 0x18:
                     {
