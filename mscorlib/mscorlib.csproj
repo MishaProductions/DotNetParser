@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
 		<DisableStandardFrameworkResolution>true</DisableStandardFrameworkResolution>
