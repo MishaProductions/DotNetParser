@@ -54,7 +54,7 @@ namespace DotNetParserRunner
 
         private static void TestRxObject(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var cctor = m.GetMethod("DotNetparserTester", "TestObject", ".ctor");
+            var cctor = m.GetMethod("TestApp.Tests", "TestObject", ".ctor");
             if (cctor == null)
                 throw new NullReferenceException();
             var s = new CustomList<MethodArgStack>();

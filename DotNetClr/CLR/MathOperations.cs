@@ -70,10 +70,21 @@ namespace libDotNetClr
                 case StackItemType.ldnull: return OpWithLdNull(arg1, arg2, op);
                 case StackItemType.Object: return OpWithObject(arg1, arg2, op);
                 case StackItemType.Array: return OpWithArray(arg1, arg2, op);
+                case StackItemType.String: return OpWithString(arg1, arg2, op);
                 default: throw new NotImplementedException();
             }
         }
+        private static MethodArgStack OpWithString(MethodArgStack arg1, MethodArgStack arg2, Operation op)
+        {
+            object v1 = arg1.value;
+            object v2 = arg2.value;
 
+            switch (op)
+            {
+                case Operation.Equal: return MethodArgStack.Int32(v1 == v2 ? 1 : 0);
+                default: throw new Exception("Invalid operation");
+            }
+        }
         private static MethodArgStack OpWithArray(MethodArgStack arg1, MethodArgStack arg2, Operation op)
         {
             object v1 = arg1.value;
