@@ -63,8 +63,13 @@ namespace System
             this.CopyTo(array, (int)index);
         }
 
+        public static void Clear(Array array, int index, int length)
+        {
+            ArrayClear(array, index, length);
+        }
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        public static extern void Clear(Array array, int index, int length);
+
+        private static extern void ArrayClear(Array array, int index, int length);
 
         // Returns the index of the first occurrence of a given value in an array.
         // The array is searched forwards, and the elements of the array are

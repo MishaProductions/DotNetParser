@@ -21,7 +21,12 @@ namespace System
         public static extern void Write(int num);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void Write(long num);
+        
+        public static void Clear()
+        {
+            ConsoleClear();
+        }
         [MethodImpl(MethodImplOptions.InternalCall)]
-        public static extern void Clear();
+        private static extern void ConsoleClear();
     }
 }

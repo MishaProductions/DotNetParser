@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace libDotNetClr
@@ -1407,6 +1408,45 @@ namespace libDotNetClr
                     stack.RemoveAt(stack.Count - 1); //Remove index
                     stack.RemoveAt(stack.Count - 1); //Remove array ref
                 }
+                else if(item.OpCodeName== "stelem.i4")
+                {
+                    var val = stack[stack.Count - 1];
+                    var index = stack[stack.Count - 2];
+                    var array = stack[stack.Count - 3];
+                    //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
+                    var idx = Arrays.GetIndexFromRef(array);
+                    Arrays.ArrayRefs[idx].Items[(int)index.value] = val;
+
+                    stack.RemoveAt(stack.Count - 1); //Remove value
+                    stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array ref
+                }
+                else if (item.OpCodeName == "stelem.i8")
+                {
+                    var val = stack[stack.Count - 1];
+                    var index = stack[stack.Count - 2];
+                    var array = stack[stack.Count - 3];
+                    //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
+                    var idx = Arrays.GetIndexFromRef(array);
+                    Arrays.ArrayRefs[idx].Items[(int)index.value] = val;
+
+                    stack.RemoveAt(stack.Count - 1); //Remove value
+                    stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array ref
+                }
+                else if (item.OpCodeName == "stelem.r8")
+                {
+                    var val = stack[stack.Count - 1];
+                    var index = stack[stack.Count - 2];
+                    var array = stack[stack.Count - 3];
+                    //if (array.type != StackItemType.Array) { clrError("Expected array, but got something else. Fault instruction name: stelem", "Internal CLR error"); return null; }
+                    var idx = Arrays.GetIndexFromRef(array);
+                    Arrays.ArrayRefs[idx].Items[(int)index.value] = val;
+
+                    stack.RemoveAt(stack.Count - 1); //Remove value
+                    stack.RemoveAt(stack.Count - 1); //Remove index
+                    stack.RemoveAt(stack.Count - 1); //Remove array ref
+                }
                 #endregion
                 #region Reflection
                 else if (item.OpCodeName == "ldtoken")
@@ -1563,7 +1603,7 @@ namespace libDotNetClr
                 #endregion
                 else
                 {
-                    clrError("Unsupported opcode: " + item.OpCodeName, "CLR Internal error");
+                    clrError("Unsupported opcode: " + item.OpCodeName+" in method "+m.Parent.FullName+"."+m.Name, "CLR Internal error");
                     return null;
                 }
             }
