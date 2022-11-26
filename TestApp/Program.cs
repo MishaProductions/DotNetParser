@@ -640,8 +640,10 @@ namespace DotNetparserTester
             Console.WriteLine("MATH TEST");
             Console.WriteLine("================");
 
-            TestAssert(Math.Clamp(21, 0, 20) == 1,"math clamp returns correct value");
-
+            TestAssert(Math.Clamp(21, 0, 20) == 20,"math clamp returns correct value");
+            TestAssert(Math.Clamp(-1, 0, 20) == 0, "math clamp returns correct value");
+            TestAssert(Math.PI == 3.1415926535897931, "math pi returns correct value");
+            TestAssert(Math.Max(8,7) == 8, "math max returns correct value");
             TestsComplete();
         }
 

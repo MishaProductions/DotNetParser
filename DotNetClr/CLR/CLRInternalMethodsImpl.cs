@@ -14,7 +14,7 @@ namespace libDotNetClr
             //Register internal methods
             RegisterCustomInternalMethod("WriteLine", InternalMethod_Console_Writeline);
             RegisterCustomInternalMethod("Write", InternalMethod_Console_Write);
-            RegisterCustomInternalMethod("Clear", InternalMethod_Console_Clear);
+            RegisterCustomInternalMethod("ConsoleClear", InternalMethod_Console_Clear);
             RegisterCustomInternalMethod("Concat", InternalMethod_String_Concat);
             RegisterCustomInternalMethod("ByteToString", InternalMethod_Byte_ToString);
             RegisterCustomInternalMethod("SByteToString", Internal__System_SByte_ToString);
