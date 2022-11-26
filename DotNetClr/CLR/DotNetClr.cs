@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace libDotNetClr
 {
@@ -109,7 +110,7 @@ namespace libDotNetClr
         private void InitAssembly(DotNetFile file, bool InitCorLib)
         {
             if (InitCorLib)
-                ResolveDLL("mscorlib"); //Always resolve mscorlib, incase the exe uses .net core
+                ResolveDLL("System.Private.CoreLib"); //Always resolve mscorlib, incase the exe uses .net core
 
             //Resolve all of the DLLS
             foreach (var item in file.Backend.Tabels.AssemblyRefTabel)
@@ -172,8 +173,8 @@ namespace libDotNetClr
             }
             else
             {
-                if (!fileName.StartsWith("System") && fileName != "netstandard")
-                    PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
+                //if (!fileName.StartsWith("System") && fileName != "netstandard")
+                PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
             }
         }
         /// <summary>
@@ -183,6 +184,7 @@ namespace libDotNetClr
         /// <param name="file">The file of the method</param>
         /// <param name="oldStack">Old stack</param>
         /// <returns>Returns the return value</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file, CustomList<MethodArgStack> parms, bool addToCallStack = true)
         {
             CustomList<MethodArgStack> stack = new CustomList<MethodArgStack>();
@@ -515,35 +517,56 @@ namespace libDotNetClr
                         throw new NotImplementedException();
                     }
                 }
+                else if (item.OpCodeName == "conv.u8")
+                {
+                    if (ThrowIfStackIsZero(stack, "conv.u8")) return null;
+
+                    var stk = stack.Pop();
+                    if (stk.type == StackItemType.Int32)
+                    {
+                        stack.Add(MethodArgStack.UInt64((ulong)(int)stk.value));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
                 #endregion
                 #region Ldind* opcodes
                 else if (item.OpCodeName == "ldind.u1")
                 {
                     //TODO: implement this opcode
+                   // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.u2")
                 {
                     //TODO: implement this opcode
+                   // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.u4")
                 {
                     //TODO: implement this opcode
+                    //throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i1")
                 {
                     //TODO: implement this opcode
+                   // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i2")
                 {
                     //TODO: implement this opcode
+                   // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i4")
                 {
                     //TODO: implement this opcode
+                   // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i8")
                 {
                     //TODO: implement this opcode
+                   // throw new NotImplementedException();
                 }
                 #endregion
                 #region Math
@@ -638,19 +661,34 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "shl")
                 {
-                    var a = stack.Pop();
+                    var a = stack.Pop(); //number of bits to shift (always int32)
                     var b = stack.Pop();
 
-                    if (a.type != StackItemType.Int32 || b.type != StackItemType.Int32)
+                    if (b.type == StackItemType.Int32)
                     {
-                        clrError($"Error in {item.OpCodeName} opcode: type is not int32", "Internal CLR error");
-                        return null;
+                        var numb1 = (int)a.value;
+                        var numb2 = (int)b.value;
+                        var result = numb2 << numb1;
+                        stack.Add(MethodArgStack.Int32(result));
                     }
-
-                    var numb1 = (int)a.value;
-                    var numb2 = (int)b.value;
-                    var result = numb2 << numb1;
-                    stack.Add(MethodArgStack.Int32(result));
+                    else if (b.type == StackItemType.Int64)
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (long)b.value;
+                        var result = numb2 << numb1;
+                        stack.Add(MethodArgStack.Int64(result));
+                    }
+                    else if (b.type == StackItemType.UInt64)
+                    {
+                        var numb1 = (int)a.value;
+                        var numb2 = (ulong)b.value;
+                        var result = numb2 << numb1;
+                        stack.Add(MethodArgStack.UInt64(result));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 else if (item.OpCodeName == "shr")
                 {
@@ -1089,6 +1127,8 @@ namespace libDotNetClr
                         clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
+                    if (m2.Name== ".ctor" && m2.AmountOfParms > 1)
+                        ;
                     var a = CreateObject(m2, stack);
 
                     stack.Add(a);
@@ -1540,7 +1580,11 @@ namespace libDotNetClr
         {
             var objAddr = Objects.AllocObject().Index;
             MethodArgStack a = new MethodArgStack() { ObjectContructor = Constructor, ObjectType = Constructor.Parent, type = StackItemType.Object, value = objAddr };
-
+            if (Constructor.Parent.FullName == "System.Decimal")
+            {
+                //HACK HACK HACK
+                a.type = StackItemType.Decimal;
+            }
             //init fields
             foreach (var f in Constructor.Parent.Fields)
             {
@@ -1572,6 +1616,12 @@ namespace libDotNetClr
                         break;
                     case StackItemType.Boolean:
                         Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.Bool(false));
+                        break;
+                    case StackItemType.UInt32:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.UInt32(0));
+                        break;
+                    case StackItemType.UInt64:
+                        Objects.ObjectRefs[objAddr].Fields.Add(f.Name, MethodArgStack.UInt64(0));
                         break;
                     default:
                         throw new NotImplementedException();
@@ -1738,7 +1788,7 @@ namespace libDotNetClr
             }
 
 
-            if(m2.AmountOfParms > stack.Count)
+            if (m2.AmountOfParms > stack.Count)
             {
                 throw new Exception("Error: wrong amount of parameters supplied to function: " + m2.Name);
             }
@@ -1947,6 +1997,10 @@ namespace libDotNetClr
                 return true;
             }
             if (m.Parent.FullName == "System.Boolean" && obj.type == StackItemType.Int32)
+            {
+                return true;
+            }
+            if (m.Parent.FullName == "System.Decimal" && obj.type == StackItemType.Object)
             {
                 return true;
             }

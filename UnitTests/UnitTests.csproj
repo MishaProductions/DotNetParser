@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if not exist  &quot;$(SolutionDir)UnitTests\$(OutDir)framework&quot; md  $(SolutionDir)UnitTests\$(OutDir)framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)mscorlib.dll $(SolutionDir)UnitTests\$(OutDir)framework" />
+    <Exec Command="if not exist  &quot;$(SolutionDir)UnitTests\$(OutDir)framework&quot; md  $(SolutionDir)UnitTests\$(OutDir)framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)System.Private.Corelib.dll $(SolutionDir)UnitTests\$(OutDir)framework" />
   </Target>
 
 </Project>

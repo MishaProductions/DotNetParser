@@ -88,10 +88,17 @@ namespace LibDotNetParser
                     return "Unknown";
             }
         }
-
+        public static MethodArgStack UInt32(uint value)
+        {
+            return new MethodArgStack() { type = StackItemType.UInt32, value = value };
+        }
         public static MethodArgStack Int32(int value)
         {
             return new MethodArgStack() { type = StackItemType.Int32, value = value };
+        }
+        public static MethodArgStack UInt64(ulong value)
+        {
+            return new MethodArgStack() { type = StackItemType.UInt64, value = value };
         }
         public static MethodArgStack Int64(long value)
         {
@@ -130,6 +137,8 @@ namespace LibDotNetParser
         {
             return new MethodArgStack() { type = StackItemType.Array, value = (int)a.Index };
         }
+
+       
     }
 
     internal class MethodArgStackHolder
@@ -171,6 +180,7 @@ namespace LibDotNetParser
         UInt64,
         Float32,
         Float64,
+        Decimal,
         String,
         ldnull,
         Object,

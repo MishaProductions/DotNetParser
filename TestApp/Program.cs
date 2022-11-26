@@ -2,6 +2,7 @@
 //#define NoInternalCalls
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Runtime.CompilerServices;
 
 namespace DotNetparserTester
@@ -635,6 +636,11 @@ namespace DotNetparserTester
             //{
             //    TestFail("Dictionary: adding key/value and reading value by key doesn't work");
             //}
+
+            Console.WriteLine("MATH TEST");
+            Console.WriteLine("================");
+
+            TestAssert(Math.Clamp(21, 0, 20) == 1,"math clamp returns correct value");
 
             TestsComplete();
         }

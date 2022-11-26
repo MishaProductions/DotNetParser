@@ -66,6 +66,7 @@ namespace libDotNetClr
                 case StackItemType.Float64: return OpWithFloat64(arg1, arg2, op);
                 case StackItemType.Int32: return OpWithInt32(arg1, arg2, op);
                 case StackItemType.Int64: return OpWithInt64(arg1, arg2, op);
+                case StackItemType.UInt64: return OpWithUInt64(arg1, arg2, op);
                 case StackItemType.ldnull: return OpWithLdNull(arg1, arg2, op);
                 case StackItemType.Object: return OpWithObject(arg1, arg2, op);
                 case StackItemType.Array: return OpWithArray(arg1, arg2, op);
@@ -181,6 +182,28 @@ namespace libDotNetClr
                 case Operation.GreaterThanEqual: return MethodArgStack.Int32(v1 >= v2 ? 1 : 0);
                 case Operation.LessThanEqual: return MethodArgStack.Int32(v1 <= v2 ? 1 : 0);
                 case Operation.Negate: return MethodArgStack.Int64(-v1);
+                default: throw new Exception("Invalid operation");
+            }
+        }
+
+
+        public static MethodArgStack OpWithUInt64(MethodArgStack arg1, MethodArgStack arg2, Operation op)
+        {
+            ulong v1 = (ulong)arg1.value;
+            ulong v2 = (ulong)arg2.value;
+
+            switch (op)
+            {
+                case Operation.Add: return MethodArgStack.UInt64(v1 + v2);
+                case Operation.Subtract: return MethodArgStack.UInt64(v1 - v2);
+                case Operation.Multiply: return MethodArgStack.UInt64(v1 * v2);
+                case Operation.Divide: return MethodArgStack.UInt64(v1 / v2);
+                case Operation.Remainder: return MethodArgStack.UInt64(v1 % v2);
+                case Operation.Equal: return MethodArgStack.UInt64(v1 == v2 ? (ulong)1 : (ulong)0);
+                case Operation.GreaterThan: return MethodArgStack.UInt64(v1 > v2 ? (ulong)1 : (ulong)0);
+                case Operation.LessThan: return MethodArgStack.UInt64(v1 < v2 ? (ulong)1 : (ulong)0);
+                case Operation.GreaterThanEqual: return MethodArgStack.UInt64(v1 >= v2 ? (ulong)1 : (ulong)0);
+                case Operation.LessThanEqual: return MethodArgStack.UInt64(v1 <= v2 ? (ulong)1 : (ulong)0);
                 default: throw new Exception("Invalid operation");
             }
         }
