@@ -793,22 +793,34 @@ namespace libDotNetClr
                 {
                     BranchWithOp(item, stack, decompiler, MathOperations.Operation.GreaterThanEqual, ref i);
                 }
-                // TODO: Implement bge.un and bge.un.s
+                else if (item.OpCodeName == "bge.un" || item.OpCodeName == "bge.un.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.GreaterThan, ref i);
+                }
                 else if (item.OpCodeName == "bgt" || item.OpCodeName == "bgt.s")
                 {
                     BranchWithOp(item, stack, decompiler, MathOperations.Operation.GreaterThan, ref i);
                 }
-                // TODO: Implement bgt.un and bgt.un.s
+                else if (item.OpCodeName == "bgt.un" || item.OpCodeName == "bgt.un.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.GreaterThan, ref i);
+                }
                 else if (item.OpCodeName == "ble" || item.OpCodeName == "ble.s")
                 {
                     BranchWithOp(item, stack, decompiler, MathOperations.Operation.LessThanEqual, ref i);
                 }
-                // TODO: Implement ble.un and ble.un.s
+                else if (item.OpCodeName == "ble.un" || item.OpCodeName == "ble.un.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.LessThan, ref i);
+                }
                 else if (item.OpCodeName == "blt" || item.OpCodeName == "blt.s")
                 {
                     BranchWithOp(item, stack, decompiler, MathOperations.Operation.LessThan, ref i);
                 }
-                // TODO: Implement blt.un and blt.un.s
+                else if (item.OpCodeName == "blt.un" || item.OpCodeName == "blt.un.s")
+                {
+                    BranchWithOp(item, stack, decompiler, MathOperations.Operation.NotEqual, ref i);
+                }
                 else if (item.OpCodeName == "bne.un" || item.OpCodeName == "bne.un.s")
                 {
                     BranchWithOp(item, stack, decompiler, MathOperations.Operation.NotEqual, ref i);
