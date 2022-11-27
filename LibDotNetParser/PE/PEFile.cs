@@ -184,6 +184,8 @@ namespace LibDotNetParser
             var header = new PEHeader();
 
             header.Signature = _assemblyReader.ReadUInt32();
+            if (header.Signature != 17744)
+                throw new Exception("Invaild PE Header signature");
             header.Machine = _assemblyReader.ReadUInt16();
             header.NumberOfSections = _assemblyReader.ReadUInt16();
             header.DateTimeStamp = _assemblyReader.ReadUInt32();
@@ -192,6 +194,9 @@ namespace LibDotNetParser
             header.SizeOfOptionalHeaders = _assemblyReader.ReadUInt16();
             header.Characteristics = _assemblyReader.ReadUInt16();
             header.OptionalMagic = _assemblyReader.ReadUInt16();
+            if (header.OptionalMagic != 0x10b && header.OptionalMagic != 0x20b)
+                throw new Exception("Invaild PE Optional header magic");
+
             header.MajorLinkerVersion = _assemblyReader.ReadByte();
             header.MinorLinkerVersion = _assemblyReader.ReadByte();
             header.SizeOfCode = _assemblyReader.ReadUInt32();
@@ -199,8 +204,18 @@ namespace LibDotNetParser
             header.SizeOfUninitData = _assemblyReader.ReadUInt32();
             header.AddressOfEntryPoint = _assemblyReader.ReadUInt32();
             header.BaseOfCode = _assemblyReader.ReadUInt32();
-            header.BaseOfData = _assemblyReader.ReadUInt32();
-            header.ImageBase = _assemblyReader.ReadUInt32();
+
+            var isPE32Plus = header.OptionalMagic == 0x20b;
+
+            //PE32+ does not have this field
+            if (!isPE32Plus)
+                header.BaseOfData = _assemblyReader.ReadUInt32();
+
+            //PE32: size 4, PE32+: size 8
+            if (!isPE32Plus)
+                header.ImageBase = _assemblyReader.ReadUInt32();
+            else
+                header.ImageBase = _assemblyReader.ReadUInt64();
             header.SectionAlignment = _assemblyReader.ReadUInt32();
             header.FileAlignment = _assemblyReader.ReadUInt32();
             header.MajorOSVersion = _assemblyReader.ReadUInt16();
@@ -215,10 +230,27 @@ namespace LibDotNetParser
             header.PEChecksum = _assemblyReader.ReadUInt32();
             header.Subsystem = _assemblyReader.ReadUInt16();
             header.DLLCharacteristics = _assemblyReader.ReadUInt16();
-            header.SizeOfStackReserve = _assemblyReader.ReadUInt32();
-            header.SizeOfStackCommit = _assemblyReader.ReadUInt32();
-            header.SizeOfHeapReserve = _assemblyReader.ReadUInt32();
-            header.SizeOfHeapCommit = _assemblyReader.ReadUInt32();
+
+            if (isPE32Plus)
+                header.SizeOfStackReserve = _assemblyReader.ReadUInt64();
+            else
+                header.SizeOfStackReserve = _assemblyReader.ReadUInt32();
+
+            if (isPE32Plus)
+                header.SizeOfStackCommit = _assemblyReader.ReadUInt64();
+            else
+                header.SizeOfStackCommit = _assemblyReader.ReadUInt32();
+
+            if (isPE32Plus)
+                header.SizeOfHeapReserve = _assemblyReader.ReadUInt64();
+            else
+                header.SizeOfHeapReserve = _assemblyReader.ReadUInt32();
+
+            if (isPE32Plus)
+                header.SizeOfHeapCommit = _assemblyReader.ReadUInt64();
+            else
+                header.SizeOfHeapCommit = _assemblyReader.ReadUInt32();
+
             header.LoaderFlags = _assemblyReader.ReadUInt32();
             header.DirectoryLength = _assemblyReader.ReadUInt32();
 

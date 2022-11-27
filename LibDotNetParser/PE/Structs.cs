@@ -79,10 +79,10 @@ namespace LibDotNetParser.PE
         public uint PEChecksum { get; set; }
         public ushort Subsystem { get; set; }
         public ushort DLLCharacteristics { get; set; }
-        public uint SizeOfStackReserve { get; set; }
-        public uint SizeOfStackCommit { get; set; }
-        public uint SizeOfHeapReserve { get; set; }
-        public uint SizeOfHeapCommit { get; set; }
+        public ulong SizeOfStackReserve { get; set; }
+        public ulong SizeOfStackCommit { get; set; }
+        public ulong SizeOfHeapReserve { get; set; }
+        public ulong SizeOfHeapCommit { get; set; }
         public uint LoaderFlags { get; set; }
         public uint DirectoryLength { get; set; }
         public IList<DataDirectory> Directories { get; set; }

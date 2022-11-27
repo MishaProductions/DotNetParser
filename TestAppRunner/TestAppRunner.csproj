@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="md  $(SolutionDir)\TestAppRunner\$(OutDir)framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)System.Private.CoreLib.dll $(SolutionDir)\TestAppRunner\$(OutDir)framework&#xD;&#xA;md  $(SolutionDir)\TesterKernel\isoFiles\&#xD;&#xA;md  $(SolutionDir)\TesterKernel\isoFiles\framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)System.Private.CoreLib.dll $(SolutionDir)\TesterKernel\isoFiles\framework&#xD;&#xA;copy $(SolutionDir)TestApp\$(OutDir)TestApp.dll $(SolutionDir)\TesterKernel\isoFiles" />
+    <Exec Command="md $(SolutionDir)\TestAppRunner\$(OutDir)framework&#xD;&#xA;copy /Y $(SolutionDir)mscorlib\$(OutDir)System.Private.CoreLib.dll $(SolutionDir)\TestAppRunner\$(OutDir)framework&#xD;&#xA;md $(SolutionDir)\TesterKernel\isoFiles\&#xD;&#xA;md $(SolutionDir)\TesterKernel\isoFiles\framework&#xD;&#xA;copy $(SolutionDir)mscorlib\$(OutDir)System.Private.CoreLib.dll $(SolutionDir)\TesterKernel\isoFiles\framework&#xD;&#xA;copy $(SolutionDir)TestApp\$(OutDir)TestApp.dll $(SolutionDir)\TesterKernel\isoFiles" />
   </Target>
 
 </Project>
