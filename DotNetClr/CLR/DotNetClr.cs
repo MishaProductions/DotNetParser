@@ -174,7 +174,6 @@ namespace libDotNetClr
             }
             else
             {
-                //if (!fileName.StartsWith("System") && fileName != "netstandard")
                 PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
             }
         }
@@ -983,6 +982,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "stsfld")
                 {
+                    
                     FieldInfo info = item.Operand as FieldInfo;
                     //write value to field.
                     DotNetField f2 = null;
@@ -1032,6 +1032,10 @@ namespace libDotNetClr
                             f.value = stack[stack.Count - 1];
                             break;
                         }
+                    }
+                    if (stack.Count == 0)
+                    {
+                        throw new Exception("stsfld instuction: nothing to write to field (stack is empty). The field is "+f2.ParrentType.FullName+"."+f2.Name);
                     }
 
                     if (f3 == null)

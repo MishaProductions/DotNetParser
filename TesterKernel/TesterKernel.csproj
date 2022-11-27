@@ -10,7 +10,7 @@
         <DebugEnabled>False</DebugEnabled>
         <DebugMode>Source</DebugMode>
         <IgnoreDebugStubAttribute>False</IgnoreDebugStubAttribute>
-        <ISOFile>bin\Debug\net5.0\TesterKernel.iso</ISOFile>
+        <ISOFile>bin\Debug\net6.0\TesterKernel.iso</ISOFile>
         <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 

@@ -16,7 +16,7 @@ namespace DotNetParserRunner
         static void Main()
         {
             //This is for debugging purposes
-            bool doil2cpu = false;
+            bool doil2cpu = true;
             string il2cpu = @"C:\Users\Misha\AppData\Roaming\Cosmos User Kit\Build\IL2CPU\IL2CPU.dll";
             string exe = doil2cpu ? il2cpu : "TestApp.dll";
 

@@ -44,13 +44,13 @@ namespace TestApp.Tests
                 }
             }
 
-            int h = 0;
-            TestByRef("this is correct", ref h);
-            if (h == 0)
+            int value = 0;
+            TestByRef("this is correct", ref value);
+            if (value == 0)
             {
                 TestController.TestFail("ByRef value did not change!");
             }
-            else if (h == 1)
+            else if (value == 1)
             {
                 TestController.TestSuccess("ByRef value is correct");
             }

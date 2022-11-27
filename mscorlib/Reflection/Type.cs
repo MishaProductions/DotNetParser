@@ -38,6 +38,20 @@ namespace System
             return Type_FromReference(handle);
         }
 
+        public static Type? GetType(
+            string typeName,
+            Func<AssemblyName, Assembly?>? assemblyResolver,
+            Func<Assembly?, string, bool, Type?>? typeResolver,
+            bool throwOnError)
+        {
+            //StackCrawlMark stackMark = StackCrawlMark.LookForMyCaller;
+            //return TypeNameParser.GetType(typeName, assemblyResolver, typeResolver, throwOnError, false, ref stackMark);
+            Console.WriteLine("type.gettype notimplemented. type is " + typeName);
+            return null;
+        }
+
+
+
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern static Type Type_FromReference(RuntimeTypeHandle handle);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -48,5 +62,22 @@ namespace System
         public extern FieldInfo InternalGetField(Type t, string name);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern MethodInfo GetMethod(string name);
+
+        public static bool op_Equality(System.Type a, System.Type b)
+        {
+            if(a==null && b != null)
+            {
+                return false;
+            }
+            if (a != null && b == null)
+            {
+                return false;
+            }
+            if (a == null && b == null)
+            {
+                return true;
+            }
+            return a.internal__fullname == b.internal__fullname;
+        }
     }
 }

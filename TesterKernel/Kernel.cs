@@ -18,35 +18,42 @@ namespace TesterKernel
             //Init the file system
             var fs = new CosmosVFS();
             VFSManager.RegisterVFS(fs);
-            Console.Clear();
+           // Console.Clear();
 
             //Find the location where we booted from
             string boot = "";
             bool frame = false;
-            foreach (var item in fs.GetVolumes())
+            foreach (var disk in fs.GetDisks())
             {
-                Console.WriteLine("Found volume: " + item.mFullPath);
-                foreach (var d in Directory.GetDirectories(item.mFullPath))
+                foreach (var part in disk.Partitions)
                 {
-                    Console.WriteLine("dir: " + d);
+                    Console.WriteLine("Found volume: " + part.RootPath);
+                    if (part.RootPath != null)
+                    {
+                        foreach (var d in Directory.GetDirectories(part.RootPath))
+                        {
+                            Console.WriteLine("dir: " + d);
+                        }
+                        foreach (var d in Directory.GetFiles(part.RootPath))
+                        {
+                            Console.WriteLine("file: " + d);
+                        }
+                        if (File.Exists(part.RootPath + "TESTAPP.DLL") | File.Exists(part.RootPath + "dotnetparser.exe"))
+                        {
+                            Console.WriteLine("Found boot volume: " + part.RootPath);
+                            boot = part.RootPath;
+                        }
+                        if (Directory.Exists(part.RootPath + "framework"))
+                        {
+                            frame = true;
+                        }
+                        else if (Directory.Exists(part.RootPath + "FRAMEW"))
+                        {
+                            frame = false;
+                        }
+                    }
                 }
-                foreach (var d in Directory.GetFiles(item.mFullPath))
-                {
-                    Console.WriteLine("file: " + d);
-                }
-                if (File.Exists(item.mFullPath + "TESTAPP.DLL") | File.Exists(item.mFullPath + "dotnetparser.exe"))
-                {
-                    Console.WriteLine("Found boot volume: " + item.mFullPath);
-                    boot = item.mFullPath;
-                }
-                if (Directory.Exists(item.mFullPath + "framework"))
-                {
-                    frame = true;
-                }
-                else if (Directory.Exists(item.mFullPath + "FRAMEW"))
-                {
-                    frame = false;
-                }
+               
             }
             if (boot == "")
             {

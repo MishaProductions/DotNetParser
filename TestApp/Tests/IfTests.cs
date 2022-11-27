@@ -41,6 +41,16 @@
             {
                 TestController.TestSuccess("78 <= 76");
             }
+
+            var flag3 = false;
+            if (!flag3)
+            {
+                TestController.TestSuccess("NOT test");
+            }
+            else
+            {
+                TestController.TestFail("NOT test");
+            }
         }
 
         /// <summary>

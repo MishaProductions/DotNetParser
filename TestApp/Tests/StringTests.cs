@@ -56,6 +56,11 @@ namespace TestApp.Tests
             {
                 TestController.TestFail("String.IndexOf() is not 1");
             }
+
+
+            var arr = "ABCBE".Split('B');
+            TestController.TestAssert(arr[0] == "A", "string.Split works correctly");
+
         }
     }
 }
