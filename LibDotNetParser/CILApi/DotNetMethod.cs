@@ -27,11 +27,22 @@ namespace LibDotNetParser.CILApi
         public List<MethodSignatureParam> Parms = new List<MethodSignatureParam>();
         public string Name { get; private set; }
         public uint RVA { get { return BackendTabel.RVA; } }
+        private uint _Offset = 0;
         public uint Offset
         {
             get
             {
-                return (uint)BinUtil.RVAToOffset(RVA, file.PeHeader.Sections);
+                try
+                {
+                    if (_Offset == 0)
+                        _Offset = (uint)BinUtil.RVAToOffset(RVA, file.PeHeader.Sections);
+                }
+                catch
+                {
+                    //probably an internal call / no body
+                }
+
+                return _Offset;
             }
         }
         public int AmountOfParms { get; private set; }
@@ -79,6 +90,11 @@ namespace LibDotNetParser.CILApi
 
         public MethodSignatureInfoV2 SignatureInfo { get; }
         public uint ParamListIndex { get; internal set; }
+        /// <summary>
+        /// Max amount of items on operand stacks
+        /// </summary>
+        public int MaxStackSize { get; private set; }
+        private byte[] MethodBody;
 
         /// <summary>
         /// Internal use only
@@ -106,13 +122,12 @@ namespace LibDotNetParser.CILApi
 
             if (SignatureInfo.ReturnVal.type != StackItemType.None)
                 HasReturnValue = true;
+
+            if (RVA != 0)
+                MethodBody = ReadMethodBody();
         }
 
-        /// <summary>
-        /// Gets the raw IL instructions for this method.
-        /// </summary>
-        /// <returns>raw IL instructions</returns>
-        public byte[] GetBody()
+        private byte[] ReadMethodBody()
         {
             var fs = file.RawFile;
             fs.BaseStream.Seek(Offset, System.IO.SeekOrigin.Begin);
@@ -133,13 +148,16 @@ namespace LibDotNetParser.CILApi
             if (header == 3) //Fat format
             {
                 byte info2 = fs.ReadByte(); //some info on header
-                ushort MaxStack = fs.ReadUInt16();
+                MaxStackSize = fs.ReadUInt16();
                 CodeSize = (int)fs.ReadUInt32();
+
+                //todo: read local variable info in #blob stream
                 uint LocalVarSigTok = fs.ReadUInt32();
             }
             else //Tiny format
             {
                 CodeSize = sizer;
+                MaxStackSize = 8; //Default stack size for tiny format
             }
             List<byte> code = new List<byte>();
 
@@ -151,6 +169,14 @@ namespace LibDotNetParser.CILApi
             }
 
             return code.ToArray();
+        }
+        /// <summary>
+        /// Gets the raw IL instructions for this method.
+        /// </summary>
+        /// <returns>raw IL instructions</returns>
+        public byte[] GetBody()
+        {
+            return MethodBody;
         }
 
         internal static MethodSignatureInfoV2 ParseMethodSignature(uint signature, DotNetFile file, string FunctionName)

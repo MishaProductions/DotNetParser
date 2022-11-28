@@ -187,9 +187,7 @@ namespace libDotNetClr
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private MethodArgStack RunMethod(DotNetMethod m, DotNetFile file, CustomList<MethodArgStack> parms, bool addToCallStack = true)
         {
-            CustomList<MethodArgStack> stack = new CustomList<MethodArgStack>();
-            if (m.Name == ".ctor" && m.Parent.FullName == "System.Object")
-                return null;
+            CustomList<MethodArgStack> stack = new CustomList<MethodArgStack>(m.MaxStackSize);
             if (!Running)
                 return null;
             #region Internal methods
@@ -364,6 +362,10 @@ namespace libDotNetClr
 
                     if (oldItem == null)
                     {
+                        //TODO: Read the method flags to determine how to initialize the local variables
+                        //See https://www.codeproject.com/Articles/12585/The-NET-File-Format#Blob
+                        //and https://www.codeproject.com/Articles/12585/The-NET-File-Format#Methods
+
                         Localstack[(byte)item.Operand] = MethodArgStack.Null();
                         stack.Add(Localstack[(byte)item.Operand]);
                     }
@@ -1196,6 +1198,12 @@ namespace libDotNetClr
                     if (obj == null)
                     {
                         clrError("Failed to find correct type in the stack", "");
+                        return null;
+                    }
+
+                    if (obj.type == StackItemType.ldnull)
+                    {
+                        clrError($"stflfd instruction: Attempted to write to field {f2.Name} in type {f2.ParrentType.FullName}, however the instance of the type is null","System.NullReferenceException");
                         return null;
                     }
 
@@ -2057,6 +2065,10 @@ namespace libDotNetClr
                 return true;
             }
             if (m.Parent.FullName == "System.Decimal" && obj.type == StackItemType.Object)
+            {
+                return true;
+            }
+            if (m.Parent.FullName == "System.Decimal" && obj.type == StackItemType.Decimal)
             {
                 return true;
             }

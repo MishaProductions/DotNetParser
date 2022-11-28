@@ -243,7 +243,7 @@ namespace LibDotNetParser.CILApi
                                 }
                                 else if (type2 == 2)
                                 {
-                                    //Type spec???? What
+                                    //Type spec???? what we just tried to read one
                                     throw new NotImplementedException();
                                 }
                                 else

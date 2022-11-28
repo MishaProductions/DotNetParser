@@ -33,6 +33,10 @@ namespace libDotNetClr
         {
             backend = new List<T>();
         }
+        public CustomList(int maxSize)
+        {
+            backend = new List<T>(maxSize);
+        }
         public void Clear()
         {
 #if STACK_DEBUG
