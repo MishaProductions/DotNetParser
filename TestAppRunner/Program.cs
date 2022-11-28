@@ -24,6 +24,9 @@ namespace DotNetParserRunner
             //Create a new dotnetfile with the path to the EXE
             m = new DotNetFile(exe);
 
+            Console.WriteLine("Welcome to .NET Parser");
+            Console.WriteLine("File CLR version: " + m.Backend.ClrMetaDataHeader.VersionString);
+
             //This is not needed, but this shows the IL code of the entry point
             var decompiler = new IlDecompiler(m.EntryPoint);
             Console.WriteLine("Decompile of Main function:");

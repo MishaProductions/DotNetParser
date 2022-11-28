@@ -1268,6 +1268,11 @@ namespace libDotNetClr
                         clrError("Object to read from not found!", "CLR internal error");
                         return null;
                     }
+                    if (obj.type == StackItemType.ldnull)
+                    {
+                        clrError($"ldfld instruction: Attempted to write to field {f2.Name} in type {f2.ParrentType.FullName}, however the instance of the type is null", "System.NullReferenceException");
+                        return null;
+                    }
 
                     stack.RemoveAt(stack.Count - 1);
                     var data = Objects.ObjectRefs[(int)obj.value];
