@@ -533,17 +533,26 @@ namespace libDotNetClr
                         throw new NotImplementedException();
                     }
                 }
+                else if (item.OpCodeName == "conv.u")
+                {
+                    if (ThrowIfStackIsZero(stack, "conv.u8")) return null;
+
+                    var stk = stack.Pop();
+
+                    //Convert uint to uint pointer
+                    throw new NotImplementedException("Converting uint to uint* not yet supported");
+                }
                 #endregion
                 #region Ldind* opcodes
                 else if (item.OpCodeName == "ldind.u1")
                 {
                     //TODO: implement this opcode
-                   // throw new NotImplementedException();
+                    // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.u2")
                 {
                     //TODO: implement this opcode
-                   // throw new NotImplementedException();
+                    // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.u4")
                 {
@@ -553,22 +562,22 @@ namespace libDotNetClr
                 else if (item.OpCodeName == "ldind.i1")
                 {
                     //TODO: implement this opcode
-                   // throw new NotImplementedException();
+                    // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i2")
                 {
                     //TODO: implement this opcode
-                   // throw new NotImplementedException();
+                    // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i4")
                 {
                     //TODO: implement this opcode
-                   // throw new NotImplementedException();
+                    // throw new NotImplementedException();
                 }
                 else if (item.OpCodeName == "ldind.i8")
                 {
                     //TODO: implement this opcode
-                   // throw new NotImplementedException();
+                    // throw new NotImplementedException();
                 }
                 #endregion
                 #region Math
@@ -996,7 +1005,7 @@ namespace libDotNetClr
                 }
                 else if (item.OpCodeName == "stsfld")
                 {
-                    
+
                     FieldInfo info = item.Operand as FieldInfo;
                     //write value to field.
                     DotNetField f2 = null;
@@ -1049,7 +1058,7 @@ namespace libDotNetClr
                     }
                     if (stack.Count == 0)
                     {
-                        throw new Exception("stsfld instuction: nothing to write to field (stack is empty). The field is "+f2.ParrentType.FullName+"."+f2.Name);
+                        throw new Exception("stsfld instuction: nothing to write to field (stack is empty). The field is " + f2.ParrentType.FullName + "." + f2.Name);
                     }
 
                     if (f3 == null)
@@ -1146,7 +1155,7 @@ namespace libDotNetClr
                         clrError($"Cannot find the called constructor: {call.NameSpace}.{call.ClassName}.{call.FunctionName}(). Function signature is {call.Signature}", "CLR internal error");
                         return null;
                     }
-                    if (m2.Name== ".ctor" && m2.AmountOfParms > 1)
+                    if (m2.Name == ".ctor" && m2.AmountOfParms > 1)
                         ;
                     var a = CreateObject(m2, stack);
 
@@ -1203,7 +1212,7 @@ namespace libDotNetClr
 
                     if (obj.type == StackItemType.ldnull)
                     {
-                        clrError($"stflfd instruction: Attempted to write to field {f2.Name} in type {f2.ParrentType.FullName}, however the instance of the type is null","System.NullReferenceException");
+                        clrError($"stflfd instruction: Attempted to write to field {f2.Name} in type {f2.ParrentType.FullName}, however the instance of the type is null", "System.NullReferenceException");
                         return null;
                     }
 
@@ -1437,7 +1446,7 @@ namespace libDotNetClr
                     stack.RemoveAt(stack.Count - 1); //Remove index
                     stack.RemoveAt(stack.Count - 1); //Remove array ref
                 }
-                else if(item.OpCodeName== "stelem.i4")
+                else if (item.OpCodeName == "stelem.i4")
                 {
                     var val = stack[stack.Count - 1];
                     var index = stack[stack.Count - 2];
@@ -1632,7 +1641,7 @@ namespace libDotNetClr
                 #endregion
                 else
                 {
-                    clrError("Unsupported opcode: " + item.OpCodeName+" in method "+m.Parent.FullName+"."+m.Name, "CLR Internal error");
+                    clrError("Unsupported opcode: " + item.OpCodeName + " in method " + m.Parent.FullName + "." + m.Name, "CLR Internal error");
                     return null;
                 }
             }
