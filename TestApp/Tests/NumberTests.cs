@@ -190,6 +190,9 @@ namespace TestApp.Tests
             TestController.TestAssert(-i == 100, "integer negation");
             d1 = -50.5;
             TestController.TestAssert(-d1 == 50.5, "double negation");
+            TestController.TestAssert(float.IsNegative(-1), "float.IsNegative");
+            TestController.TestAssert(float.IsPositiveInfinity(float.PositiveInfinity), "float.IsPositiveInfinity");
+            TestController.TestAssert(float.IsNegativeInfinity(float.NegativeInfinity), "float.IsNegativeInfinity");
 
             if (true.ToString() == "True")
             {

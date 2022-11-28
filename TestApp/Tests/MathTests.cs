@@ -103,6 +103,16 @@ namespace TestApp.Tests
             TestController.TestAssert(Math.Clamp(-1, 0, 20) == 0, "math clamp returns correct value");
             TestController.TestAssert(Math.PI == 3.1415926535897931, "math pi returns correct value");
             TestController.TestAssert(Math.Max(8, 7) == 8, "math max returns correct value");
+
+            //decimal x = 0.1M;
+            //if(0.2M > x)
+            //{
+            //    TestController.TestSuccess("decimal 0.2 > 0.1 is true");
+            //}
+            //else
+            //{
+            //    TestController.TestSuccess("decimal 0.2 > 0.1 is FALSE");
+            //}
         }
     }
 }

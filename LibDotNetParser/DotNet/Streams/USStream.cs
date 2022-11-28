@@ -55,7 +55,7 @@ namespace LibDotNetParser.DotNet.Streams
                 var o = _reader.BaseStream.Position;
                 var nb = Read7BitInt(_reader);
                 _reader.BaseStream.Position = o;
-                    var len = _reader.ReadByte();
+                var len = _reader.ReadByte();
                 if (len == 0x80)
                 {
                     eightByteStart = true;
@@ -70,7 +70,7 @@ namespace LibDotNetParser.DotNet.Streams
 
                 List<byte> bytes = new List<byte>();
                 bool end = false;
-                for (int i2 = 0; i2 < ActualStringLen/2; i2++)
+                for (int i2 = 0; i2 < ActualStringLen / 2; i2++)
                 {
                     try
                     {
@@ -84,7 +84,7 @@ namespace LibDotNetParser.DotNet.Streams
                         bytes.Add(a);
                         bytes.Add(b);
                     }
-                    catch (System.IO.EndOfStreamException)
+                    catch (EndOfStreamException)
                     {
                         throw new Exception("Error while reading US stream table: End of stream. Please open an issue on github.");
                     }

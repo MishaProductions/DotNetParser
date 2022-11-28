@@ -9,8 +9,6 @@
                 return OrdinalIgnoreCaseComparer.Instance;
             }
         }
-
-
     }
     internal sealed class OrdinalIgnoreCaseComparer : StringComparer
     {
@@ -21,7 +19,6 @@
             return 0;
         }
 
-        // Token: 0x06001801 RID: 6145 RVA: 0x000F2B1D File Offset: 0x000F1D1D
         public bool Equals(string x, string y)
         {
             return String.Equals(x, y, StringComparison.OrdinalIgnoreCase);
