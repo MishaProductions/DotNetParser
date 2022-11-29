@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 
 namespace LibDotNetParser.PE
@@ -6,51 +7,38 @@ namespace LibDotNetParser.PE
     public class MetadataReader : BinaryReader
     {
         public StreamOffsetSizeFlags StreamOffsetSizeFlags { get; set; }
-
-        public MetadataReader(Stream input) : base(input)
+        public HeapSizes HeapSizes { get; }
+        public MetadataReader(Stream input, HeapSizes s) : base(input)
         {
-
+            HeapSizes = s;
         }
-
-        public MetadataReader(Stream input, Encoding encoding)
-            : base(input, encoding)
+        public uint ReadSize(uint size)
         {
+            switch (size)
+            {
+                case 1:
+                    return ReadByte();
+                case 2:
+                    return ReadUInt16();
+                case 4:
+                    return ReadUInt32();
+                default:
+                    throw new NotImplementedException("Unsupported size: " + size);
+            }
         }
-
         public uint ReadStringStreamIndex()
         {
-            return ReadStreamIndex(StreamOffsetSizeFlags.String);
+            return ReadSize(HeapSizes.String);
         }
 
         public uint ReadGuidStreamIndex()
         {
-            return ReadStreamIndex(StreamOffsetSizeFlags.GUID);
+            return ReadSize(HeapSizes.Guid);
         }
 
         public uint ReadBlobStreamIndex()
         {
-            return ReadStreamIndex(StreamOffsetSizeFlags.Blob);
-        }
-
-        private uint ReadStreamIndex(StreamOffsetSizeFlags streamFlag)
-        {
-            return HasAFlag(streamFlag) ? ReadUInt32() : ReadUInt16();
-        }
-        /// <summary>
-        /// Hacky, but it works
-        /// </summary>
-        /// <param name="x"></param>
-        /// <returns></returns>
-        private bool HasAFlag(StreamOffsetSizeFlags x)
-        {
-            if (x == StreamOffsetSizeFlags.Blob)
-                return (StreamOffsetSizeFlags & StreamOffsetSizeFlags.Blob) != 0;
-            else if (x == StreamOffsetSizeFlags.GUID)
-                return (StreamOffsetSizeFlags & StreamOffsetSizeFlags.GUID) != 0;
-            else if (x == StreamOffsetSizeFlags.String)
-                return (StreamOffsetSizeFlags & StreamOffsetSizeFlags.String) != 0;
-            else
-                return false;
+            return ReadSize(HeapSizes.Blob);
         }
     }
 }

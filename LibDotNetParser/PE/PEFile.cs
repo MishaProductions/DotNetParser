@@ -131,7 +131,7 @@ namespace LibDotNetParser
                 ClrMetaDataStreamHeader.TableSizes[i] = TableStreamR.ReadUInt32();
             }
 
-            MetadataReader = new MetadataReader(TableStreamR.BaseStream);
+            MetadataReader = new MetadataReader(TableStreamR.BaseStream, new HeapSizes((byte)ClrMetaDataStreamHeader.OffsetSizeFlags));
             BlobStream = GetStreamBytes("#Blob", r);
 
             //Parse the tabels
