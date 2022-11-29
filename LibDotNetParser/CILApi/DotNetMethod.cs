@@ -545,6 +545,11 @@ namespace LibDotNetParser.CILApi
                     sig = "T" + num;
 
                     break;
+                case 0x1F:
+                    var num3 = IlDecompiler.ParseNumber(r);
+                    IlDecompiler.DecodeTypeDefOrRef((uint)num3, out uint rowType3, out uint index3);
+                    sig = "TODO: 0x1F";
+                    break;
                 case 0x20:
                     var num2 = IlDecompiler.ParseNumber(r);
                     IlDecompiler.DecodeTypeDefOrRef((uint)num2, out uint rowType2, out uint index2);

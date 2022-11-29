@@ -41,6 +41,7 @@ namespace DotNetParserRunner
                 m,
                 Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location),
                 "framework"));
+            clr.ShouldPrintDebugMessages = true;
 
             //Register our internal methods
             clr.RegisterCustomInternalMethod("TestsComplete", TestsComplete);
@@ -50,6 +51,7 @@ namespace DotNetParserRunner
             Stopwatch ws = new Stopwatch();
             ws.Start();
             //Put arguments in the string array
+            
             clr.Start(new string[] { "testArg" });
             ws.Stop();
             Console.WriteLine("Tests took "+ws.ElapsedMilliseconds+" ms");
