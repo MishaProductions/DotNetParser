@@ -16,7 +16,7 @@ namespace LibDotNetParser.CILApi
         /// <summary>
         /// The opcode
         /// </summary>
-        public int OpCode { get; set; }
+        public ushort OpCode { get; set; }
         /// <summary>
         /// The operand
         /// </summary>

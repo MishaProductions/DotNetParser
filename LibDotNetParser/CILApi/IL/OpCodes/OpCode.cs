@@ -10,10 +10,10 @@ namespace LibDotNetParser.CILApi.IL
     public class OpCode
     {
         public string Name { get; internal set; }
-        public byte Value { get; internal set; }
+        public ushort Value { get; internal set; }
         public OpCodeOperandType OpCodeOperandType { get; internal set; }
         public bool IsExtended { get; internal set; }
-        public OpCode(string name, byte value, OpCodeOperandType type)
+        public OpCode(string name, ushort value, OpCodeOperandType type)
         {
             this.Name = name;
             this.Value = value;
@@ -21,7 +21,7 @@ namespace LibDotNetParser.CILApi.IL
             this.IsExtended = false;
         }
 
-        public OpCode(string name, byte value, OpCodeOperandType type,bool IsExtended)
+        public OpCode(string name, ushort value, OpCodeOperandType type,bool IsExtended)
         {
             this.Name = name;
             this.Value = value;

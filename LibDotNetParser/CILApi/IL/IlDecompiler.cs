@@ -61,6 +61,9 @@ namespace LibDotNetParser.CILApi
                 opCode = OpCodes.MultiOpCodes[opCodeb];
                 Offset++;
                 size++;
+
+                //make sure that opcode value is correct
+                opCode.Value = BitConverter.ToUInt16(new byte[] { opCodeb,0xFE }, 0);
             }
             if (opCode == null)
             {

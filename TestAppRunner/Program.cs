@@ -3,6 +3,7 @@ using LibDotNetParser;
 using LibDotNetParser.CILApi;
 using LibDotNetParser.CILApi.IL;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace DotNetParserRunner
@@ -46,10 +47,12 @@ namespace DotNetParserRunner
             clr.RegisterCustomInternalMethod("TestSuccess", TestSuccess);
             clr.RegisterCustomInternalMethod("TestFail", TestFail);
             clr.RegisterCustomInternalMethod("TestsRxObject", TestRxObject);
-
+            Stopwatch ws = new Stopwatch();
+            ws.Start();
             //Put arguments in the string array
             clr.Start(new string[] { "testArg" });
-
+            ws.Stop();
+            Console.WriteLine("Tests took "+ws.ElapsedMilliseconds+" ms");
 
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);
