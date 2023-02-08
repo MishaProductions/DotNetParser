@@ -411,8 +411,11 @@ namespace libDotNetClr
                         }
                     case OpCodes.OpCodesList.Box:
                         {
-                            throw new NotImplementedException($"OpCode {item.OpCodeName} not implemented");
-                        }
+                        var a = stack.Pop();
+                  
+                        stack.Add(new MethodArgStack() { type = StackItemType.ObjectRef, value = a.value });
+                        break;
+                    }
                     case OpCodes.OpCodesList.Br:
                     case OpCodes.OpCodesList.Br_S:
                         {
@@ -2067,11 +2070,31 @@ namespace libDotNetClr
                         }
                     case OpCodes.OpCodesList.Unbox:
                         {
-                            throw new NotImplementedException($"OpCode {item.OpCodeName} not implemented");
+                        throw new NotImplementedException($"OpCode {item.OpCodeName} not implemented");
                         }
                     case OpCodes.OpCodesList.Unbox_Any:
                         {
-                            throw new NotImplementedException($"OpCode {item.OpCodeName} not implemented");
+                            var aV = stack.Pop();
+                            if (aV.type != StackItemType.ObjectRef) {
+                                clrError($"Error in {item.OpCodeName} opcode: type is not objectref", "Internal CLR error");
+                                return null;
+                            }
+
+                        if (aV.value is Int64 i64)
+                            stack.Add(MethodArgStack.Int64(i64));
+                        else if (aV.value is Int32 i32)
+                            stack.Add(MethodArgStack.Int32(i32));
+                        else if (aV.value is UInt64 ui64)
+                            stack.Add(MethodArgStack.UInt64(ui64));
+                        else if (aV.value is UInt32 ui32)
+                            stack.Add(MethodArgStack.UInt32(ui32));
+                        else if (aV.value is float f32)
+                            stack.Add(MethodArgStack.Float32(f32));
+                        else if (aV.value is double f64)
+                            stack.Add(MethodArgStack.Float64(f64));
+                        else
+                            clrError($"Error in {item.OpCodeName} opcode: object ref type is not supported", "Internal CLR error");
+                            break;
                         }
                     case OpCodes.OpCodesList.Volatile:
                         {

@@ -68,6 +68,22 @@ namespace TestApp.Tests
             Console.WriteLine("Testing subclasses");
             MyObject.SubClass subClass = new MyObject.SubClass();
             subClass.HelloFromSubClass();
+
+            Console.WriteLine("Testing boxing");
+            int i = 5;
+            object o = i;
+            float fbox = 5.3f;
+            object fobj = fbox;
+
+            Console.WriteLine("Testing unboxing");
+            int i2 = (int)o;
+            float f2 = (float)fobj;
+
+            if (i == i2 && fbox == f2) {
+                TestController.TestSuccess("Boxing and unboxing test");
+            } else {
+                TestController.TestFail("Boxing and unboxing test");
+            }
         }
     }
 
