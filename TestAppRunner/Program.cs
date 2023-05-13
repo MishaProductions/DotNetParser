@@ -38,9 +38,7 @@ namespace DotNetParserRunner
             //This creates an instance of a CLR, and then runs it
             Console.WriteLine("Running program:");
             clr = new DotNetClr(
-                m,
-                Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location),
-                "framework"));
+                m);
             clr.ShouldPrintDebugMessages = true;
 
             //Needed so that we can load dlls

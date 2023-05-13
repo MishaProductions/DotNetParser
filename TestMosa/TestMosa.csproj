@@ -30,4 +30,7 @@
 	  <ProjectReference Include="..\LibDotNetParser\LibDotNetParser.csproj" />
 	</ItemGroup>
 
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	  <Exec Command="dotnet $(ProjectDir)\..\BuiltinGen\bin\Debug\net7.0\BuiltinGen.dll $(ProjectDir)\Builtin.cs" />
+	</Target>
 </Project>

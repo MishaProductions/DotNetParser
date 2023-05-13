@@ -16,7 +16,6 @@ namespace libDotNetClr
     public partial class DotNetClr
     {
         private DotNetFile file;
-        private string EXEPath;
         /// <summary>
         /// Is the CLR running?
         /// </summary>
@@ -40,18 +39,12 @@ namespace libDotNetClr
 
         public delegate byte[] AssemblyResolveCallback(string dll);
         private AssemblyResolveCallback _Cb;
-        public DotNetClr(DotNetFile exe, string DllPath)
+        public DotNetClr(DotNetFile exe)
         {
-            if (!Directory.Exists(DllPath))
-            {
-                throw new DirectoryNotFoundException(DllPath);
-            }
             if (exe == null)
             {
                 throw new ArgumentException(nameof(exe));
             }
-
-            EXEPath = DllPath;
             Init(exe);
         }
         private void Init(DotNetFile p)
@@ -78,6 +71,11 @@ namespace libDotNetClr
         /// <param name="args">String array of arguments</param>
         public void Start(string[] args = null)
         {
+            if (_Cb == null)
+            {
+                clrError("RegisterResolveCallBack() must be called to be able to start the CLR", "Internal Error");
+                return;
+            }
             try
             {
                 if (file.EntryPoint == null)

@@ -5,6 +5,7 @@ using LibDotNetParser;
 using LibDotNetParser.CILApi;
 using System;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
 using Sys = Cosmos.System;
 
 namespace TesterKernel
@@ -13,71 +14,22 @@ namespace TesterKernel
     {
         private static int NumbOfSuccesssTests = 0;
         private static int NumbOfFailedTests = 0;
+        private static DotNetClr clr;
+        private static DotNetFile fl;
         protected override void BeforeRun()
         {
             //Init the file system
-            var fs = new CosmosVFS();
-            VFSManager.RegisterVFS(fs);
-           // Console.Clear();
-
-            //Find the location where we booted from
-            string boot = "";
-            bool frame = false;
-            foreach (var disk in fs.GetDisks())
-            {
-                foreach (var part in disk.Partitions)
-                {
-                    Console.WriteLine("Found volume: " + part.RootPath);
-                    if (part.RootPath != null)
-                    {
-                        foreach (var d in Directory.GetDirectories(part.RootPath))
-                        {
-                            Console.WriteLine("dir: " + d);
-                        }
-                        foreach (var d in Directory.GetFiles(part.RootPath))
-                        {
-                            Console.WriteLine("file: " + d);
-                        }
-                        if (File.Exists(part.RootPath + "TESTAPP.DLL") | File.Exists(part.RootPath + "dotnetparser.exe"))
-                        {
-                            Console.WriteLine("Found boot volume: " + part.RootPath);
-                            boot = part.RootPath;
-                        }
-                        if (Directory.Exists(part.RootPath + "framework"))
-                        {
-                            frame = true;
-                        }
-                        else if (Directory.Exists(part.RootPath + "FRAMEW"))
-                        {
-                            frame = false;
-                        }
-                    }
-                }
-               
-            }
-            if (boot == "")
-            {
-                Console.WriteLine("Cannot find the media that we booted from.");
-                return;
-            }
             try
             {
-                byte[] fi = TestApp.file;
-                if (File.Exists(boot + @"TESTAPP.DLL"))
-                {
-                    fi = File.ReadAllBytes(boot + @"TESTAPP.DLL");
-                }
-                else if (File.Exists(boot + @"DotNetparserTester.exe"))
-                {
-                    fi = File.ReadAllBytes(boot + @"DotNetparserTester.exe");
-                }
-                var fl = new DotNetFile(fi);
-                var clr = new DotNetClr(fl, frame ? boot + @"framework" : boot + @"FRAMEW");
+                fl = new DotNetFile(Builtin.TestApp);
+                clr = new DotNetClr(fl);
 
                 //Register our internal methods
+                clr.RegisterResolveCallBack(AssemblyCallback);
                 clr.RegisterCustomInternalMethod("TestsComplete", TestsComplete);
                 clr.RegisterCustomInternalMethod("TestSuccess", TestSuccess);
                 clr.RegisterCustomInternalMethod("TestFail", TestFail);
+                clr.RegisterCustomInternalMethod("TestsRxObject", TestRxObject);
 
                 clr.Start();
                 Console.WriteLine("Program exec complete.");
@@ -92,7 +44,17 @@ namespace TesterKernel
         {
 
         }
-
+        private static byte[] AssemblyCallback(string dll)
+        {
+            if (dll == "System.Private.CoreLib")
+            {
+                return Builtin.CorLib;
+            }
+            else
+            {
+                return null;
+            }
+        }
         private static void TestSuccess(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             var testName = (string)Stack[Stack.Length - 1].value;
@@ -117,7 +79,15 @@ namespace TesterKernel
             PrintWithColor("Test Failure: " + testName, ConsoleColor.Red);
             NumbOfFailedTests++;
         }
-
+        private static void TestRxObject(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            var cctor = fl.GetMethod("TestApp.Tests", "TestObject", ".ctor");
+            if (cctor == null)
+                throw new NullReferenceException();
+            var s = new CustomList<MethodArgStack>();
+            s.Add(MethodArgStack.String("value"));
+            returnValue = clr.CreateObject(cctor, s);
+        }
         private static void PrintWithColor(string text, ConsoleColor fg)
         {
             var old = Console.ForegroundColor;
