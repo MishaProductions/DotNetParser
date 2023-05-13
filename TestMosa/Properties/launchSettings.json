@@ -1,0 +1,10 @@
+{
+	"profiles": {
+		"TestMosa": {
+			"commandName": "Executable",
+			"executablePath": "dotnet",
+			"commandLineArgs": "Tools/Mosa.Tool.Launcher.dll TestMosa.dll",
+			"workingDirectory": "bin"
+		}
+	}
+}
