@@ -10,7 +10,8 @@ namespace TestMosa
         {
             Console.ResetColor();
             Console.Clear();
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello World! Starting .NET Parser");
+
         }
 
         public static void Loop()

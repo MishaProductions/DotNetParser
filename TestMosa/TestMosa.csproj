@@ -25,4 +25,9 @@
 		<PackageReference Include="Mosa.Tools.Package" Version="*" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\DotNetClr\libDotNetClr.csproj" />
+	  <ProjectReference Include="..\LibDotNetParser\LibDotNetParser.csproj" />
+	</ItemGroup>
+
 </Project>
