@@ -43,6 +43,9 @@ namespace DotNetParserRunner
                 "framework"));
             clr.ShouldPrintDebugMessages = true;
 
+            //Needed so that we can load dlls
+            clr.RegisterResolveCallBack(AssemblyCallback);
+
             //Register our internal methods
             clr.RegisterCustomInternalMethod("TestsComplete", TestsComplete);
             clr.RegisterCustomInternalMethod("TestSuccess", TestSuccess);
@@ -51,13 +54,25 @@ namespace DotNetParserRunner
             Stopwatch ws = new Stopwatch();
             ws.Start();
             //Put arguments in the string array
-            
+
             clr.Start(new string[] { "testArg" });
             ws.Stop();
-            Console.WriteLine("Tests took "+ws.ElapsedMilliseconds+" ms");
+            Console.WriteLine("Tests took " + ws.ElapsedMilliseconds + " ms");
 
             if (NumbOfFailedTests >= 1)
                 Environment.Exit(1);
+        }
+
+        private static byte[] AssemblyCallback(string dll)
+        {
+            if (dll == "System.Private.CoreLib")
+            {
+                return File.ReadAllBytes("framework/System.Private.CoreLib.dll");
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private static void TestRxObject(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
@@ -83,7 +98,7 @@ namespace DotNetParserRunner
             Console.WriteLine();
             PrintWithColor("All Tests Completed.", ConsoleColor.DarkYellow);
             Console.WriteLine();
-            PrintWithColor("Passed tests: "+NumbOfSuccesssTests, ConsoleColor.Green);
+            PrintWithColor("Passed tests: " + NumbOfSuccesssTests, ConsoleColor.Green);
             PrintWithColor("Failed tests: " + NumbOfFailedTests, ConsoleColor.Red);
         }
 

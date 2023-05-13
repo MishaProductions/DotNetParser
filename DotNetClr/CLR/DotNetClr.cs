@@ -37,6 +37,9 @@ namespace libDotNetClr
         /// Should debug messages be printed to the console?
         /// </summary>
         public bool ShouldPrintDebugMessages { get; set; }
+
+        public delegate byte[] AssemblyResolveCallback(string dll);
+        private AssemblyResolveCallback _Cb;
         public DotNetClr(DotNetFile exe, string DllPath)
         {
             if (!Directory.Exists(DllPath))
@@ -60,6 +63,14 @@ namespace libDotNetClr
             RegisterAllInternalMethods();
         }
 
+        /// <summary>
+        /// Registers the callback for resolving assemblies
+        /// </summary>
+        /// <param name="cb"></param>
+        public void RegisterResolveCallBack(AssemblyResolveCallback cb)
+        {
+            _Cb = cb;
+        }
 
         /// <summary>
         /// Runs the entry point
@@ -147,27 +158,11 @@ namespace libDotNetClr
                 return;
             }
 
-            if (File.Exists(Path.Combine(EXEPath, fileName + ".exe")))
-            {
-                fullPath = Path.Combine(EXEPath, fileName + ".exe");
-            }
-            else if (File.Exists(Path.Combine(EXEPath, fileName + ".dll")))
-            {
-                fullPath = Path.Combine(EXEPath, fileName + ".dll");
-            }
-            else if (File.Exists(fileName + ".exe"))
-            {
-                fullPath = fileName + ".exe";
-            }
-            else if (File.Exists(fileName + ".dll"))
-            {
-                fullPath = fileName + ".dll";
-            }
+            var assembly = _Cb(fileName);
 
-
-            if (!string.IsNullOrEmpty(fullPath))
+            if (assembly != null)
             {
-                var file2 = new DotNetFile(fullPath);
+                var file2 = new DotNetFile(assembly);
                 dlls.Add(fileName, file2);
                 InitAssembly(file2, false);
                 PrintColor("[OK] Loaded assembly: " + fileName, ConsoleColor.Green);
@@ -177,6 +172,7 @@ namespace libDotNetClr
                 PrintColor("[ERROR] Load failed: " + fileName, ConsoleColor.Red);
             }
         }
+
         /// <summary>
         /// Runs a method
         /// </summary>

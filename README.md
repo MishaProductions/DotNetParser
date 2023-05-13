@@ -39,9 +39,25 @@ var clr = new DotNetClr(fl, @"c:\framework\");
 ```
 `C:\framework` points to a folder where a basic corlib is made. You can find one under the releases.
 ### Executing
-Then you can run the Start method to begin executing the code.
+RegisterResolveCallBack is used to load dlls such as System.Private.Corlib. You can run the Start method to begin executing the code.
 ```csharp
+clr.RegisterResolveCallBack(callback);
 clr.Start();
+```
+
+Example of the callback:
+```csharp
+  private static byte[] AssemblyCallback(string dll)
+        {
+            if(dll == "System.Private.CoreLib")
+            {
+                return File.ReadAllBytes("framework/System.Private.CoreLib.dll");
+            }
+            else
+            {
+                return null;
+            }
+        }
 ```
 
 ## Marshaling
