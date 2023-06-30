@@ -56,7 +56,12 @@ namespace libDotNetClr
                 arg2 = ConvertToInt32(arg2);
             }
 
-
+            // If either argument is a double, convert both arguments to double
+            else if (arg1.type == StackItemType.Float64 || arg2.type == StackItemType.Float64)
+            {
+                arg1 = ConvertToFloat64(arg1);
+                arg2 = ConvertToFloat64(arg2);
+            }
 
             if (arg1.type != arg2.type && arg2.type != StackItemType.ldnull) throw new Exception("Inconsistent type definitions");
 
@@ -72,6 +77,19 @@ namespace libDotNetClr
                 case StackItemType.Array: return OpWithArray(arg1, arg2, op);
                 case StackItemType.String: return OpWithString(arg1, arg2, op);
                 default: throw new NotImplementedException();
+            }
+        }
+        private static MethodArgStack ConvertToFloat64(MethodArgStack arg)
+        {
+            switch (arg.type)
+            {
+                case StackItemType.Float64: return arg; // Already in the desired format
+                case StackItemType.Float32: return MethodArgStack.Float64((double)(float)arg.value);
+                case StackItemType.Int32: return MethodArgStack.Float64((double)(int)arg.value);
+                case StackItemType.Int64: return MethodArgStack.Float64((double)(long)arg.value);
+                case StackItemType.UInt64: return MethodArgStack.Float64((double)(ulong)arg.value);
+                case StackItemType.Char: return MethodArgStack.Float64((double)(char)arg.value);
+                default: throw new Exception("Unsupported type conversion");
             }
         }
         private static MethodArgStack OpWithString(MethodArgStack arg1, MethodArgStack arg2, Operation op)
