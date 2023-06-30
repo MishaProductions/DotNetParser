@@ -8,6 +8,8 @@ namespace System
     public static class Console
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
+        public static extern string ReadLine();
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void WriteLine(string str);
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern void WriteLine(int num);
