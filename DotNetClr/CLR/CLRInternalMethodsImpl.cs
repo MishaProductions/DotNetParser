@@ -12,6 +12,7 @@ namespace libDotNetClr
         private void RegisterAllInternalMethods()
         {
             //Register internal methods
+            RegisterCustomInternalMethod("ReadLine", InternalMethod_Console_ReadLine);
             RegisterCustomInternalMethod("WriteLine", InternalMethod_Console_Writeline);
             RegisterCustomInternalMethod("Write", InternalMethod_Console_Write);
             RegisterCustomInternalMethod("ConsoleClear", InternalMethod_Console_Clear);
@@ -580,6 +581,15 @@ namespace libDotNetClr
         }
         #endregion
         #region Console class
+        private void InternalMethod_Console_ReadLine(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
+        {
+            string line = Console.ReadLine();
+
+            var str = new MethodArgStack();
+            str.type = StackItemType.String;
+            str.value = line;
+            returnValue = str;
+        }
         private void InternalMethod_Console_Writeline(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
             if (Stack.Length == 0)
