@@ -505,8 +505,8 @@ namespace libDotNetClr
         #region Implementation for various ToString methods
         private void Internal__System_Char_ToString(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
         {
-            var c = Stack[Stack.Length - 1].value;
-            returnValue = new MethodArgStack() { value = (int)c, type = StackItemType.Int32 };
+            var c = (char)Stack[Stack.Length - 1].value;
+            returnValue = MethodArgStack.String(c.ToString());
         }
 
         private void Internal__System_String_get_Chars_1(MethodArgStack[] Stack, ref MethodArgStack returnValue, DotNetMethod method)
