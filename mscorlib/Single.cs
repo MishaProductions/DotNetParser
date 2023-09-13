@@ -30,6 +30,11 @@ namespace System
         {
             return f == float.NegativeInfinity;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool IsPositiveInfinity(float f)
+        {
+            return f == float.PositiveInfinity;
+        }
         public static unsafe bool IsNaN(float f)
         {
             // A NaN will never equal itself so this is an
